@@ -1,43 +1,48 @@
-class LiFePO4Battery:
-    def __init__(self, voltage=51.2, capacity=2.5, efficiency=0.95):
-        """
-        Initialize the LiFePO4 battery simulation.
-        
-        Parameters:
-        - voltage: Nominal voltage of the battery (V)
-        - capacity: Total energy capacity of the battery (kWh)
-        - efficiency: Efficiency of the battery (0 to 1, where 1 is 100% efficient)
-        """
-        self.nominal_voltage = voltage
-        self.capacity = capacity * 3600 * 1000  # Convert kWh to Wh
-        self.efficiency = efficiency
-        self.soc = 1.0  # Start with a fully charged battery (SoC of 1)
+# batterij gaat nooit 100% opladen of ontladen
+# aan de hand van de soc zal de oplading en ontlading anders worden
+# efficienty dus als we in theorie 100% geladen zijn gaat dit minder zijn
+# verschil ac en dc laden toevoegen
+# 
+# 
+# 
+
+class Battery:
+    def __init__(self, capacity, charge_power, discharge_power, max_soc, min_dod, max_charge_current, efficienty):
+        self.capacity = capacity  # in kWh
+        self.charge_power = charge_power  # in kW
+        self.discharge_power = discharge_power  # in kW
+        self.max_soc = max_soc  # Maximum State of Charge in percentage (e.g., 100 for fully charged)
+        self.min_dod = min_dod  # Minimum Depth of Discharge in percentage (e.g., 0 for fully charged)
+        self.max_charge_current = max_charge_current  # in A
+        self.efficienty = efficienty
+        self.soc = 0  # in kWh, current charge level of the battery
 
     def charge(self, power, time):
         """
-        Simulate charging the battery.
-        
-        Parameters:
-        - power: Charging power (W)
-        - time: Charging duration (hours)
+        Simulate the charging of the battery while considering limitations.
+        power: charging power in kW
+        time: charging time in hours
         """
-        # Calculate the amount of energy added to the battery
-        energy_in = power * time * self.efficiency
-        # Update state of charge
-        self.soc = min(1.0, self.soc + (energy_in / self.capacity))
+        energy_added = power * time
+        #if energy_added > self.max_charge_current * time:
+        #    print("Exceeded maximum charging current. Charging at maximum possible current.")
+        #    energy_added = self.max_charge_current * time
+        self.soc = min(self.soc + energy_added, self.capacity * (self.max_soc))
 
     def discharge(self, power, time):
         """
-        Simulate discharging the battery.
-        
-        Parameters:
-        - power: Discharging power (W)
-        - time: Discharging duration (hours)
+        Simulate the discharging of the battery while considering limitations.
+        power: discharging power in kW
+        time: discharging time in hours
         """
-        # Calculate the amount of energy taken from the battery
-        energy_out = power * time / self.efficiency
-        # Update state of charge
-        self.soc = max(0.0, self.soc - (energy_out / self.capacity))
+        #max_discharge = self.capacity * ((100 - self.min_dod) / 100)
+        energy_consumed = power * time
+        #if energy_consumed > max_discharge:
+        #    print("Exceeded allowable depth of discharge. Discharging at maximum allowable depth.")
+        #    energy_consumed = max_discharge
+        self.soc = max(self.soc - energy_consumed, self.min_dod)
+
+
 
     def get_voltage(self):
         """
@@ -62,18 +67,4 @@ class LiFePO4Battery:
         Check if the battery is fully discharged.
         """
         return self.soc <= 0.0
-
-# Example usage:
-if __name__ == "__main__":
-    battery = LiFePO4Battery()
-    print("Initial SoC:", battery.get_soc())
-
-    # Discharging the battery
-    battery.discharge(500, 1)  # Discharging at 500W for 1 hour
-    print("SoC after discharging:", battery.get_soc())
-
-    # Charging the battery
-    battery.charge(1000, 2)  # Charging at 1000W for 2 hours
-    print("SoC after charging:", battery.get_soc())
-
     
