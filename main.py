@@ -9,11 +9,11 @@
 from battery import Battery  
 
 if __name__ == "__main__":
-    battery = Battery(capacity=2.5, charge_power=1.0, discharge_power=1.2, max_soc=0.9, min_dod=0.1, max_charge_current=15, efficienty=0.95)
+    battery = Battery(capacity=2.5, charge_power=1.0, discharge_power=1.2, max_soc=0.9, min_dod=0.1, efficienty=0.95)
     print(f"Initial battery charge: {battery.soc} kWh")
 
     # Charging the battery
-    battery.charge(1.2, 2)  # charging at 0.8 kW for 2 hours
+    battery.charge(1.1, 2)  # charging at 0.8 kW for 2 hours
     print(f"Battery charge after charging: {battery.soc} kWh")
 
     # Discharging the battery
