@@ -11,27 +11,27 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from battery import Battery 
 from solcast import get_solar_radiation_forecast 
 import csv
+import matplotlib.dates as mdates
+import datetime
 
-def retrieve_data():
+def retrieve_data_api():
     forecast_data = get_solar_radiation_forecast("radiation", 5)
-    return forecast_data
 
-def process_data(forecast_data):
     if forecast_data:
         print("Solar Radiation Data:")
         print(forecast_data)
         # Parse CSV data into list of dictionaries
         reader = csv.DictReader(forecast_data.splitlines())
         forecast_list = list(reader)
-        # Initialize battery
-        battery = Battery(capacity=13, charge_power=5.0, discharge_power=5.0, max_soc=0.9, min_dod=0.1, efficienty=0.95)
-        # Initialize lists to store data for plotting
-        charge_values = []
-        time_values = []
+        
+        # Initialize list to store data for plotting as tuples of (power_value, time_value)
+        data_points = []
+
         # Iterate over the forecast data
         for data_point in forecast_list:
             pv_estimate = float(data_point['PvEstimate'])
-            period_end = data_point['PeriodEnd']
+            print(data_point["PeriodEnd"])
+            period_end = datetime.datetime.strptime(data_point['PeriodEnd'], "%Y-%m-%dT%H:%M:%SZ")  # Convert string to datetime
             print(f"Pv Estimate: {pv_estimate}, Period End: {period_end}")
             
             # Convert period to hours
