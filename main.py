@@ -74,16 +74,63 @@ def calculate_new_values(time_values, charge_values, power_usage):
         new_charge_values.append(new_charge_value)
     return time_values, new_charge_values
 
-def update_gui(fig, ax, time_values, charge_values):
-    ax.clear()
-    ax.plot(time_values, charge_values, marker='o', linestyle='-')
-    ax.set_xlabel('Time')
-    ax.set_ylabel('Battery Charge (kWh)')
-    ax.set_title('Battery Charge Over Time')
+def update_gui(fig, ax1, ax2, ax3, ax4, data_points, daily_average_usage, grid_injection, grid_extraction):
+    # Extract values for plotting
 
-     # Filter time values to display only every 6 hours
+    print(data_points)
+    time_values = [point['time_value'] for point in data_points]# if point['time_value']]
+    power_values = [point['power_value'] for point in data_points]
+    charge_values = [point['charge_value'] for point in data_points]
+    residue_energy_values = [point['residue_energy'] for point in data_points]# if 'residue_energy' in point]
+    
+    # Plot PV production on the first graph
+    ax1.plot(time_values, power_values, color='lightgreen', label='PV Production')
+    ax1.set_xlabel('Time')
+    ax1.set_ylabel('PV Production (kW)')
+    ax1.set_title('PV Production')
+
+    # Plot power usage throughout the day on the second graph
+    ax2.plot(time_values, [daily_average_usage/48]*len(time_values), color='lightgreen', label='Power Usage')
+    ax2.set_xlabel('Time')
+    ax2.set_ylabel('Power (kW)')
+    ax2.set_title('Home Power Usage')
+
+    # Plot battery charge on the third graph
+    ax3.clear()
+    ax3.plot(time_values, charge_values, color='lightgreen', marker='o', linestyle='-')
+    ax3.set_xlabel('Time')
+    ax3.set_ylabel('Charge (kWh)')
+    ax3.set_title(f'Battery Charge (Start: {time_values[0].strftime("%Y-%m-%d %H:%M")})')
+
+    # Plot residue energy as a bar chart on the fourth graph
+    ax4.clear()
+    ax4.stem(time_values, residue_energy_values, label='Residue Energy', linefmt='lightgreen', markerfmt='lightgreen', basefmt=' ')
+    ax4.set_xlabel('Time')
+    ax4.set_ylabel('Energy (kWh)')
+    ax4.set_title('Grid Usage')
+
+    # Calculate sum of positive and negative residue values
+    grid_injection_sum = sum(value for value in residue_energy_values if value > 0)
+    grid_extraction_sum = sum(value for value in residue_energy_values if value < 0)
+
+    # Calculate cost for grid injection and grid extraction assuming energy cost of 0.1 euro per kWh
+    grid_injection_cost = grid_injection_sum * 0.035
+    grid_extraction_cost = grid_extraction_sum * -0.1211
+
+    # Update labels with sums
+    grid_injection.config(text=f"Grid injection: {grid_injection_sum:.4f} kWh     Received Money: {grid_injection_cost:.4f} €")
+    grid_extraction.config(text=f"Grid extraction: {(grid_extraction_sum*-1):.4f} kWh     Paid Money: {grid_extraction_cost:.4f} €")
+
+    # Filter time values to display only every 6 hours
     filtered_time_values = [time_values[i] for i in range(len(time_values)) if i % 12 == 0]
-    ax.set_xticks(filtered_time_values)
+    ax1.xaxis.set_major_formatter(mdates.DateFormatter('%H:%M'))  # Format to display only hour and minute
+    ax1.set_xticks(filtered_time_values)
+    ax2.xaxis.set_major_formatter(mdates.DateFormatter('%H:%M'))  # Format to display only hour and minute
+    ax2.set_xticks(filtered_time_values)
+    ax3.xaxis.set_major_formatter(mdates.DateFormatter('%H:%M'))  # Format to display only hour and minute
+    ax3.set_xticks(filtered_time_values)
+    ax4.xaxis.set_major_formatter(mdates.DateFormatter('%H:%M'))  # Format to display only hour and minute
+    ax4.set_xticks(filtered_time_values)
 
     fig.canvas.draw()
 
