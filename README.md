@@ -21,13 +21,17 @@ The research is conducted in collaboration with "iLumen," a leading company in t
 
 
 
-# KEEP IN MIND
+
+
+
+
+## KEEP IN MIND
     # battery will never be fully charged or discharged
     # depending on the soc the battery charge and discharge is not linear
     # efficiency is depending on the soc
     # verschil ac en dc laden toevoegen
 
-# TODO
+## TODO
     # add function to choose dates on solcast api
     # add the fluvius live prices and try to show it
     # use PyBamm instead of simple battery models
