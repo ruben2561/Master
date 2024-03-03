@@ -134,13 +134,17 @@ def update_gui(fig, ax1, ax2, ax3, ax4, data_points, daily_average_usage, grid_i
 
     fig.canvas.draw()
 
-def start_process(fig, ax):
-    forecast_data = retrieve_data()
-    time_values, charge_values = process_data(forecast_data)
-    # Calculate daily average power usage (example value)
-    daily_average_usage = 7.5  # kWh
-    time_values, new_charge_values = calculate_new_values(time_values, charge_values, daily_average_usage)
-    update_gui(fig, ax, time_values, new_charge_values)
+def start_process(fig, ax1, ax2, ax3, ax4, grid_injection, grid_extraction):
+    battery = Battery(capacity=3, soc=2, charge_power=5.0, discharge_power=5.0, max_soc=1, min_dod=0, efficienty=0.90)
+    daily_average_usage = 9  # kWh
+
+    data_points = retrieve_data_api()
+
+    data_points = process_data(data_points, daily_average_usage, battery)
+
+    #time_values, new_charge_values = calculate_new_values(time_values, charge_values, daily_average_usage)
+
+    update_gui(fig, ax1, ax2, ax3, ax4, data_points, daily_average_usage, grid_injection, grid_extraction)
 
 def create_gui():
     root = tk.Tk()
@@ -156,18 +160,38 @@ def create_gui():
     title_label = tk.Label(left_frame, text="Smart Home Simulation", font=("Arial", 14))
     title_label.grid(row=0, columnspan=2, pady=10)
 
-    start_button = ttk.Button(left_frame, text="Start", command=lambda: start_process(fig, ax))
+    start_button = ttk.Button(left_frame, text="Start", command=lambda: start_process(fig, ax1, ax2, ax3, ax4, grid_injection, grid_extraction))
     start_button.grid(row=1, columnspan=2, pady=10)
+
 
     right_frame = tk.Frame(root)
     right_frame.pack(side=tk.RIGHT, padx=10, pady=10)
 
-    fig = Figure(figsize=(5, 4), dpi=100)
-    ax = fig.add_subplot(111)
+    fig = Figure(figsize=(12, 6), dpi=100)
+
+    # Add subplot 1
+    ax1 = fig.add_subplot(221)  # 2 rows, 2 columns, subplot 1
+    # Add subplot 2
+    ax2 = fig.add_subplot(222)  # 2 rows, 2 columns, subplot 2
+    # Add subplot 3
+    ax3 = fig.add_subplot(223)  # 2 rows, 2 columns, subplot 3
+    # Add subplot 4
+    ax4 = fig.add_subplot(224)  # 2 rows, 2 columns, subplot 4
+
+    # Adjust spacing between subplots
+    fig.subplots_adjust(hspace=0.5, wspace=0.3)
 
     canvas = FigureCanvasTkAgg(fig, master=right_frame)
     canvas.draw()
     canvas.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=1)
+
+    # Add labels for battery charge, grid injection, and grid extraction on the right side of the graph
+    battery_charge_label = tk.Label(right_frame, text="Battery Charge: ", font=("Arial", 10))
+    battery_charge_label.pack(side=tk.TOP, padx=10, pady=5)
+    grid_injection = tk.Label(right_frame, text="Grid injection: ", font=("Arial", 10))
+    grid_injection.pack(side=tk.TOP, padx=10, pady=5)
+    grid_extraction = tk.Label(right_frame, text="Grid extraction: ", font=("Arial", 10))
+    grid_extraction.pack(side=tk.TOP, padx=10, pady=5)
 
     root.mainloop()
 
