@@ -7,15 +7,15 @@
 # 
 
 class Battery:
-    def __init__(self, capacity, charge_power, discharge_power, max_soc, min_dod, efficienty):
+    def __init__(self, capacity, soc, charge_power, discharge_power, max_soc, min_dod, efficienty):
         self.capacity = capacity  # in kWh
         self.charge_power = charge_power  # in kW
         self.discharge_power = discharge_power  # in kW
-        self.max_soc = max_soc  # Maximum State of Charge in percentage (e.g., 100 for fully charged)
-        self.min_dod = min_dod  # Minimum Depth of Discharge in percentage (e.g., 0 for fully charged)
+        self.max_soc = max_soc  # Maximum State of Charge in percentage (e.g., 1 for fully charged)
+        self.min_dod = min_dod  # Minimum Depth of Discharge in percentage (e.g., 1 for fully charged)
         #self.max_charge_current = max_charge_current  # in A
         self.efficienty = efficienty
-        self.soc = 0  # in kWh, current charge level of the battery
+        self.soc = soc  # in kWh, current charge level of the battery
 
     def charge(self, power, time):
         """
@@ -27,7 +27,24 @@ class Battery:
 
         energy_added = power * time
 
-        self.soc = min(self.soc + energy_added, self.capacity * (self.max_soc)) #check if battery is not over charged
+        if(self.soc + energy_added <= self.capacity * (self.max_soc)):
+            self.soc = self.soc + energy_added
+            return 0
+        else:
+            self.soc = self.capacity * (self.max_soc)
+            return  (energy_added - ((self.capacity * self.max_soc) - self.soc))
+
+    def charge_kWh(self, energy):
+        """
+        Simulate the charging of the battery while considering limitations.
+        energy: kWh
+        """
+        if(self.soc + energy <= self.capacity * (self.max_soc)):
+            self.soc = self.soc + energy
+            return 0
+        else:
+            self.soc = self.capacity * (self.max_soc)
+            return  (energy - ((self.capacity * self.max_soc) - self.soc))
 
     def discharge(self, power, time):
         """
@@ -39,8 +56,24 @@ class Battery:
 
         energy_consumed = power * time
 
-        self.soc = max(self.soc - energy_consumed, self.min_dod) #check if battery is not drained beyond the min dod
+        if(self.soc - energy_consumed >= self.capacity * (self.min_dod)):
+            self.soc = self.soc - energy_consumed
+            return 0
+        else:
+            self.soc = self.capacity * (self.min_dod)
+            return  (energy_consumed - (self.soc - self.capacity * (self.min_dod)))
 
+    def discharge_kWh(self, energy):
+        """
+        Simulate the discharging of the battery while considering limitations.
+        energy: kWh
+        """
+        if(self.soc - energy >= self.capacity * (self.min_dod)):
+            self.soc = self.soc - energy
+            return 0
+        else:
+            self.soc = self.capacity * (self.min_dod)
+            return  (energy - (self.soc - self.capacity * (self.min_dod)))
 
     def get_soc(self):
         """
