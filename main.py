@@ -34,27 +34,43 @@ def retrieve_data_api():
             period_end = datetime.datetime.strptime(data_point['PeriodEnd'], "%Y-%m-%dT%H:%M:%SZ")  # Convert string to datetime
             print(f"Pv Estimate: {pv_estimate}, Period End: {period_end}")
             
-            # Convert period to hours
-            period_hours = 0.5  # Assuming each period is 0.5 hours
-            
-            # Charge the battery
-            battery.charge(pv_estimate, period_hours)
-            print(f"Battery charge after charging: {battery.soc} kWh")
-            
-            # Store battery charge and time for plotting
-            charge_values.append(battery.soc)
-            time_values.append(period_end)
+            # Store data point as a dictionary
+            data_points.append({'power_value': pv_estimate, 'time_value': period_end, 'charge_value': 0, 'residue_energy': 0})
 
-        return time_values, charge_values
-    else:
-        print("Failed to retrieve solar radiation forecast.")
-        return [], []
+    return data_points
+
+def process_data(data_points, power_usage, battery):
+    for i in range(len(data_points) - 1):
+        current_point = data_points[i]
+        next_point = data_points[i + 1]
+
+        power_value = current_point.get('power_value', 0)
+        time_value = current_point.get('time_value')
+        next_time = next_point.get('time_value')
+
+        if time_value and next_time:
+            # Calculate time difference in hours
+            time_difference_hours = (next_time - time_value).total_seconds() / 3600
+            print(time_difference_hours)
+            print(power_value)
+            # Charge the battery based on the time difference
+            residue_to_much_energy = battery.charge(power_value, time_difference_hours)
+            residue_to_little_energy = battery.discharge_kWh(power_usage / 48)  # Subtract average power usage every half hour
+
+            print(f"Battery charge after charging: {battery.soc} kWh")
+
+            # Add charge value to the data_point dictionary
+            current_point['charge_value'] = battery.soc
+            current_point['residue_energy'] = (residue_to_much_energy - residue_to_little_energy)
+
+    return data_points
     
-def calculate_new_values(time_values, charge_values, daily_average_usage):
+def calculate_new_values(time_values, charge_values, power_usage):
     new_charge_values = []
     for charge_value in charge_values:
+        print(charge_value)
         # Subtract daily average power usage from solar power values
-        new_charge_value = max(0, charge_value - daily_average_usage/48) #because time windows are 30 min
+        new_charge_value = max(0, charge_value - power_usage/48) #because time windows are 30 min
         new_charge_values.append(new_charge_value)
     return time_values, new_charge_values
 
