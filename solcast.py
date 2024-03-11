@@ -1,5 +1,6 @@
 import requests
 import csv
+import datetime
 
 # Set your Solcast API key
 api_key = "w58k5_UUO4JxNP3ykI-gsRn8w65hJQQQ"
@@ -7,6 +8,23 @@ api_key = "w58k5_UUO4JxNP3ykI-gsRn8w65hJQQQ"
 # Specify the location (latitude and longitude)
 latitude = 50.9254992
 longitude = 5.3932811
+
+print("sexy")
+import requests
+
+url = "https://api.solcast.com.au/data/historic/rooftop_pv_power?latitude=-33.856784&longitude=151.215297&period=PT30M&output_parameters=pv_power_rooftop&capacity=1&install_date=2020-12-30&format=json&start=2022-10-25T12:00:00.000Z&end=2022-10-26T12:00:00.000Z&api_key=w58k5_UUO4JxNP3ykI-gsRn8w65hJQQQ"
+
+payload={}
+headers = {}
+
+response = requests.request("GET", url, headers=headers, data=payload)
+
+print(response.text)
+print(f"Error: {response.status_code}, {response.text}")
+
+print("sexyyy")
+
+
 
 def get_sample_data():
     try:
@@ -17,8 +35,9 @@ def get_sample_data():
         print(f"Error reading sample data: {e}")
         return None
 
-def get_solar_radiation_forecast(type, time):
+def get_solar_radiation_forecast(latitude, longitude, start_date, end_date):
     try:
+
         # Solcast API endpoint for Global Horizontal Irradiance (GHI) forecast
         #if(type == "radiation"):
         #    endpoint = "https://api.solcast.com.au/weather_sites/f0c1-3849-a865-4bca/estimated_actuals?format=csvapi_key=w58k5_UUO4JxNP3ykI-gsRn8w65hJQQQ"
@@ -26,8 +45,15 @@ def get_solar_radiation_forecast(type, time):
         #elif(type == "pv"):
         #    endpoint = "https://api.solcast.com.au/rooftop_sites/2232-a658-4143-f02f/estimated_actuals?format=csv&api_key=w58k5_UUO4JxNP3ykI-gsRn8w65hJQQQ"
         #    print("trying to retrieve rooftop pv")
+        
+        # Convert to datetime object
+        start_date_object = datetime.strptime(start_date, "%d/%m/%Y")
 
-        endpoint = "https://api.solcast.com.au/rooftop_sites/2232-a658-4143-f02f/estimated_actuals?format=csv&api_key=w58k5_UUO4JxNP3ykI-gsRn8w65hJQQQ"
+        # Convert to desired format
+        formatted_start_date = start_date_object.strftime("%Y-%m-%dT%H:%M:%S.000Z")
+
+        endpoint2 = "https://api.solcast.com.au/rooftop_sites/2232-a658-4143-f02f/estimated_actuals?format=csv&api_key=w58k5_UUO4JxNP3ykI-gsRn8w65hJQQQ"
+        endpoint = f"https://api.solcast.com.au/data/historic/rooftop_pv_power?latitude={latitude}&longitude={longitude}&period=PT30M&output_parameters=pv_power_rooftop&capacity=1&install_date=2020-12-30&format=json&start={start_date}&end={end_date}&api_key=w58k5_UUO4JxNP3ykI-gsRn8w65hJQQQ"
 
         payload={}
         headers = {}
