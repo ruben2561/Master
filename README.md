@@ -25,11 +25,7 @@ The research is conducted in collaboration with "iLumen," a leading company in t
 
 
 
-## KEEP IN MIND
-    # battery will never be fully charged or discharged
-    # depending on the soc the battery charge and discharge is not linear
-    # efficiency is depending on the soc
-    # verschil ac en dc laden toevoegen
+
 
 ## TODO
     # add function to choose dates on solcast api
@@ -41,3 +37,9 @@ The research is conducted in collaboration with "iLumen," a leading company in t
     # add more items like car charger and try to make them work together
     # adding function to choose ac or dc charging
     # add database to store simulations or simulation params
+
+## KEEP IN MIND
+    # battery will never be fully charged or discharged
+    # depending on the soc the battery charge and discharge is not linear
+    # efficiency is depending on the soc
+    # verschil ac en dc laden toevoegen
