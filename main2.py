@@ -67,7 +67,12 @@ def process_data(data_points, power_usage, battery, pybamm_battery):
             current_point['charge_value'] = battery.soc
             current_point['residue_energy'] = (residue_to_much_energy - residue_to_little_energy)
 
-    pybamm_battery.simulation()
+    ######
+    ######
+    #pybamm_battery.simulation()
+    ######  
+    ######
+
 
     return data_points
     

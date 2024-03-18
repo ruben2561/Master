@@ -9,7 +9,7 @@ api_key = "w58k5_UUO4JxNP3ykI-gsRn8w65hJQQQ"
 latitude = 50.9254992
 longitude = 5.3932811
 
-print("sexy")
+""" print("sexy")
 import requests
 
 url = "https://api.solcast.com.au/data/historic/rooftop_pv_power?latitude=-33.856784&longitude=151.215297&period=PT30M&output_parameters=pv_power_rooftop&capacity=1&install_date=2020-12-30&format=json&start=2022-10-25T12:00:00.000Z&end=2022-10-26T12:00:00.000Z&api_key=w58k5_UUO4JxNP3ykI-gsRn8w65hJQQQ"
@@ -22,7 +22,7 @@ response = requests.request("GET", url, headers=headers, data=payload)
 print(response.text)
 print(f"Error: {response.status_code}, {response.text}")
 
-print("sexyyy")
+print("sexyyy") """
 
 
 

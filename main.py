@@ -45,7 +45,7 @@ class App(customtkinter.CTk):
 
         self.sidebar_button_1 = customtkinter.CTkButton(self.sidebar_frame, text="battery", command=self.sidebar_button_event)
         self.sidebar_button_1.grid(row=2, column=0, padx=20, pady=10)
-        self.sidebar_button_2 = customtkinter.CTkButton(self.sidebar_frame, command=lambda: self.start_process("50.9254992", "5.3932811", "16/03/2018", "16/04/2018"))
+        self.sidebar_button_2 = customtkinter.CTkButton(self.sidebar_frame, text="Start Sim.", command=lambda: self.start_process("50.9254992", "5.3932811", "16/03/2018", "16/04/2018"))
         self.sidebar_button_2.grid(row=3, column=0, padx=20, pady=10)
         self.appearance_mode_label = customtkinter.CTkLabel(self.sidebar_frame, text="Appearance Mode:", anchor="w")
         self.appearance_mode_label.grid(row=5, column=0, padx=20, pady=(10, 0))
@@ -130,46 +130,33 @@ class App(customtkinter.CTk):
         self.appearance_mode_optionemenu.set("Dark")
         self.scaling_optionemenu.set("100%")
         self.optionmenu_1.set("Battery")
-        #self.optionmenu_2.set("Solar ")
         self.combobox_1.set("CTkComboBox")
 
         # create Matplotlib graphs
         self.fig, ((self.ax1, self.ax2), (self.ax3, self.ax4)) = plt.subplots(2, 2, figsize=(8, 6))
         self.canvas1 = FigureCanvasTkAgg(self.fig, master=self)
+        plt.subplots_adjust(wspace=0.5, hspace=0.5)
+        self.ax1.set_title('PV Production')
+        self.ax2.set_title('Home Power Usage')
+        self.ax3.set_title('Battery Charge')
+        self.ax4.set_title('Grid Usage')
+        
+        self.ax1.set_xlabel('Time')
+        self.ax1.set_ylabel('PV Production (kW)')
+
+        self.ax2.set_xlabel('Time')
+        self.ax2.set_ylabel('Power (kW)')
+
+        self.ax3.set_xlabel('Time')
+        self.ax3.set_ylabel('Charge (kWh)')
+
+        self.ax4.set_xlabel('Time')
+        self.ax4.set_ylabel('Energy (kWh)')
         self.canvas1.get_tk_widget().grid(row=0, column=4, rowspan=4, padx=(20, 0), pady=(20, 0))
 
         # Call functions to draw initial graphs
         #self.draw_graphs()
 
-    def draw_graphs(self):
-        # Example data for plotting
-        x = [1, 2, 3, 4, 5]
-        y1 = [10, 15, 13, 18, 16]
-        y2 = [8, 9, 11, 7, 12]
-        y3 = [5, 7, 6, 8, 4]
-        y4 = [3, 5, 4, 6, 2]
-
-        # Clear existing plots
-        self.ax1.clear()
-        self.ax2.clear()
-        self.ax3.clear()
-        self.ax4.clear()
-
-        # Plot data
-        self.ax1.plot(x, y1)
-        self.ax1.set_title('Graph 1')
-
-        self.ax2.plot(x, y2)
-        self.ax2.set_title('Graph 2')
-
-        self.ax3.plot(x, y3)
-        self.ax3.set_title('Graph 3')
-
-        self.ax4.plot(x, y4)
-        self.ax4.set_title('Graph 4')
-
-        # Redraw canvas
-        self.canvas1.draw()
 
     def update_graphs_with_new_data(self, data_points, daily_average_usage):
         # Perform some calculations to get new data
@@ -203,6 +190,32 @@ class App(customtkinter.CTk):
 
         self.ax4.plot(time_values, new_y4)
         self.ax4.set_title('Grid Usage')
+
+        self.ax1.set_xlabel('Time')
+        self.ax1.set_ylabel('PV Production (kW)')
+
+        self.ax2.set_xlabel('Time')
+        self.ax2.set_ylabel('Power (kW)')
+
+        self.ax3.set_xlabel('Time')
+        self.ax3.set_ylabel('Charge (kWh)')
+
+        self.ax4.set_xlabel('Time')
+        self.ax4.set_ylabel('Energy (kWh)')
+
+        # Filter time values to display only every 6 hours
+        filtered_time_values = [time_values[i] for i in range(len(time_values)) if i % 12 == 0]
+        self.ax1.xaxis.set_major_formatter(mdates.DateFormatter('%H:%M'))  # Format to display only hour and minute
+        self.ax1.set_xticks(filtered_time_values)
+        self.ax2.xaxis.set_major_formatter(mdates.DateFormatter('%H:%M'))  # Format to display only hour and minute
+        self.ax2.set_xticks(filtered_time_values)
+        self.ax3.xaxis.set_major_formatter(mdates.DateFormatter('%H:%M'))  # Format to display only hour and minute
+        self.ax3.set_xticks(filtered_time_values)
+        self.ax4.xaxis.set_major_formatter(mdates.DateFormatter('%H:%M'))  # Format to display only hour and minute
+        self.ax4.set_xticks(filtered_time_values)
+
+        # Adjust layout to add space between subplots
+        plt.subplots_adjust(wspace=0.5, hspace=0.5)
 
         # Redraw canvas
         self.canvas1.draw()

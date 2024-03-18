@@ -7,14 +7,14 @@
 # 
 
 class Battery:
-    def __init__(self, capacity, soc, charge_power, discharge_power, max_soc, min_dod, efficienty):
+    def __init__(self, capacity, soc, charge_power, discharge_power, max_soc, min_dod, efficiency):
         self.capacity = capacity  # in kWh
         self.charge_power = charge_power  # in kW
         self.discharge_power = discharge_power  # in kW
         self.max_soc = max_soc  # Maximum State of Charge in percentage (e.g., 1 for fully charged)
         self.min_dod = min_dod  # Minimum Depth of Discharge in percentage (e.g., 1 for fully charged)
         #self.max_charge_current = max_charge_current  # in A
-        self.efficienty = efficienty
+        self.efficienty = efficiency
         self.soc = soc  # in kWh, current charge level of the battery
 
     def charge(self, power, time):
