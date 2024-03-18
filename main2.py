@@ -9,7 +9,8 @@ from tkinter import ttk
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from battery import Battery 
-from solcast import get_solar_radiation_forecast 
+from pybammBattery import PyBaMM_Battery
+from solcast import get_solar_radiation_forecast
 import csv
 import matplotlib.dates as mdates
 import datetime
@@ -19,7 +20,7 @@ def retrieve_data_api(latitude, longitude, start_date, end_date):
 
     if forecast_data:
         print("Solar Radiation Data:")
-        print(forecast_data)
+        #print(forecast_data)
         # Parse CSV data into list of dictionaries
         reader = csv.DictReader(forecast_data.splitlines())
         forecast_list = list(reader)
@@ -30,16 +31,16 @@ def retrieve_data_api(latitude, longitude, start_date, end_date):
         # Iterate over the forecast data
         for data_point in forecast_list:
             pv_estimate = float(data_point['PvEstimate'])
-            print(data_point["PeriodEnd"])
+            #print(data_point["PeriodEnd"])
             period_end = datetime.datetime.strptime(data_point['PeriodEnd'], "%Y-%m-%dT%H:%M:%SZ")  # Convert string to datetime
-            print(f"Pv Estimate: {pv_estimate}, Period End: {period_end}")
+            #print(f"Pv Estimate: {pv_estimate}, Period End: {period_end}")
             
             # Store data point as a dictionary
             data_points.append({'power_value': pv_estimate, 'time_value': period_end, 'charge_value': 0, 'residue_energy': 0})
 
     return data_points
 
-def process_data(data_points, power_usage, battery):
+def process_data(data_points, power_usage, battery, pybamm_battery):
     for i in range(len(data_points) - 1):
         current_point = data_points[i]
         next_point = data_points[i + 1]
@@ -56,19 +57,24 @@ def process_data(data_points, power_usage, battery):
             # Charge the battery based on the time difference
             residue_to_much_energy = battery.charge(power_value, time_difference_hours)
             residue_to_little_energy = battery.discharge_kWh(power_usage / 48)  # Subtract average power usage every half hour
+            
+            pybamm_battery.charge(power_value, time_difference_hours)
+            pybamm_battery.discharge(power_usage/48, 0.5)
 
-            print(f"Battery charge after charging: {battery.soc} kWh")
+            #print(f"Battery charge after charging: {battery.soc} kWh")
 
             # Add charge value to the data_point dictionary
             current_point['charge_value'] = battery.soc
             current_point['residue_energy'] = (residue_to_much_energy - residue_to_little_energy)
+
+    pybamm_battery.simulation()
 
     return data_points
     
 def calculate_new_values(time_values, charge_values, power_usage):
     new_charge_values = []
     for charge_value in charge_values:
-        print(charge_value)
+        #print(charge_value)
         # Subtract daily average power usage from solar power values
         new_charge_value = max(0, charge_value - power_usage/48) #because time windows are 30 min
         new_charge_values.append(new_charge_value)
@@ -77,7 +83,7 @@ def calculate_new_values(time_values, charge_values, power_usage):
 def update_gui(fig, ax1, ax2, ax3, ax4, data_points, daily_average_usage, grid_injection, grid_extraction):
     # Extract values for plotting
 
-    print(data_points)
+    #print(data_points)
     time_values = [point['time_value'] for point in data_points]# if point['time_value']]
     power_values = [point['power_value'] for point in data_points]
     charge_values = [point['charge_value'] for point in data_points]
@@ -135,16 +141,18 @@ def update_gui(fig, ax1, ax2, ax3, ax4, data_points, daily_average_usage, grid_i
     fig.canvas.draw()
 
 def start_process(fig, ax1, ax2, ax3, ax4, grid_injection, grid_extraction, latitude, longitude, start_date, end_date):
-    battery = Battery(capacity=3, soc=2, charge_power=5.0, discharge_power=5.0, max_soc=1, min_dod=0, efficienty=0.90)
+    battery = Battery(capacity=3, soc=2, charge_power=5.0, discharge_power=5.0, max_soc=0.95, min_dod=0.05, efficiency=0.90)
+    pybamm_battery = PyBaMM_Battery(capacity=3, soc=2, charge_power=5.0, discharge_power=5.0, max_soc=0.95, min_dod=0.05, efficiency=0.90)
+    
     daily_average_usage = 9  # kWh
 
     data_points = retrieve_data_api(latitude, longitude, start_date, end_date)
 
-    data_points = process_data(data_points, daily_average_usage, battery)
+    data_points = process_data(data_points, daily_average_usage, battery, pybamm_battery)
 
     #time_values, new_charge_values = calculate_new_values(time_values, charge_values, daily_average_usage)
 
-    update_gui(fig, ax1, ax2, ax3, ax4, data_points, daily_average_usage, grid_injection, grid_extraction)
+    #update_gui(fig, ax1, ax2, ax3, ax4, data_points, daily_average_usage, grid_injection, grid_extraction)
 
 def create_gui():
     root = tk.Tk()
