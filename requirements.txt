@@ -1,0 +1,7 @@
+tkinter
+customtkinter
+csv
+datetime
+mathplotlib
+request
+pybamm
