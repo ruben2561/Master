@@ -7,7 +7,7 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import tkinter as tk
 from tkinter import ttk
 from battery import Battery
-from main2 import process_data, retrieve_data_api, update_gui 
+from process import process_data, retrieve_data_api, update_gui 
 from pybammBattery import PyBaMM_Battery
 from solcast import get_solar_radiation_forecast
 import csv
@@ -116,25 +116,25 @@ class App(customtkinter.CTk):
         self.logo_label2 = customtkinter.CTkLabel(self.sidebar_frame2, text="Sim Results", font=customtkinter.CTkFont(size=20, weight="bold"))
         self.logo_label2.grid(row=0, column=0, padx=20, pady=(20, 5), columnspan=2)
 
-        self.label_ev_charger = customtkinter.CTkLabel(self.sidebar_frame2, text="Grid Injection:", font=customtkinter.CTkFont(size=15))
-        self.label_ev_charger.grid(row=1, column=0, padx=5, pady=(5, 0))
-        self.label_ev_charger = customtkinter.CTkLabel(self.sidebar_frame2, text="...", font=customtkinter.CTkFont(size=15))
-        self.label_ev_charger.grid(row=1, column=1, padx=(5,15), pady=(5, 0))
+        self.label_result1 = customtkinter.CTkLabel(self.sidebar_frame2, text="Grid Extraction:", font=customtkinter.CTkFont(size=15))
+        self.label_result1.grid(row=1, column=0, padx=5, pady=(5, 0))
+        self.label_result1 = customtkinter.CTkLabel(self.sidebar_frame2, text="...", font=customtkinter.CTkFont(size=15))
+        self.label_result1.grid(row=1, column=1, padx=(5,15), pady=(5, 0))
 
-        self.label_ev_charger = customtkinter.CTkLabel(self.sidebar_frame2, text="Grid Extraction:", font=customtkinter.CTkFont(size=15))
-        self.label_ev_charger.grid(row=2, column=0, padx=5, pady=(5, 0))
-        self.label_ev_charger = customtkinter.CTkLabel(self.sidebar_frame2, text="...", font=customtkinter.CTkFont(size=15))
-        self.label_ev_charger.grid(row=2, column=1, padx=(5,15), pady=(5, 0))
+        self.label_result2 = customtkinter.CTkLabel(self.sidebar_frame2, text="Grid Injection:", font=customtkinter.CTkFont(size=15))
+        self.label_result2.grid(row=2, column=0, padx=5, pady=(5, 0))
+        self.label_result2 = customtkinter.CTkLabel(self.sidebar_frame2, text="...", font=customtkinter.CTkFont(size=15))
+        self.label_result2.grid(row=2, column=1, padx=(5,15), pady=(5, 0))
 
-        self.label_ev_charger = customtkinter.CTkLabel(self.sidebar_frame2, text="Total Cost:", font=customtkinter.CTkFont(size=15))
-        self.label_ev_charger.grid(row=3, column=0, padx=5, pady=(5, 0))
-        self.label_ev_charger = customtkinter.CTkLabel(self.sidebar_frame2, text="...", font=customtkinter.CTkFont(size=15))
-        self.label_ev_charger.grid(row=3, column=1, padx=(5,15), pady=(5, 0))
+        self.label_result3 = customtkinter.CTkLabel(self.sidebar_frame2, text="Total Cost:", font=customtkinter.CTkFont(size=15))
+        self.label_result3.grid(row=3, column=0, padx=5, pady=(5, 0))
+        self.label_result3 = customtkinter.CTkLabel(self.sidebar_frame2, text="...", font=customtkinter.CTkFont(size=15))
+        self.label_result3.grid(row=3, column=1, padx=(5,15), pady=(5, 0))
 
-        self.label_ev_charger = customtkinter.CTkLabel(self.sidebar_frame2, text="Result 4:", font=customtkinter.CTkFont(size=15))
-        self.label_ev_charger.grid(row=4, column=0, padx=5, pady=(5, 0))
-        self.label_ev_charger = customtkinter.CTkLabel(self.sidebar_frame2, text="...", font=customtkinter.CTkFont(size=15))
-        self.label_ev_charger.grid(row=4, column=1, padx=(5,15), pady=(5, 0))
+        self.label_result4 = customtkinter.CTkLabel(self.sidebar_frame2, text="Total Earning:", font=customtkinter.CTkFont(size=15))
+        self.label_result4.grid(row=4, column=0, padx=5, pady=(5, 0))
+        self.label_result4 = customtkinter.CTkLabel(self.sidebar_frame2, text="...", font=customtkinter.CTkFont(size=15))
+        self.label_result4.grid(row=4, column=1, padx=(5,15), pady=(5, 0))
 
 
     def update_graphs_with_new_data(self, data_points, daily_average_usage):
@@ -143,6 +143,20 @@ class App(customtkinter.CTk):
         power_values = [point['power_value'] for point in data_points]
         charge_values = [point['charge_value'] for point in data_points]
         residue_energy_values = [point['residue_energy'] for point in data_points]# if 'residue_energy' in point]
+
+        # Calculate sum of positive and negative residue values
+        grid_injection_sum = sum(value for value in residue_energy_values if value > 0)
+        grid_extraction_sum = sum(value for value in residue_energy_values if value < 0)
+
+        # Calculate cost for grid injection and grid extraction assuming energy cost of 0.1 euro per kWh
+        grid_injection_cost = grid_injection_sum * 0.035
+        grid_extraction_cost = grid_extraction_sum * -0.1211
+
+        #code to display in text field
+        self.label_result1.configure(text=str(round(grid_extraction_sum, 4)) + " kWh")
+        self.label_result2.configure(text=str(round(grid_injection_sum, 4)) + " kWh")
+        self.label_result3.configure(text=str(round(grid_injection_cost, 4)) + " €")
+        self.label_result4.configure(text=str(round(grid_extraction_cost, 4)) + " €")
 
         # For example, let's generate new random data for each graph
         import numpy as np
