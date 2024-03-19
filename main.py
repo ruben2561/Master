@@ -24,113 +24,67 @@ class App(customtkinter.CTk):
 
         # configure window
         self.title("Smart Home Simulation")
-        self.geometry(f"{1280}x{720}")
+        self.geometry(f"{1280}x{560}")
 
         # configure grid layout (4x4)
-        self.grid_columnconfigure(1, weight=1)
-        self.grid_columnconfigure((2, 3), weight=0)
-        self.grid_rowconfigure((0, 1, 2), weight=1)
+        self.grid_columnconfigure(0, weight=1)
+        #self.grid_columnconfigure((2, 3), weight=0)
+        self.grid_rowconfigure(0, weight=1)
+
+        customtkinter.set_appearance_mode("Dark")
 
         # create sidebar frame with widgets
-        self.sidebar_frame = customtkinter.CTkFrame(self, width=140, corner_radius=0)
-        self.sidebar_frame.grid(row=0, column=0, rowspan=4, sticky="nsew")
-        self.sidebar_frame.grid_rowconfigure(4, weight=1)
-        self.logo_label = customtkinter.CTkLabel(self.sidebar_frame, text="Sim Params", font=customtkinter.CTkFont(size=20, weight="bold"))
-        self.logo_label.grid(row=0, column=0, padx=20, pady=(20, 10))
+        self.sidebar_frame = customtkinter.CTkFrame(self, width=200, corner_radius=0)
+        self.sidebar_frame.grid(row=0, column=0, sticky="nsew")
+        self.sidebar_frame.grid_rowconfigure(10, weight=1)
+        self.logo_label = customtkinter.CTkLabel(self.sidebar_frame, text="Simulation Params", font=customtkinter.CTkFont(size=20, weight="bold"))
+        self.logo_label.grid(row=0, column=0, padx=20, pady=(20, 5), columnspan=2)
 
-        self.optionmenu_1 = customtkinter.CTkOptionMenu(self.sidebar_frame, dynamic_resizing=False,
+        # Option Menu for Battery
+        self.label_battery = customtkinter.CTkLabel(self.sidebar_frame, text="Battery", font=customtkinter.CTkFont(size=15))
+        self.label_battery.grid(row=1, column=0, padx=5, pady=(5, 0))
+        self.optionmenu_battery = customtkinter.CTkOptionMenu(self.sidebar_frame, dynamic_resizing=False,
                                                         values=["Lithium-ion", "Lead-acid", "..."])
-        self.optionmenu_1.grid(row=1, column=0, padx=20, pady=(20, 10))
+        self.optionmenu_battery.grid(row=2, column=0, padx=20, pady=(5, 5))
+        self.edit_button_battery = customtkinter.CTkButton(self.sidebar_frame, text="Edit", command=self.open_input_dialog_event)
+        self.edit_button_battery.grid(row=2, column=1, padx=5, pady=(5, 5))
 
+        # Option Menu for SolarPanel
+        self.label_solar_panel = customtkinter.CTkLabel(self.sidebar_frame, text="Solar Panel", font=customtkinter.CTkFont(size=15))
+        self.label_solar_panel.grid(row=3, column=0, padx=5, pady=(5, 0))
+        self.optionmenu_solar_panel = customtkinter.CTkOptionMenu(self.sidebar_frame, dynamic_resizing=False,
+                                                        values=["Option 1", "Option 2", "..."])
+        self.optionmenu_solar_panel.grid(row=4, column=0, padx=20, pady=(5, 5))
+        self.edit_button_solar_panel = customtkinter.CTkButton(self.sidebar_frame, text="Edit", command=self.open_input_dialog_event)
+        self.edit_button_solar_panel.grid(row=4, column=1, padx=5, pady=(5, 5))
 
-        self.sidebar_button_1 = customtkinter.CTkButton(self.sidebar_frame, text="battery", command=self.sidebar_button_event)
-        self.sidebar_button_1.grid(row=2, column=0, padx=20, pady=10)
-        self.sidebar_button_2 = customtkinter.CTkButton(self.sidebar_frame, text="Start Sim.", command=lambda: self.start_process("50.9254992", "5.3932811", "16/03/2018", "16/04/2018"))
-        self.sidebar_button_2.grid(row=3, column=0, padx=20, pady=10)
-        self.appearance_mode_label = customtkinter.CTkLabel(self.sidebar_frame, text="Appearance Mode:", anchor="w")
-        self.appearance_mode_label.grid(row=5, column=0, padx=20, pady=(10, 0))
-        self.appearance_mode_optionemenu = customtkinter.CTkOptionMenu(self.sidebar_frame, values=["Light", "Dark", "System"],
-                                                                       command=self.change_appearance_mode_event)
-        self.appearance_mode_optionemenu.grid(row=6, column=0, padx=20, pady=(10, 10))
-        self.scaling_label = customtkinter.CTkLabel(self.sidebar_frame, text="UI Scaling:", anchor="w")
-        self.scaling_label.grid(row=7, column=0, padx=20, pady=(10, 0))
-        self.scaling_optionemenu = customtkinter.CTkOptionMenu(self.sidebar_frame, values=["80%", "90%", "100%", "110%", "120%"],
-                                                               command=self.change_scaling_event)
-        self.scaling_optionemenu.grid(row=8, column=0, padx=20, pady=(10, 20))
+        # Option Menu for EVCharger
+        self.label_ev_charger = customtkinter.CTkLabel(self.sidebar_frame, text="EV Charger", font=customtkinter.CTkFont(size=15))
+        self.label_ev_charger.grid(row=5, column=0, padx=5, pady=(5, 0))
+        self.optionmenu_ev_charger = customtkinter.CTkOptionMenu(self.sidebar_frame, dynamic_resizing=False,
+                                                        values=["Option A", "Option B", "..."])
+        self.optionmenu_ev_charger.grid(row=6, column=0, padx=20, pady=(5, 40))
+        self.edit_button_ev_charger = customtkinter.CTkButton(self.sidebar_frame, text="Edit", command=self.open_input_dialog_event)
+        self.edit_button_ev_charger.grid(row=6, column=1, padx=5, pady=(5, 40))
 
         # create main entry and button
-        self.entry = customtkinter.CTkEntry(self, placeholder_text="CTkEntry")
-        self.entry.grid(row=3, column=1, columnspan=2, padx=(20, 0), pady=(20, 20), sticky="nsew")
+        self.entry_field1 = customtkinter.CTkEntry(self.sidebar_frame, placeholder_text="Start date")
+        self.entry_field1.grid(row=7, column=0, padx=20, pady=(5, 40))
 
-        self.main_button_1 = customtkinter.CTkButton(master=self, fg_color="transparent", border_width=2, text_color=("gray10", "#DCE4EE"))
-        self.main_button_1.grid(row=3, column=3, padx=(20, 20), pady=(20, 20), sticky="nsew")
+        self.entry_field2 = customtkinter.CTkEntry(self.sidebar_frame, placeholder_text="End date")
+        self.entry_field2.grid(row=7, column=1, padx=20, pady=(5, 40))
 
-        # create tabview
-        self.tabview = customtkinter.CTkTabview(self, width=250)
-        self.tabview.grid(row=0, column=2, padx=(20, 0), pady=(20, 0), sticky="nsew")
-        self.tabview.add("CTkTabview")
-        self.tabview.add("Tab 2")
-        self.tabview.add("Tab 3")
-        self.tabview.tab("CTkTabview").grid_columnconfigure(0, weight=1)  # configure grid of individual tabs
-        self.tabview.tab("Tab 2").grid_columnconfigure(0, weight=1)
 
-        self.optionmenu_battery = customtkinter.CTkOptionMenu(self.tabview.tab("CTkTabview"), dynamic_resizing=False,
-                                                        values=["Value 1", "Value 2", "Value Long Long Long"])
-        self.optionmenu_1.grid(row=0, column=0, padx=20, pady=(20, 10))
-        self.combobox_1 = customtkinter.CTkComboBox(self.tabview.tab("CTkTabview"),
-                                                    values=["Value 1", "Value 2", "Value Long....."])
-        self.combobox_1.grid(row=1, column=0, padx=20, pady=(10, 10))
-        self.string_input_button = customtkinter.CTkButton(self.tabview.tab("CTkTabview"), text="Open CTkInputDialog",
-                                                           command=self.open_input_dialog_event)
-        self.string_input_button.grid(row=2, column=0, padx=20, pady=(10, 10))
+        #self.sidebar_button_1 = customtkinter.CTkButton(self.sidebar_frame, text="battery", command=self.sidebar_button_event)
+        #self.sidebar_button_1.grid(row=2, column=0, padx=20, pady=10)
+        self.sidebar_button_2 = customtkinter.CTkButton(self.sidebar_frame, text="Start Sim.", command=lambda: self.start_process("50.9254992", "5.3932811", "16/03/2018", "16/04/2018"))
+        self.sidebar_button_2.grid(row=8, column=0, padx=20, pady=10, columnspan=2)
 
-        self.label_tab_2 = customtkinter.CTkLabel(self.tabview.tab("Tab 2"), text="CTkLabel on Tab 2")
-        self.label_tab_2.grid(row=0, column=0, padx=20, pady=20)
-
-        # create radiobutton frame
-        self.radiobutton_frame = customtkinter.CTkFrame(self)
-        self.radiobutton_frame.grid(row=0, column=3, padx=(20, 20), pady=(20, 0), sticky="nsew")
-        self.radio_var = tkinter.IntVar(value=0)
-        self.label_radio_group = customtkinter.CTkLabel(master=self.radiobutton_frame, text="CTkRadioButton Group:")
-        self.label_radio_group.grid(row=0, column=2, columnspan=1, padx=10, pady=10, sticky="")
-        self.radio_button_1 = customtkinter.CTkRadioButton(master=self.radiobutton_frame, variable=self.radio_var, value=0)
-        self.radio_button_1.grid(row=1, column=2, pady=10, padx=20, sticky="n")
-        self.radio_button_2 = customtkinter.CTkRadioButton(master=self.radiobutton_frame, variable=self.radio_var, value=1)
-        self.radio_button_2.grid(row=2, column=2, pady=10, padx=20, sticky="n")
-        self.radio_button_3 = customtkinter.CTkRadioButton(master=self.radiobutton_frame, variable=self.radio_var, value=2)
-        self.radio_button_3.grid(row=3, column=2, pady=10, padx=20, sticky="n")
-
-        # create scrollable frame
-        self.scrollable_frame = customtkinter.CTkScrollableFrame(self, label_text="CTkScrollableFrame")
-        self.scrollable_frame.grid(row=1, column=2, padx=(20, 0), pady=(20, 0), sticky="nsew")
-        self.scrollable_frame.grid_columnconfigure(0, weight=1)
-        self.scrollable_frame_switches = []
-        for i in range(100):
-            switch = customtkinter.CTkSwitch(master=self.scrollable_frame, text=f"CTkSwitch {i}")
-            switch.grid(row=i, column=0, padx=10, pady=(0, 20))
-            self.scrollable_frame_switches.append(switch)
-
-        # create checkbox and switch frame
-        self.checkbox_slider_frame = customtkinter.CTkFrame(self)
-        self.checkbox_slider_frame.grid(row=1, column=3, padx=(20, 20), pady=(20, 0), sticky="nsew")
-        self.checkbox_1 = customtkinter.CTkCheckBox(master=self.checkbox_slider_frame)
-        self.checkbox_1.grid(row=1, column=0, pady=(20, 0), padx=20, sticky="n")
-        self.checkbox_2 = customtkinter.CTkCheckBox(master=self.checkbox_slider_frame)
-        self.checkbox_2.grid(row=2, column=0, pady=(20, 0), padx=20, sticky="n")
-        self.checkbox_3 = customtkinter.CTkCheckBox(master=self.checkbox_slider_frame)
-        self.checkbox_3.grid(row=3, column=0, pady=20, padx=20, sticky="n")
-
+        #self.main_button_1 = customtkinter.CTkButton(master=self, fg_color="transparent", border_width=2, text_color=("gray10", "#DCE4EE"))
 
         # set default values
-        self.checkbox_3.configure(state="disabled")
-        self.checkbox_1.select()
-        self.scrollable_frame_switches[0].select()
-        self.scrollable_frame_switches[4].select()
-        self.radio_button_3.configure(state="disabled")
-        self.appearance_mode_optionemenu.set("Dark")
-        self.scaling_optionemenu.set("100%")
-        self.optionmenu_1.set("Battery")
-        self.combobox_1.set("CTkComboBox")
+        customtkinter.set_appearance_mode("Dark")
+        #self.optionmenu_1.set("Battery")
 
         # create Matplotlib graphs
         self.fig, ((self.ax1, self.ax2), (self.ax3, self.ax4)) = plt.subplots(2, 2, figsize=(8, 6))
@@ -152,10 +106,35 @@ class App(customtkinter.CTk):
 
         self.ax4.set_xlabel('Time')
         self.ax4.set_ylabel('Energy (kWh)')
-        self.canvas1.get_tk_widget().grid(row=0, column=4, rowspan=4, padx=(20, 0), pady=(20, 0))
+        self.canvas1.get_tk_widget().grid(row=0, column=1, rowspan=10, padx=(40, 40), pady=(40, 40))
 
-        # Call functions to draw initial graphs
-        #self.draw_graphs()
+
+        # create sidebar frame with widgets
+        self.sidebar_frame2 = customtkinter.CTkFrame(self, width=140, corner_radius=0)
+        self.sidebar_frame2.grid(row=0, column=2, sticky="nsew")
+        self.sidebar_frame2.grid_rowconfigure(10, weight=1)
+        self.logo_label2 = customtkinter.CTkLabel(self.sidebar_frame2, text="Sim Results", font=customtkinter.CTkFont(size=20, weight="bold"))
+        self.logo_label2.grid(row=0, column=0, padx=20, pady=(20, 5), columnspan=2)
+
+        self.label_ev_charger = customtkinter.CTkLabel(self.sidebar_frame2, text="Grid Injection:", font=customtkinter.CTkFont(size=15))
+        self.label_ev_charger.grid(row=1, column=0, padx=5, pady=(5, 0))
+        self.label_ev_charger = customtkinter.CTkLabel(self.sidebar_frame2, text="...", font=customtkinter.CTkFont(size=15))
+        self.label_ev_charger.grid(row=1, column=1, padx=(5,15), pady=(5, 0))
+
+        self.label_ev_charger = customtkinter.CTkLabel(self.sidebar_frame2, text="Grid Extraction:", font=customtkinter.CTkFont(size=15))
+        self.label_ev_charger.grid(row=2, column=0, padx=5, pady=(5, 0))
+        self.label_ev_charger = customtkinter.CTkLabel(self.sidebar_frame2, text="...", font=customtkinter.CTkFont(size=15))
+        self.label_ev_charger.grid(row=2, column=1, padx=(5,15), pady=(5, 0))
+
+        self.label_ev_charger = customtkinter.CTkLabel(self.sidebar_frame2, text="Total Cost:", font=customtkinter.CTkFont(size=15))
+        self.label_ev_charger.grid(row=3, column=0, padx=5, pady=(5, 0))
+        self.label_ev_charger = customtkinter.CTkLabel(self.sidebar_frame2, text="...", font=customtkinter.CTkFont(size=15))
+        self.label_ev_charger.grid(row=3, column=1, padx=(5,15), pady=(5, 0))
+
+        self.label_ev_charger = customtkinter.CTkLabel(self.sidebar_frame2, text="Result 4:", font=customtkinter.CTkFont(size=15))
+        self.label_ev_charger.grid(row=4, column=0, padx=5, pady=(5, 0))
+        self.label_ev_charger = customtkinter.CTkLabel(self.sidebar_frame2, text="...", font=customtkinter.CTkFont(size=15))
+        self.label_ev_charger.grid(row=4, column=1, padx=(5,15), pady=(5, 0))
 
 
     def update_graphs_with_new_data(self, data_points, daily_average_usage):
