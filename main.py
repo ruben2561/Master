@@ -7,7 +7,7 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import tkinter as tk
 from tkinter import ttk
 from battery import Battery
-from process import process_data, retrieve_data_api, update_gui 
+from process import get_power_usage_values, process_data, retrieve_data_api
 from pybammBattery import PyBaMM_Battery
 from solcast import get_solar_radiation_forecast
 import csv
@@ -37,6 +37,7 @@ class App(customtkinter.CTk):
         self.sidebar_frame = customtkinter.CTkFrame(self, width=200, corner_radius=0)
         self.sidebar_frame.grid(row=0, column=0, sticky="nsew")
         self.sidebar_frame.grid_rowconfigure(10, weight=1)
+        self.sidebar_frame.grid_propagate(False)  # Prevent resizing
         self.logo_label = customtkinter.CTkLabel(self.sidebar_frame, text="Simulation Params", font=customtkinter.CTkFont(size=20, weight="bold"))
         self.logo_label.grid(row=0, column=0, padx=20, pady=(20, 5), columnspan=2)
 
@@ -53,7 +54,7 @@ class App(customtkinter.CTk):
         self.label_solar_panel = customtkinter.CTkLabel(self.sidebar_frame, text="Solar Panel", font=customtkinter.CTkFont(size=15))
         self.label_solar_panel.grid(row=3, column=0, padx=5, pady=(5, 0))
         self.optionmenu_solar_panel = customtkinter.CTkOptionMenu(self.sidebar_frame, dynamic_resizing=False,
-                                                        values=["Option 1", "Option 2", "..."])
+                                                        values=["Monocrystalline", "Polycrystalline", "PERC", "Thin film", "..."])
         self.optionmenu_solar_panel.grid(row=4, column=0, padx=20, pady=(5, 5))
         self.edit_button_solar_panel = customtkinter.CTkButton(self.sidebar_frame, text="Edit", command=self.open_input_dialog_event)
         self.edit_button_solar_panel.grid(row=4, column=1, padx=5, pady=(5, 5))
@@ -62,7 +63,7 @@ class App(customtkinter.CTk):
         self.label_ev_charger = customtkinter.CTkLabel(self.sidebar_frame, text="EV Charger", font=customtkinter.CTkFont(size=15))
         self.label_ev_charger.grid(row=5, column=0, padx=5, pady=(5, 0))
         self.optionmenu_ev_charger = customtkinter.CTkOptionMenu(self.sidebar_frame, dynamic_resizing=False,
-                                                        values=["Option A", "Option B", "..."])
+                                                        values=["Type 1", "Type 2", "Type 3"])
         self.optionmenu_ev_charger.grid(row=6, column=0, padx=20, pady=(5, 40))
         self.edit_button_ev_charger = customtkinter.CTkButton(self.sidebar_frame, text="Edit", command=self.open_input_dialog_event)
         self.edit_button_ev_charger.grid(row=6, column=1, padx=5, pady=(5, 40))
@@ -137,12 +138,13 @@ class App(customtkinter.CTk):
         self.label_result4.grid(row=4, column=1, padx=(5,15), pady=(5, 0))
 
 
-    def update_graphs_with_new_data(self, data_points, daily_average_usage):
+    def update_graphs_with_new_data(self, data_points):
         # Perform some calculations to get new data
-        time_values = [point['time_value'] for point in data_points]# if point['time_value']]
-        power_values = [point['power_value'] for point in data_points]
+        time_values = [point['time_value'] for point in data_points]
+        pv_power_values = [point['pv_power_value'] for point in data_points]
+        power_usage_values = [point['power_usage_value'] for point in data_points]
         charge_values = [point['charge_value'] for point in data_points]
-        residue_energy_values = [point['residue_energy'] for point in data_points]# if 'residue_energy' in point]
+        residue_energy_values = [point['residue_energy'] for point in data_points]
 
         # Calculate sum of positive and negative residue values
         grid_injection_sum = sum(value for value in residue_energy_values if value > 0)
@@ -155,13 +157,13 @@ class App(customtkinter.CTk):
         #code to display in text field
         self.label_result1.configure(text=str(round(grid_extraction_sum, 4)) + " kWh")
         self.label_result2.configure(text=str(round(grid_injection_sum, 4)) + " kWh")
-        self.label_result3.configure(text=str(round(grid_injection_cost, 4)) + " €")
-        self.label_result4.configure(text=str(round(grid_extraction_cost, 4)) + " €")
+        self.label_result3.configure(text=str(round(grid_extraction_cost, 4)) + " €")
+        self.label_result4.configure(text=str(round(grid_injection_cost, 4)) + " €")
 
         # For example, let's generate new random data for each graph
         import numpy as np
-        new_y1 = power_values
-        new_y2 = [daily_average_usage/48]*len(time_values)
+        new_y1 = pv_power_values
+        new_y2 = power_usage_values
         new_y3 = charge_values
         new_y4 = residue_energy_values
 
@@ -229,18 +231,18 @@ class App(customtkinter.CTk):
     
     def start_process(self, latitude, longitude, start_date, end_date):
         
-        battery = Battery(capacity=3, soc=2, charge_power=5.0, discharge_power=5.0, max_soc=0.95, min_dod=0.05, efficiency=0.90)
-        pybamm_battery = PyBaMM_Battery(capacity=3, soc=2, charge_power=5.0, discharge_power=5.0, max_soc=0.95, min_dod=0.05, efficiency=0.90)
-        
-        daily_average_usage = 9  # kWh
+        battery = Battery(capacity=2, soc=2, charge_power=5.0, discharge_power=5.0, max_soc=0.95, min_dod=0.05, efficiency=0.90)
+        pybamm_battery = PyBaMM_Battery(capacity=2, soc=2, charge_power=5.0, discharge_power=5.0, max_soc=0.95, min_dod=0.05, efficiency=0.90)
 
         data_points = retrieve_data_api(latitude, longitude, start_date, end_date)
 
-        data_points = process_data(data_points, daily_average_usage, battery, pybamm_battery)
+        data_points = get_power_usage_values(data_points)
+
+        data_points = process_data(data_points, battery, pybamm_battery)
 
         #time_values, new_charge_values = calculate_new_values(time_values, charge_values, daily_average_usage)
 
-        self.update_graphs_with_new_data(data_points, daily_average_usage)
+        self.update_graphs_with_new_data(data_points)
 
 if __name__ == "__main__":
     app = App()
