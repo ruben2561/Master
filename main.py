@@ -183,7 +183,11 @@ class App(customtkinter.CTk):
         self.ax3.plot(time_values, new_y3)
         self.ax3.set_title('Battery Charge')
 
-        self.ax4.plot(time_values, new_y4)
+        default_line_color = plt.rcParams['lines.color']
+        print("Default line color:", default_line_color)
+
+        self.ax4.bar(time_values, new_y4, width=0.01)
+        self.ax4.axhline(y=0, color='C0', linestyle='-', linewidth=1)
         self.ax4.set_title('Grid Usage')
 
         self.ax1.set_xlabel('Time')
