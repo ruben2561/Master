@@ -7,6 +7,7 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import tkinter as tk
 from tkinter import ttk
 from battery import Battery
+from databaseManager import DatabaseManager
 from process import get_power_usage_values, process_data, retrieve_data_api
 from pybammBattery import PyBaMM_Battery
 from solcast import get_solar_radiation_forecast
@@ -21,6 +22,8 @@ customtkinter.set_default_color_theme("blue")  # Themes: "blue" (standard), "gre
 class App(customtkinter.CTk):
     def __init__(self):
         super().__init__()
+        self.db_manager = DatabaseManager("database_master.db")  # Create an instance of DatabaseManager
+
 
         # configure window
         self.title("Smart Home Simulation")
@@ -44,11 +47,11 @@ class App(customtkinter.CTk):
         # Option Menu for Battery
         self.label_battery = customtkinter.CTkLabel(self.sidebar_frame, text="Battery", font=customtkinter.CTkFont(size=15))
         self.label_battery.grid(row=1, column=0, padx=5, pady=(5, 0))
-        self.optionmenu_battery = customtkinter.CTkOptionMenu(self.sidebar_frame, dynamic_resizing=False,
-                                                        values=["Lithium-ion", "Lead-acid", "..."])
+        self.optionmenu_battery = customtkinter.CTkOptionMenu(self.sidebar_frame, dynamic_resizing=False)
         self.optionmenu_battery.grid(row=2, column=0, padx=20, pady=(5, 5))
         self.edit_button_battery = customtkinter.CTkButton(self.sidebar_frame, text="Edit", command=self.open_input_dialog_event)
         self.edit_button_battery.grid(row=2, column=1, padx=5, pady=(5, 5))
+        self.populate_battery_options()
 
         # Option Menu for SolarPanel
         self.label_solar_panel = customtkinter.CTkLabel(self.sidebar_frame, text="Solar Panel", font=customtkinter.CTkFont(size=15))
@@ -216,6 +219,15 @@ class App(customtkinter.CTk):
         # Redraw canvas
         self.canvas1.draw()
 
+    def populate_battery_options(self):
+        # Fetch battery data from the database
+        battery_data = self.db_manager.fetch_battery_data()
+        # Extract battery names
+        self.battery_options = [battery[1] for battery in battery_data]
+        # Update option menu with battery names   
+        self.optionmenu_battery.configure(values=self.battery_options)
+        self.optionmenu_battery.set(self.battery_options[0])
+
     def open_input_dialog_event(self):
         battery_types = ["Lithium-ion", "Lead-acid", "NiMH", "Flow Battery"]  # Example list of battery types
 
@@ -226,6 +238,7 @@ class App(customtkinter.CTk):
             default=0,
         )
 
+        #self.optionmenu_battery.set(option)
         if dialog.result == "OK":
             selected_battery_type = dialog.listBox.curselection()  # Get the index of the selected battery type
             if selected_battery_type:
@@ -237,7 +250,23 @@ class App(customtkinter.CTk):
     
     def start_process(self, latitude, longitude, start_date, end_date):
         
-        battery = Battery(capacity=2, soc=2, charge_power=5.0, discharge_power=5.0, max_soc=0.95, min_dod=0.05, efficiency=0.90)
+        selected_battery = self.optionmenu_battery.get()
+        selected_battery_data = self.db_manager.fetch_battery_by_name(selected_battery)
+        print("dataaaaa")
+        print(selected_battery_data)
+
+        # Initialize battery using the retrieved data
+        battery = Battery(
+            capacity=selected_battery_data[2],
+            soc=2,
+            charge_power=selected_battery_data[3],
+            discharge_power=selected_battery_data[4],
+            max_soc=selected_battery_data[5],
+            min_dod=selected_battery_data[6],
+            efficiency=selected_battery_data[7]
+        )
+
+        #.battery = Battery(capacity=2, soc=2, charge_power=5.0, discharge_power=5.0, max_soc=0.95, min_dod=0.05, efficiency=0.90)
         pybamm_battery = PyBaMM_Battery(capacity=2, soc=2, charge_power=5.0, discharge_power=5.0, max_soc=0.95, min_dod=0.05, efficiency=0.90)
 
         data_points = retrieve_data_api(latitude, longitude, start_date, end_date)

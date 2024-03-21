@@ -19,8 +19,6 @@ def retrieve_data_api(latitude, longitude, start_date, end_date):
     forecast_data = get_solar_radiation_forecast(latitude, longitude, start_date, end_date)
 
     if forecast_data:
-        print("Solar Radiation Data:")
-        #print(forecast_data)
         # Parse CSV data into list of dictionaries
         reader = csv.DictReader(forecast_data.splitlines())
         forecast_list = list(reader)
@@ -53,8 +51,6 @@ def process_data(data_points, battery, pybamm_battery):
         if time_value and next_time:
             # Calculate time difference in hours
             time_difference_hours = (next_time - time_value).total_seconds() / 3600
-            print(time_difference_hours)
-            print(pv_power_value)
             # Charge the battery based on the time difference
             residue_to_much_energy = battery.charge(pv_power_value, time_difference_hours)
             residue_to_little_energy = battery.discharge(power_usage_value, time_difference_hours)  # Subtract average power usage every half hour
@@ -79,7 +75,7 @@ def process_data(data_points, battery, pybamm_battery):
 
 def get_power_usage_values(data_points):
     try:
-        with open("power_usage_data.csv", "r") as file:
+        with open("sampleData/power_usage_data.csv", "r") as file:
             sample_data = file.read()
 
             if sample_data:

@@ -28,7 +28,7 @@ print("sexyyy") """
 
 def get_sample_data():
     try:
-        with open("pv_data.csv", "r") as file:
+        with open("sampleData/pv_data.csv", "r") as file:
             sample_data = file.read()
             return sample_data
     except Exception as e:
