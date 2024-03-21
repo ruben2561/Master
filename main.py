@@ -183,9 +183,6 @@ class App(customtkinter.CTk):
         self.ax3.plot(time_values, new_y3)
         self.ax3.set_title('Battery Charge')
 
-        default_line_color = plt.rcParams['lines.color']
-        print("Default line color:", default_line_color)
-
         self.ax4.bar(time_values, new_y4, width=0.01)
         self.ax4.axhline(y=0, color='C0', linestyle='-', linewidth=1)
         self.ax4.set_title('Grid Usage')
@@ -220,18 +217,23 @@ class App(customtkinter.CTk):
         self.canvas1.draw()
 
     def open_input_dialog_event(self):
-        dialog = customtkinter.CTkInputDialog(text="Type in a number:", title="CTkInputDialog")
-        print("CTkInputDialog:", dialog.get_input())
+        battery_types = ["Lithium-ion", "Lead-acid", "NiMH", "Flow Battery"]  # Example list of battery types
 
-    def change_appearance_mode_event(self, new_appearance_mode: str):
-        customtkinter.set_appearance_mode(new_appearance_mode)
+        dialog = tkinter.simpledialog.Dialog(
+            title="Battery Types",
+            text="Select a battery type to edit or delete:",
+            buttons=["OK", "Cancel"],
+            default=0,
+        )
 
-    def change_scaling_event(self, new_scaling: str):
-        new_scaling_float = int(new_scaling.replace("%", "")) / 100
-        customtkinter.set_widget_scaling(new_scaling_float)
+        if dialog.result == "OK":
+            selected_battery_type = dialog.listBox.curselection()  # Get the index of the selected battery type
+            if selected_battery_type:
+                index = selected_battery_type[0]
+                battery_type = battery_types[index]
+                self.edit_battery_type(battery_type)  # Call the method to edit the selected battery type
+                # You can also call the method to delete the selected battery type if needed
 
-    def sidebar_button_event(self):
-        print('"sidebar button')
     
     def start_process(self, latitude, longitude, start_date, end_date):
         
