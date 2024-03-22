@@ -40,6 +40,32 @@ class DatabaseManager:
         self.cursor.execute(query, (name,))
         self.connection.commit()
 
+
+    def fetch_solar_panel_data(self):
+        self.connect()
+        try:
+            self.cursor.execute("SELECT * FROM SolarPanel")
+            solarpanel_data = self.cursor.fetchall()
+            return solarpanel_data
+        except sqlite3.Error as e:
+            print("Error fetching solarpanel data:", e)
+
+    def fetch_solarpanel_by_name(self, solarpanel_name):
+        query = "SELECT * FROM SolarPanel WHERE name = ?"
+        self.cursor.execute(query, (solarpanel_name,))
+        solarpanel_data = self.cursor.fetchone()
+        return solarpanel_data
+    
+    def add_solarpanel(self, name, capacityACkW, capacityDCkW, azimuth, tilt, efficiency):
+        query = "INSERT INTO SolarPanel ?,?,?,?,?,?"
+        self.cursor.execute(query, (name, capacityACkW, capacityDCkW, azimuth, tilt, efficiency))
+        self.connection.commit()
+
+    def delete_solarpanel_by_name(self, name):
+        query = "DELETE FROM SolarPanel WHERE name = ?"
+        self.cursor.execute(query, (name,))
+        self.connection.commit()
+
 # Usage example:
 # db_manager = DatabaseManager("database_master.db")
 # battery_data = db_manager.fetch_battery_data()
