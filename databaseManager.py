@@ -29,6 +29,30 @@ class DatabaseManager:
         self.cursor.execute(query, (battery_name,))
         battery_data = self.cursor.fetchone()
         return battery_data
+    
+    def add_battery(self, name, capacity, charge_power, discharge_power, max_soc, min_dod, efficiency):
+        try:
+            # Insert a new battery record into the Battery table
+            self.cursor.execute("""
+                INSERT INTO Battery (name, capacityKWh, chargePowerKW, dischargePowerKW, maxSoc, minDod, efficiency)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
+            """, (name, capacity, charge_power, discharge_power, max_soc, min_dod, efficiency))
+            self.conn.commit()
+            print("Battery added successfully.")
+        except sqlite3.Error as e:
+            print("Error adding battery:", e)
+
+    def delete_battery_by_name(self, name):
+        try:
+            # Delete the battery record from the Battery table based on the name
+            self.cursor.execute("""
+                DELETE FROM Battery
+                WHERE name = ?
+            """, (name,))
+            self.conn.commit()
+            print("Battery deleted successfully.")
+        except sqlite3.Error as e:
+            print("Error deleting battery:", e)
 
 # Usage example:
 # db_manager = DatabaseManager("database_master.db")

@@ -1,7 +1,9 @@
 import tkinter
 import tkinter.messagebox
+from CTkMessagebox import CTkMessagebox
 import customtkinter
 from matplotlib.figure import Figure
+from CTkListbox import *
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import tkinter as tk
@@ -49,7 +51,7 @@ class App(customtkinter.CTk):
         self.label_battery.grid(row=1, column=0, padx=5, pady=(5, 0))
         self.optionmenu_battery = customtkinter.CTkOptionMenu(self.sidebar_frame, dynamic_resizing=False)
         self.optionmenu_battery.grid(row=2, column=0, padx=20, pady=(5, 5))
-        self.edit_button_battery = customtkinter.CTkButton(self.sidebar_frame, text="Edit", command=self.open_input_dialog_event)
+        self.edit_button_battery = customtkinter.CTkButton(self.sidebar_frame, text="Edit", command=self.open_edit_dialog)
         self.edit_button_battery.grid(row=2, column=1, padx=5, pady=(5, 5))
         self.populate_battery_options()
 
@@ -59,7 +61,7 @@ class App(customtkinter.CTk):
         self.optionmenu_solar_panel = customtkinter.CTkOptionMenu(self.sidebar_frame, dynamic_resizing=False,
                                                         values=["Monocrystalline", "Polycrystalline", "PERC", "Thin film", "..."])
         self.optionmenu_solar_panel.grid(row=4, column=0, padx=20, pady=(5, 5))
-        self.edit_button_solar_panel = customtkinter.CTkButton(self.sidebar_frame, text="Edit", command=self.open_input_dialog_event)
+        self.edit_button_solar_panel = customtkinter.CTkButton(self.sidebar_frame, text="Edit", command=self.open_selection_list)
         self.edit_button_solar_panel.grid(row=4, column=1, padx=5, pady=(5, 5))
 
         # Option Menu for EVCharger
@@ -68,7 +70,7 @@ class App(customtkinter.CTk):
         self.optionmenu_ev_charger = customtkinter.CTkOptionMenu(self.sidebar_frame, dynamic_resizing=False,
                                                         values=["Type 1", "Type 2", "Type 3"])
         self.optionmenu_ev_charger.grid(row=6, column=0, padx=20, pady=(5, 40))
-        self.edit_button_ev_charger = customtkinter.CTkButton(self.sidebar_frame, text="Edit", command=self.open_input_dialog_event)
+        self.edit_button_ev_charger = customtkinter.CTkButton(self.sidebar_frame, text="Edit", command=self.open_selection_list)
         self.edit_button_ev_charger.grid(row=6, column=1, padx=5, pady=(5, 40))
 
         # create main entry and button
@@ -228,24 +230,49 @@ class App(customtkinter.CTk):
         self.optionmenu_battery.configure(values=self.battery_options)
         self.optionmenu_battery.set(self.battery_options[0])
 
-    def open_input_dialog_event(self):
-        battery_types = ["Lithium-ion", "Lead-acid", "NiMH", "Flow Battery"]  # Example list of battery types
+    def open_edit_dialog(self, selection_window, selected_option):
+        print(selected_option)
+        selected_option.destroy()
 
-        dialog = tkinter.simpledialog.Dialog(
-            title="Battery Types",
-            text="Select a battery type to edit or delete:",
-            buttons=["OK", "Cancel"],
-            default=0,
-        )
+        msg = CTkMessagebox(title="Edit", message=f"What do you want to do with {selected_option}",
+                            icon="question", option_1="Cancel", option_2="Delete", option_3="Edit")
+        response = msg.get()
 
-        #self.optionmenu_battery.set(option)
-        if dialog.result == "OK":
-            selected_battery_type = dialog.listBox.curselection()  # Get the index of the selected battery type
-            if selected_battery_type:
-                index = selected_battery_type[0]
-                battery_type = battery_types[index]
-                self.edit_battery_type(battery_type)  # Call the method to edit the selected battery type
-                # You can also call the method to delete the selected battery type if needed
+        if msg.result == "Edit":
+            self.edit_battery(selected_option)
+        elif msg.result == "Delete":
+            self.delete_battery(selected_option)
+    
+    def open_selection_list(self):
+        selection_window = customtkinter.CTk()
+
+        listbox = CTkListbox(selection_window, command=self.open_edit_dialog)
+        listbox.pack(fill="both", expand=True, padx=10, pady=10)
+
+        battery_data = self.db_manager.fetch_battery_data()
+        # Extract battery names
+        self.battery_options = [battery[1] for battery in battery_data]
+
+        for index, option in enumerate(self.battery_options):
+            listbox.insert(index, option)
+
+        # Run the selection window
+        selection_window.mainloop()
+
+
+    def edit_battery(self, battery_name, battery_data):
+        # Implement edit functionality here
+        # You can open another dialog or window for editing battery properties
+        return 0
+
+    def delete_battery(self, battery_name):
+        confirmation = tkinter.messagebox.askyesno("Confirmation", f"Are you sure you want to delete {battery_name}?")
+        if confirmation:
+            # Perform deletion operation
+            # Delete the battery record from the database
+            self.db_manager.delete_battery(battery_name)
+            # Refresh the battery options in the option menu
+            self.populate_battery_options()
 
     
     def start_process(self, latitude, longitude, start_date, end_date):
