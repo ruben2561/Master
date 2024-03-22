@@ -40,6 +40,15 @@ class DatabaseManager:
         self.cursor.execute(query, (name,))
         self.connection.commit()
 
+    def update_battery(self, old_name, new_name, capacity, charge_power, discharge_power, max_soc, min_dod, efficiency):
+        query = """
+                UPDATE Battery 
+                SET name=?, capacityKWh=?, chargePowerKW=?, dischargePowerKW=?, maxSoc=?, minDod=?, efficiency=?
+                WHERE name=?
+                """
+        self.cursor.execute(query, (new_name, capacity, charge_power, discharge_power, max_soc, min_dod, efficiency, old_name))
+        self.connection.commit()
+
 
     def fetch_solar_panel_data(self):
         self.connect()
