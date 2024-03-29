@@ -46,7 +46,7 @@ class App(customtkinter.CTk):
         self.sidebar_frame.grid_rowconfigure(10, weight=1)
         self.sidebar_frame.grid_propagate(False)  # Prevent resizing
         self.logo_label = customtkinter.CTkLabel(self.sidebar_frame, text="Simulation Params", font=customtkinter.CTkFont(size=20, weight="bold"))
-        self.logo_label.grid(row=0, column=0, padx=20, pady=(20, 5), columnspan=2)
+        self.logo_label.grid(row=0, column=0, padx=20, pady=(20, 25), columnspan=2)
 
         # Option Menu for Battery
         self.label_battery = customtkinter.CTkLabel(self.sidebar_frame, text="Battery", font=customtkinter.CTkFont(size=15))
@@ -76,17 +76,23 @@ class App(customtkinter.CTk):
         self.edit_button_ev_charger.grid(row=6, column=1, padx=5, pady=(5, 40))
 
         # create main entry and button
-        self.entry_field1 = customtkinter.CTkEntry(self.sidebar_frame, placeholder_text="Start date")
-        self.entry_field1.grid(row=7, column=0, padx=20, pady=(5, 40))
+        self.entry_latitude = customtkinter.CTkEntry(self.sidebar_frame, placeholder_text="Latitude")
+        self.entry_latitude.grid(row=7, column=0, padx=20, pady=(5, 5))
 
-        self.entry_field2 = customtkinter.CTkEntry(self.sidebar_frame, placeholder_text="End date")
-        self.entry_field2.grid(row=7, column=1, padx=20, pady=(5, 40))
+        self.entry_longitude = customtkinter.CTkEntry(self.sidebar_frame, placeholder_text="Longitude")
+        self.entry_longitude.grid(row=7, column=1, padx=20, pady=(5, 5))
+
+        self.entry_start_date = customtkinter.CTkEntry(self.sidebar_frame, placeholder_text="Start date")
+        self.entry_start_date.grid(row=8, column=0, padx=20, pady=(5, 40))
+
+        self.entry_end_date = customtkinter.CTkEntry(self.sidebar_frame, placeholder_text="End date")
+        self.entry_end_date.grid(row=8, column=1, padx=20, pady=(5, 40))
 
 
         #self.sidebar_button_1 = customtkinter.CTkButton(self.sidebar_frame, text="battery", command=self.sidebar_button_event)
         #self.sidebar_button_1.grid(row=2, column=0, padx=20, pady=10)
         self.sidebar_button_2 = customtkinter.CTkButton(self.sidebar_frame, text="Start Sim.", command=lambda: self.start_process("50.9254992", "5.3932811", "16/03/2018", "16/04/2018"))
-        self.sidebar_button_2.grid(row=8, column=0, padx=20, pady=10, columnspan=2)
+        self.sidebar_button_2.grid(row=9, column=0, padx=20, pady=10, columnspan=2)
 
         #self.main_button_1 = customtkinter.CTkButton(master=self, fg_color="transparent", border_width=2, text_color=("gray10", "#DCE4EE"))
 
@@ -191,6 +197,7 @@ class App(customtkinter.CTk):
         self.ax3.set_title('Battery Charge')
 
         self.ax4.bar(time_values, new_y4, width=0.01)
+        self.ax4.set_ylim(-0.7, 0.7)
         self.ax4.axhline(y=0, color='C0', linestyle='-', linewidth=1)
         self.ax4.set_title('Grid Usage')
 
