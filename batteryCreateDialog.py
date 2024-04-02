@@ -157,7 +157,7 @@ class batteryCreateDialog(customtkinter.CTk):
         efficiency = self.entry_efficiency.get()
 
         # Update the battery record in the database
-        self.db_manager.add_battery(self.battery_name, new_battery_name, capacity_kwh, charge_power_kw, discharge_power_kw, max_soc, min_dod, efficiency)
+        self.db_manager.add_battery(new_battery_name, capacity_kwh, charge_power_kw, discharge_power_kw, max_soc, min_dod, efficiency)
 
         # Close the dialog
         self.destroy()
