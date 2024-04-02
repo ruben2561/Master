@@ -31,7 +31,8 @@ class DatabaseManager:
         return battery_data
     
     def add_battery(self, name, capacity, charge_power, discharge_power, max_soc, min_dod, efficiency):
-        query = "INSERT INTO Battery ?,?,?,?,?,?,?"
+        query = f"INSERT INTO Battery (name, capacityKWh, chargePowerKW, dischargePowerKW, maxSoc, minDod, efficiency) VALUES (?, ?, ?, ?, ?, ?, ?)"
+        print(query)
         self.cursor.execute(query, (name,capacity,charge_power,discharge_power,max_soc,min_dod,efficiency))
         self.connection.commit()
 
