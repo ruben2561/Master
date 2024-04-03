@@ -5,3 +5,9 @@ datetime
 mathplotlib
 request
 pybamm
+CTkMessagebox
+CTkListbox
+pandas
+csv
+datetime
+numpy
