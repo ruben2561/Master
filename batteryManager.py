@@ -8,8 +8,10 @@ from databaseManager import DatabaseManager
 from batteryEditDialog import batteryEditDialog
 
 class BatteryManager(customtkinter.CTk):
-    def __init__(self, db_manager):
+    def __init__(self, db_manager, callback):
         super().__init__()
+        self.db_manager = db_manager
+        self.callback = callback
 
         w = 350  # width
         h = 500  # height
@@ -41,7 +43,7 @@ class BatteryManager(customtkinter.CTk):
         self.listbox.pack(pady=10, padx=10)
         self.listbox.bind("<Double-Button-1>", self.open_edit_dialog)
 
-        self.populate_battery_list(db_manager)
+        self.populate_battery(db_manager)
 
         self.button_edit = customtkinter.CTkButton(
             self.frame_3, text="Edit", command=lambda: self.open_edit_dialog(db_manager)
@@ -65,7 +67,14 @@ class BatteryManager(customtkinter.CTk):
 
         self.mainloop()
 
-    def populate_battery_list(self, db_manager):
+    def close_dialog(self):
+        # Code to close the dialog
+        self.destroy()
+        # Call the callback function if it's provided
+        if self.callback:
+            self.callback()
+
+    def populate_battery(self, db_manager):
         # Assuming you have a DatabaseManager class with a method to fetch battery names
         battery_data = db_manager.fetch_battery_data()
         battery_names = [battery[1] for battery in battery_data]

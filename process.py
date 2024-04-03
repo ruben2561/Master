@@ -34,7 +34,7 @@ def retrieve_data_api(latitude, longitude, start_date, end_date):
             #print(f"Pv Estimate: {pv_estimate}, Period End: {period_end}")
             
             # Store data point as a dictionary
-            data_points.append({'pv_power_value': pv_estimate, 'time_value': period_end, 'charge_value': 0, 'residue_energy': 0, 'power_usage_value': 0})
+            data_points.append({'pv_power_value': pv_estimate, 'time_value': period_end, 'soc_value': 0, 'charge_value': 0, 'grid_usage': 0, 'power_usage_value': 0})
 
     return data_points
 
@@ -52,17 +52,30 @@ def process_data(data_points, battery, pybamm_battery):
             # Calculate time difference in hours
             time_difference_hours = (next_time - time_value).total_seconds() / 3600
             # Charge the battery based on the time difference
-            residue_to_much_energy = battery.charge(pv_power_value, time_difference_hours)
-            residue_to_little_energy = battery.discharge(power_usage_value, time_difference_hours)  # Subtract average power usage every half hour
-            
-            pybamm_battery.charge(pv_power_value, time_difference_hours)
-            pybamm_battery.discharge(power_usage_value, time_difference_hours)
+            #print(time_difference_hours)
 
-            #print(f"Battery charge after charging: {battery.soc} kWh")
+            charge_discharge_battery = pv_power_value - power_usage_value
+            #print(charge_discharge_battery)
+
+            if charge_discharge_battery > 0:
+                charged, residue_to_much_energy = battery.charge(charge_discharge_battery, time_difference_hours)
+                current_point['grid_usage'] = residue_to_much_energy * -1
+                current_point['charge_value'] = charged
+                    
+            elif charge_discharge_battery < 0: 
+                discharged, residue_to_little_energy = battery.discharge(abs(charge_discharge_battery), time_difference_hours)
+                current_point['grid_usage'] = residue_to_little_energy
+                current_point['charge_value'] = discharged * -1
+
+            
+            else:
+                current_point['grid_usage'] = 0
+            
+            #pybamm_battery.charge(pv_power_value, time_difference_hours)
+            #pybamm_battery.discharge(power_usage_value, time_difference_hours)
 
             # Add charge value to the data_point dictionary
-            current_point['charge_value'] = battery.soc
-            current_point['residue_energy'] = (residue_to_much_energy - residue_to_little_energy)
+            current_point['soc_value'] = battery.soc
 
     ######
     ######
@@ -75,7 +88,7 @@ def process_data(data_points, battery, pybamm_battery):
 
 def get_power_usage_values(data_points):
     try:
-        with open("sampleData/power_usage_data.csv", "r") as file:
+        with open("sampleData/power_usage_data_day.csv", "r") as file:
             sample_data = file.read()
 
             if sample_data:
