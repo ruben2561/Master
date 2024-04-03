@@ -92,7 +92,7 @@ class App(customtkinter.CTk):
         self.entry_start_date.grid(row=9, column=0, padx=20, pady=(5, 5), columnspan=2)
 
         self.entry_end_date = customtkinter.CTkEntry(self.sidebar_frame, placeholder_text="End date")
-        self.entry_end_date.grid(row=10, column=0, padx=20, pady=(5, 25), columnspan=2)
+        self.entry_end_date.grid(row=10, column=0, padx=20, pady=(5, 0), columnspan=2)
 
 
         #self.sidebar_button_1 = customtkinter.CTkButton(self.sidebar_frame, text="battery", command=self.sidebar_button_event)
@@ -109,7 +109,7 @@ class App(customtkinter.CTk):
         customtkinter.set_appearance_mode("Dark")
 
         # create Matplotlib graphs
-        self.fig, (self.ax1, self.ax2) = plt.subplots(2, 1, figsize=(12, 9))
+        self.fig, (self.ax1, self.ax2) = plt.subplots(2, 1, figsize=(13, 7), gridspec_kw={'height_ratios': [2, 1]})
         self.canvas1 = FigureCanvasTkAgg(self.fig, master=self)
 
         self.ax1.set_title('Not Optimized')
@@ -198,32 +198,26 @@ class App(customtkinter.CTk):
 
         print(df)
 
-        print(len(pv_power_values))
-        print(len(grid_extraction_values))
-        print(len(discharge_values))
-        print(len(power_usage_values))
-        print(len(charge_values))
-
         # Calculate bottom values
-        bottom_discharge = [x + y for x, y in zip(pv_power_values, grid_extraction_values)]
-
+        bottom_extraction = [x + y for x, y in zip(pv_power_values, discharge_values)]
         bottom_injection = [x + y for x, y in zip(power_usage_values, charge_values)]
 
-        self.ax1.bar(time_values, pv_power_values, color='g', width=0.02)
-        self.ax1.bar(time_values, grid_extraction_values, bottom=pv_power_values, color='b', width=0.02)
-        self.ax1.bar(time_values, discharge_values, bottom=bottom_discharge, color='y', width=0.02)
+        line_width = 0.01
+
+        self.ax1.bar(time_values, pv_power_values, color='y', width=line_width)
+        self.ax1.bar(time_values, discharge_values, bottom=pv_power_values, color='r', width=line_width)
+        self.ax1.bar(time_values, grid_extraction_values, bottom=bottom_extraction, color='c', width=line_width)
         
-        self.ax1.bar(time_values, power_usage_values, color='r', width=0.02)
-        self.ax1.bar(time_values, charge_values, bottom=power_usage_values, color='c', width=0.02)
-        self.ax1.bar(time_values, grid_injection_values, bottom=bottom_injection, color='m', width=0.02)
+        self.ax1.bar(time_values, power_usage_values, color='m', width=line_width)
+        self.ax1.bar(time_values, charge_values, bottom=power_usage_values, color='g', width=line_width)
+        self.ax1.bar(time_values, grid_injection_values, bottom=bottom_injection, color='b', width=line_width)
 
         # Customize the plot
-        self.ax1.legend(["PV Power", "Grid Extraction", "Discharge", "Power Usage", "Charge", "Grid Injection"])
-        self.ax1.axhline(y=0, color='C0', linestyle='-', linewidth=1)
+        self.ax1.legend(["PV Power", "Discharge", "Grid Extraction", "Power Usage", "Charge", "Grid Injection"])
+        self.ax1.axhline(y=0, color='k', linestyle='-', linewidth=0.1)
         self.ax1.set_title('Not Optimized')
 
-        self.ax2.bar(time_values, soc_values, width=0.01)
-        self.ax2.axhline(y=0, color='C0', linestyle='-', linewidth=1)
+        self.ax2.bar(time_values, soc_values, width=line_width, color='k')
         self.ax2.set_title('Battery Charge')
 
         self.ax1.set_xlabel('Time')
@@ -233,7 +227,7 @@ class App(customtkinter.CTk):
         self.ax2.set_ylabel('Charge (kWh)')
 
         # Filter time values to display only every 6 hours
-        filtered_time_values = [time_values[i] for i in range(len(time_values)) if i % 12 == 0]
+        filtered_time_values = [time_values[i] for i in range(len(time_values)) if i % 3 == 0]
         self.ax1.xaxis.set_major_formatter(mdates.DateFormatter('%H:%M'))  # Format to display only hour and minute
         self.ax1.set_xticks(filtered_time_values)
         self.ax2.xaxis.set_major_formatter(mdates.DateFormatter('%H:%M'))  # Format to display only hour and minute
