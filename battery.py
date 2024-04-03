@@ -36,8 +36,10 @@ class Battery:
             self.soc = self.soc + energy_added
             return energy_added, 0
         else:
+            charged = ((self.capacity * self.max_soc) - self.soc)
+            extra = (energy_added + self.soc - (self.capacity * self.max_soc))
             self.soc = self.capacity * self.max_soc
-            return  ((self.capacity * self.max_soc) - self.soc)/self.efficienty, (energy_added + self.soc - (self.capacity * self.max_soc))/self.efficienty
+            return  charged, extra
 
     def charge_kWh(self, energy):
         """
@@ -50,8 +52,10 @@ class Battery:
             self.soc = self.soc + energy_added
             return energy_added, 0
         else:
+            charged = ((self.capacity * self.max_soc) - self.soc)
+            extra = (energy_added + self.soc - (self.capacity * self.max_soc))
             self.soc = self.capacity * self.max_soc
-            return  ((self.capacity * self.max_soc) - self.soc), (energy_added + self.soc - (self.capacity * self.max_soc))
+            return  charged, extra
 
     def discharge(self, power, time):
         """
@@ -67,8 +71,10 @@ class Battery:
             self.soc = self.soc - energy_consumed
             return energy_consumed/self.efficienty, 0
         else:
+            discharged = (self.soc - self.capacity * self.min_dod)
+            insufficient = (energy_consumed - (self.soc - self.capacity * self.min_dod))
             self.soc = self.capacity * self.min_dod
-            return  (self.soc - self.capacity * self.min_dod)*self.efficienty, (energy_consumed - (self.soc - self.capacity * self.min_dod))*self.efficienty
+            return  discharged, insufficient
 
     def discharge_kWh(self, energy):
         """
@@ -81,8 +87,10 @@ class Battery:
             self.soc = self.soc - energy_consumed
             return 0
         else:
+            discharged = (self.soc - self.capacity * self.min_dod)
+            insufficient = (energy_consumed - (self.soc - self.capacity * self.min_dod))
             self.soc = self.capacity * self.min_dod
-            return  (self.soc - self.capacity * self.min_dod), (energy_consumed - (self.soc - self.capacity * self.min_dod))
+            return  discharged, insufficient
 
     def get_soc(self):
         """
