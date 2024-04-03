@@ -14,7 +14,7 @@ import pandas as pd
 from battery import Battery
 from databaseManager import DatabaseManager
 from batteryManager import BatteryManager
-from process import get_power_usage_values, process_data, retrieve_data_api
+from process import calculate_values, get_power_usage_values, process_data, retrieve_data_api
 from pybammBattery import PyBaMM_Battery
 from solcast import get_solar_radiation_forecast
 import csv
@@ -46,9 +46,9 @@ class App(customtkinter.CTk):
         customtkinter.set_appearance_mode("Dark")
 
         # create sidebar frame with widgets
-        self.sidebar_frame = customtkinter.CTkFrame(self, width=270, corner_radius=0, border_width=2)
+        self.sidebar_frame = customtkinter.CTkFrame(self, width=265, corner_radius=0, border_width=2)
         self.sidebar_frame.grid(row=0, column=0, rowspan=2, sticky="nsew")
-        self.sidebar_frame.grid_rowconfigure(11, weight=1)
+        self.sidebar_frame.grid_rowconfigure(16, weight=1)
         self.sidebar_frame.grid_propagate(False)  # Prevent resizing
 
         self.logo_label = customtkinter.CTkLabel(self.sidebar_frame, text="Simulation Params", font=customtkinter.CTkFont(size=20, weight="bold"))
@@ -77,28 +77,42 @@ class App(customtkinter.CTk):
         self.label_ev_charger.grid(row=5, column=0, padx=5, pady=(5, 0))
         self.optionmenu_ev_charger = customtkinter.CTkOptionMenu(self.sidebar_frame, dynamic_resizing=False,
                                                         values=["Type 1", "Type 2", "Type 3"])
-        self.optionmenu_ev_charger.grid(row=6, column=0, padx=20, pady=(5, 30))
+        self.optionmenu_ev_charger.grid(row=6, column=0, padx=20, pady=(5, 5))
         self.edit_button_ev_charger = customtkinter.CTkButton(self.sidebar_frame, width=60, text="Edit", command=self.edit_battery)
-        self.edit_button_ev_charger.grid(row=6, column=1, padx=5, pady=(5, 30))
+        self.edit_button_ev_charger.grid(row=6, column=1, padx=5, pady=(5, 5))
+
+        # Option Menu for consumer profiles
+        self.label_consumer = customtkinter.CTkLabel(self.sidebar_frame, text="Consumer Profile", font=customtkinter.CTkFont(size=15))
+        self.label_consumer.grid(row=7, column=0, columnspan=2, padx=5, pady=(15, 0))
+        self.optionmenu_consumer = customtkinter.CTkOptionMenu(self.sidebar_frame, dynamic_resizing=False,
+                                                        values=["Single person", "couple", "singe with kids", "couple with kids", "pensioner"])
+        self.optionmenu_consumer.grid(row=8, column=0, columnspan=2, padx=20, pady=(5, 30))
 
         # create main entry and button
         self.entry_latitude = customtkinter.CTkEntry(self.sidebar_frame, placeholder_text="Latitude")
-        self.entry_latitude.grid(row=7, column=0, padx=20, pady=(5, 5), columnspan=2)
+        self.entry_latitude.grid(row=9, column=0, pady=(5, 5), columnspan=2)
 
         self.entry_longitude = customtkinter.CTkEntry(self.sidebar_frame, placeholder_text="Longitude")
-        self.entry_longitude.grid(row=8, column=0, padx=20, pady=(5, 25), columnspan=2)
+        self.entry_longitude.grid(row=10, column=0, pady=(5, 25), columnspan=2)
 
         self.entry_start_date = customtkinter.CTkEntry(self.sidebar_frame, placeholder_text="Start date")
-        self.entry_start_date.grid(row=9, column=0, padx=20, pady=(5, 5), columnspan=2)
+        self.entry_start_date.grid(row=11, column=0, padx=20, pady=(5, 5), columnspan=2)
 
         self.entry_end_date = customtkinter.CTkEntry(self.sidebar_frame, placeholder_text="End date")
-        self.entry_end_date.grid(row=10, column=0, padx=20, pady=(5, 0), columnspan=2)
+        self.entry_end_date.grid(row=12, column=0, padx=20, pady=(5, 0), columnspan=2)
+
+        # Option Menu for Simulation scale
+        self.label_scale = customtkinter.CTkLabel(self.sidebar_frame, text="Simulation scale", font=customtkinter.CTkFont(size=15))
+        self.label_scale.grid(row=13, column=0, columnspan=2, padx=5, pady=(15, 0))
+        self.optionmenu_scale = customtkinter.CTkOptionMenu(self.sidebar_frame, dynamic_resizing=False,
+                                                        values=["DAY", "MONTH", "YEAR"])
+        self.optionmenu_scale.grid(row=14, column=0, columnspan=2, pady=(5, 0))
 
 
         #self.sidebar_button_1 = customtkinter.CTkButton(self.sidebar_frame, text="battery", command=self.sidebar_button_event)
         #self.sidebar_button_1.grid(row=2, column=0, padx=20, pady=10)
         self.sidebar_button_2 = customtkinter.CTkButton(self.sidebar_frame, text="Start Sim.", command=lambda: self.start_process("50.9254992", "5.3932811", "16/03/2018", "16/04/2018"))
-        self.sidebar_button_2.grid(row=11, column=0, padx=20, pady=10, columnspan=2)
+        self.sidebar_button_2.grid(row=15, column=0, padx=20, pady=25, columnspan=2)
 
         # Update layout after adding widgets
         self.sidebar_frame.update_idletasks()
@@ -156,26 +170,24 @@ class App(customtkinter.CTk):
 
 
     def update_graphs_with_new_data(self, data_points):
+
+        calculated_values = calculate_values(data_points, self.optionmenu_scale.get())
+
         # Perform some calculations to get new data
-        time_values = [point['time_value'] for point in data_points]
-        pv_power_values = [point['pv_power_value'] for point in data_points]
-        power_usage_values = [-point['power_usage_value'] for point in data_points]
-        charge_values = [max(0, point['charge_value']) for point in data_points]
-        discharge_values = [min(0, point['charge_value']) for point in data_points]
-        soc_values = [point['soc_value'] for point in data_points]
-        grid_injection_values = [min(0, point['grid_usage']) for point in data_points]
-        grid_extraction_values = [max(0, point['grid_usage']) for point in data_points]
+        time_values = calculated_values['time_values']
+        pv_power_values = calculated_values['pv_power_values']
+        power_usage_values = calculated_values['power_usage_values']
+        charge_values = calculated_values['charge_values']
+        discharge_values = calculated_values['discharge_values']
+        soc_values = calculated_values['soc_values']
+        grid_injection_values = calculated_values['injection_values']
+        grid_extraction_values = calculated_values['extraction_values']
 
-        discharge_values = [-1 * x for x in discharge_values]
-        charge_values = [-1 * x for x in charge_values]
+        grid_injection_sum = calculated_values['grid_injection_sum']
+        grid_extraction_sum = calculated_values['grid_extraction_sum']
 
-        # Calculate sum of positive and negative residue values
-        grid_injection_sum = sum(grid_injection_values)
-        grid_extraction_sum = sum(grid_extraction_values)
-
-        # Calculate cost for grid injection and grid extraction assuming energy cost of 0.1 euro per kWh
-        grid_injection_cost = grid_injection_sum * 0.035
-        grid_extraction_cost = grid_extraction_sum * -0.1211
+        grid_injection_cost = calculated_values['grid_injection_cost']
+        grid_extraction_cost = calculated_values['grid_extraction_cost']
 
         #code to display in text field
         self.label_result1.configure(text=str(round(grid_extraction_sum, 4)) + " kWh")
@@ -205,24 +217,22 @@ class App(customtkinter.CTk):
         line_width = 0.01
 
         self.ax1.bar(time_values, pv_power_values, color='y', width=line_width)
-        self.ax1.bar(time_values, discharge_values, bottom=pv_power_values, color='r', width=line_width)
-        self.ax1.bar(time_values, grid_extraction_values, bottom=bottom_extraction, color='c', width=line_width)
+        self.ax1.bar(time_values, discharge_values, bottom=pv_power_values, color='#FF0000', width=line_width)
+        self.ax1.bar(time_values, grid_extraction_values, bottom=bottom_extraction, color='b', width=line_width)
         
-        self.ax1.bar(time_values, power_usage_values, color='m', width=line_width)
-        self.ax1.bar(time_values, charge_values, bottom=power_usage_values, color='g', width=line_width)
-        self.ax1.bar(time_values, grid_injection_values, bottom=bottom_injection, color='b', width=line_width)
+        self.ax1.bar(time_values, power_usage_values, color='c', width=line_width)
+        self.ax1.bar(time_values, charge_values, bottom=power_usage_values, color='#009600', width=line_width)
+        self.ax1.bar(time_values, grid_injection_values, bottom=bottom_injection, color='m', width=line_width)
 
         # Customize the plot
         self.ax1.legend(["PV Power", "Discharge", "Grid Extraction", "Power Usage", "Charge", "Grid Injection"])
         self.ax1.axhline(y=0, color='k', linestyle='-', linewidth=0.1)
         self.ax1.set_title('Not Optimized')
-
-        self.ax2.bar(time_values, soc_values, width=line_width, color='k')
-        self.ax2.set_title('Battery Charge')
-
         self.ax1.set_xlabel('Time')
         self.ax1.set_ylabel('kWh')
 
+        self.ax2.bar(time_values, soc_values, width=line_width, color='k')
+        self.ax2.set_title('Battery Charge')
         self.ax2.set_xlabel('Time')
         self.ax2.set_ylabel('Charge (kWh)')
 
