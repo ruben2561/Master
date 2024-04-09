@@ -242,12 +242,15 @@ class App(customtkinter.CTk):
         )
         self.sidebar_frame2.grid(row=1, column=1, sticky="nsew")
         self.sidebar_frame2.grid_rowconfigure(10, weight=1)
+        
+        
         self.logo_label2 = customtkinter.CTkLabel(
             self.sidebar_frame2,
             text="Sim Results",
             font=customtkinter.CTkFont(size=20, weight="bold"),
         )
         self.logo_label2.grid(row=0, column=0, padx=20, pady=(20, 5), columnspan=4)
+
 
         self.label_result1 = customtkinter.CTkLabel(
             self.sidebar_frame2,
@@ -260,6 +263,7 @@ class App(customtkinter.CTk):
         )
         self.label_result1.grid(row=1, column=1, padx=(0, 30), pady=(5, 0))
 
+
         self.label_result2 = customtkinter.CTkLabel(
             self.sidebar_frame2,
             text="Grid Injection:",
@@ -271,14 +275,16 @@ class App(customtkinter.CTk):
         )
         self.label_result2.grid(row=2, column=1, padx=(0, 30), pady=(5, 20))
 
+
         self.label_result3 = customtkinter.CTkLabel(
             self.sidebar_frame2, text="Total Cost:", font=customtkinter.CTkFont(size=15)
         )
-        self.label_result3.grid(row=1, column=2, padx=5, pady=(5, 5))
+        self.label_result3.grid(row=1, column=2, padx=5, pady=(5, 0))
         self.label_result3 = customtkinter.CTkLabel(
             self.sidebar_frame2, text="...", font=customtkinter.CTkFont(size=15)
         )
         self.label_result3.grid(row=1, column=3, padx=(0, 15), pady=(5, 0))
+
 
         self.label_result4 = customtkinter.CTkLabel(
             self.sidebar_frame2,
@@ -290,6 +296,54 @@ class App(customtkinter.CTk):
             self.sidebar_frame2, text="...", font=customtkinter.CTkFont(size=15)
         )
         self.label_result4.grid(row=2, column=3, padx=(0, 15), pady=(5, 20))
+        
+        
+        self.label_result5 = customtkinter.CTkLabel(
+            self.sidebar_frame2,
+            text="Total PV Prod:",
+            font=customtkinter.CTkFont(size=15),
+        )
+        self.label_result5.grid(row=1, column=4, padx=20, pady=(5, 0))
+        self.label_result5 = customtkinter.CTkLabel(
+            self.sidebar_frame2, text="...", font=customtkinter.CTkFont(size=15)
+        )
+        self.label_result5.grid(row=1, column=5, padx=(0, 15), pady=(5, 0))
+        
+        
+        self.label_result6 = customtkinter.CTkLabel(
+            self.sidebar_frame2,
+            text="Total Power Use:",
+            font=customtkinter.CTkFont(size=15),
+        )
+        self.label_result6.grid(row=2, column=4, padx=20, pady=(5, 20))
+        self.label_result6 = customtkinter.CTkLabel(
+            self.sidebar_frame2, text="...", font=customtkinter.CTkFont(size=15)
+        )
+        self.label_result6.grid(row=2, column=5, padx=(0, 15), pady=(5, 20))
+        
+        
+        self.label_result7 = customtkinter.CTkLabel(
+            self.sidebar_frame2,
+            text="Total Charge:",
+            font=customtkinter.CTkFont(size=15),
+        )
+        self.label_result7.grid(row=1, column=6, padx=5, pady=(5, 0))
+        self.label_result7 = customtkinter.CTkLabel(
+            self.sidebar_frame2, text="...", font=customtkinter.CTkFont(size=15)
+        )
+        self.label_result7.grid(row=1, column=7, padx=(0, 15), pady=(5, 0))
+        
+        
+        self.label_result8 = customtkinter.CTkLabel(
+            self.sidebar_frame2,
+            text="Total Discharge:",
+            font=customtkinter.CTkFont(size=15),
+        )
+        self.label_result8.grid(row=2, column=6, padx=5, pady=(5, 20))
+        self.label_result8 = customtkinter.CTkLabel(
+            self.sidebar_frame2, text="...", font=customtkinter.CTkFont(size=15)
+        )
+        self.label_result8.grid(row=2, column=7, padx=(0, 15), pady=(5, 20))
         
         #set default values
         self.entry_start_date.insert(tkinter.END, '2023-01-01')
@@ -326,6 +380,10 @@ class App(customtkinter.CTk):
         self.label_result2.configure(text=str(abs(round(grid_injection_sum, 4))) + " kWh")
         self.label_result3.configure(text=str(round(grid_extraction_cost, 4)) + " €")
         self.label_result4.configure(text=str(abs(round(grid_injection_cost, 4))) + " €")
+        self.label_result5.configure(text=str(abs(round(sum(pv_power_values, 4)))) + " kWh")
+        self.label_result6.configure(text=str(abs(round(sum(power_usage_values, 4)))) + " kWh")
+        self.label_result7.configure(text=str(abs(round(sum(charge_values, 4)))) + " kWh")
+        self.label_result8.configure(text=str(abs(round(sum(discharge_values, 4)))) + " kWh")
 
         # Clear existing plots
         self.ax1.clear()

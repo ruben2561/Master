@@ -136,7 +136,6 @@ def calculate_values(data_points, specific_time, scale):
             or (point["time_value"].month, point["time_value"].day) != (1, 1) and point["time_value"].isocalendar()[1] == int(specific_time)
         ]  # Modify the date accordingly
         data_points = month_data_points
-        print(data_points)
         
         # Assuming time_values contains datetime objects
         # If time_values contains strings, convert them to datetime objects first
