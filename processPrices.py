@@ -1,7 +1,7 @@
 import csv
 
 import numpy as np
-from APIEntsoe import get_prices_data
+from APIPrices import get_prices_data
 
 def Calculate_injection_and_extraction_prices(pricing_data):
     prices_grid = [float(data_point["price"]) for data_point in pricing_data if float(data_point["price"]) >= 0]
