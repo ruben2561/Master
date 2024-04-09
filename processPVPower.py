@@ -119,7 +119,7 @@ def process_solar_data(latitude, longitude, start_date, end_date):
         # Store data point as a dictionary
         data_points.append(
             {
-                "pv_power_value": data_point['pv_power_value']/4,
+                "pv_power_value": data_point['pv_power_value']/2,
                 "time_value": data_point['time_value'],
                 "soc_value": 0,
                 "charge_value": 0,
