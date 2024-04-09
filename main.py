@@ -395,7 +395,7 @@ class App(customtkinter.CTk):
         bottom_injection = [x + y for x, y in zip(power_usage_values, charge_values)]
 
         line_width = calculated_values["line_width"]
-        self.ax1.set_title("Not Optimized")
+        self.ax1.set_title(calculated_values["title"])
         self.ax1.set_xlabel("Time")            
 
         self.ax1.bar(

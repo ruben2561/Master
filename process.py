@@ -112,7 +112,8 @@ def calculate_values(data_points, specific_time, scale):
         grid_extraction_sums = [point["grid_extraction"] for point in data_points]
         prices_injection = [point["price_injection"] for point in data_points]
         prices_extraction = [point["price_extraction"] for point in data_points]
-        line_width = 0.01
+        line_width = 0.04
+        title = "Not Optimized - Hourly Data For Date " + str(specific_time) + " In 2023"
 
         
         # Calculate cost for grid injection and grid extraction
@@ -188,7 +189,8 @@ def calculate_values(data_points, specific_time, scale):
         grid_injection_sums = [sums['grid_injection'] for sums in daily_sums.values()]
         grid_extraction_sums = [sums['grid_extraction'] for sums in daily_sums.values()]
         time_values = list(daily_sums.keys())
-        line_width = 0.5
+        line_width = 0.95
+        title = "Not Optimized - Dayly Data For Week " + str(specific_time) + " In 2023"
         
         soc_sums = [x / 24 for x in soc_sums]
     
@@ -253,7 +255,8 @@ def calculate_values(data_points, specific_time, scale):
         grid_injection_sums = [sums['grid_injection'] for sums in daily_sums.values()]
         grid_extraction_sums = [sums['grid_extraction'] for sums in daily_sums.values()]
         time_values = list(daily_sums.keys())
-        line_width = 0.5
+        line_width = 0.9
+        title = "Not Optimized - Dayly Data For Month " + str(specific_time) + " In 2023"
         
         soc_sums = [x / 24 for x in soc_sums]
     
@@ -310,6 +313,7 @@ def calculate_values(data_points, specific_time, scale):
         grid_extraction_sums = [sums['grid_extraction'] for sums in daily_sums.values()]
         time_values = list(daily_sums.keys())
         line_width = 2
+        title = "Not Optimized - Yealy Data For 2023"
         
         soc_sums = [x /(365*24) for x in soc_sums]
         
@@ -365,7 +369,8 @@ def calculate_values(data_points, specific_time, scale):
         grid_injection_sums = [sums['grid_injection'] for sums in daily_sums.values()]
         grid_extraction_sums = [sums['grid_extraction'] for sums in daily_sums.values()]
         time_values = list(daily_sums.keys())
-        line_width = 0.4
+        line_width = 0.9
+        title = "Not Optimized - Montly Data For 2023"
         
         soc_sums = [x /(30.5*24) for x in soc_sums]
         
@@ -424,7 +429,8 @@ def calculate_values(data_points, specific_time, scale):
         grid_injection_sums = [sums['grid_injection'] for sums in daily_sums.values()]
         grid_extraction_sums = [sums['grid_extraction'] for sums in daily_sums.values()]
         time_values = list(daily_sums.keys())
-        line_width = 0.4
+        line_width = 0.7
+        title = "Not Optimized - Weekly Data For 2023"
         
         soc_sums = [x /(7*24) for x in soc_sums]
         
@@ -443,7 +449,8 @@ def calculate_values(data_points, specific_time, scale):
         "grid_extraction_sum": round(grid_extraction_sum, 4),
         "grid_injection_cost": round(grid_injection_costs_total, 4),
         "grid_extraction_cost": round(grid_extraction_costs_total, 4),
-        "line_width": line_width
+        "line_width": line_width,
+        "title": title
         }
 
 
