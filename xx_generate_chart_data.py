@@ -91,12 +91,21 @@ def combine_and_scale_data(combined_data, average_month_values):
 
     return scaled_data
 
-# Example usage:
-path_summer = 'imagespowerdata/foto1.png'
-path_spring = 'imagespowerdata/foto2.png'
-path_winter = 'imagespowerdata/foto3.png'
-max_value = 0.8
-average_months = [130, 115, 120, 120, 115, 100, 48, 105, 110, 120, 120, 130]
+#######################
+# Example usage #######
+#######################
+
+path_summer = 'imagespowerdata/foto202_1.png'
+path_spring = 'imagespowerdata/foto202_2.png'
+path_winter = 'imagespowerdata/foto202_3.png'
+max_value = 2
+average_months = [328, 307, 321, 295, 314, 285, 297, 187, 284, 323, 320, 339]
+csv_filename = 'profile_2adult_0child_2working.csv'
+
+########################
+########################
+########################
+
 number_of_points = 168 # 24 * 7
 start_date_str = '2023-01-01 00:00:00'
 start_date = datetime.strptime(start_date_str, '%Y-%m-%d %H:%M:%S')
@@ -126,10 +135,10 @@ data = [(value, date) for value, date in zip(combined_data_scaled, dates)]
 
 
 # Write the combined data to a CSV file
-csv_filename = 'combined_data.csv'
+
 with open(csv_filename, 'w', newline='') as csvfile:
     csv_writer = csv.writer(csvfile)
-    csv_writer.writerow(['Date', 'Value'])  # Write header
+    csv_writer.writerow(['Power', 'PeriodEnd'])  # Write header
     csv_writer.writerows(data)
 
 print(f"CSV file '{csv_filename}' has been created successfully.")
