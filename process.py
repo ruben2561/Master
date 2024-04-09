@@ -11,7 +11,7 @@ from matplotlib.figure import Figure
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from battery import Battery
 from pybammBattery import PyBaMM_Battery
-from APISolcast import get_solar_data
+from APIWeather import get_solar_data_solcast
 import csv
 import matplotlib.dates as mdates
 import datetime
@@ -29,12 +29,11 @@ def process_data(data_points, battery, pybamm_battery):
 
         if time_value and next_time:
             # Calculate time difference in hours
+
             time_difference_hours = (next_time - time_value).total_seconds() / 3600
             # Charge the battery based on the time difference
-            # print(time_difference_hours)
 
             charge_discharge_battery = pv_power_value - power_usage_value
-            # print(charge_discharge_battery)
 
             current_point["soc_value"] = battery.soc
 
@@ -70,9 +69,10 @@ def process_data(data_points, battery, pybamm_battery):
     return data_points
 
 
-def get_power_usage_values(data_points):
+def get_power_usage_values(data_points, selected_user_profile):
+    profile = "consumptionProfile/profile_" + selected_user_profile + ".csv"
     try:
-        with open("sampleData/power_usage_data_year.csv", "r") as file:
+        with open(profile, "r") as file:
             sample_data = file.read()
 
             if sample_data:
@@ -86,70 +86,57 @@ def get_power_usage_values(data_points):
         return data_points
 
     except Exception as e:
-        print(f"Error reading sample data: {e}")
+        print(f"Error reading sample data power usage: {e}")
         return None
 
 
-def calculate_values(data_points, scale):
+def calculate_values(data_points, specific_time, scale):
 
-    if scale == "DAY":
+    if scale == "SPECIFIC DAY":
         # Filter data points for the first day
-        first_day_data_points = [
+        day_data_points = [
             point
             for point in data_points
-            if point["time_value"].date() == datetime.date(2023, 1, 1)
+            if point["time_value"].day == int(specific_time.split("-")[0]) and point["time_value"].month == int(specific_time.split("-")[1])
         ]  # Modify the date accordingly
-        data_points = first_day_data_points
+        data_points = day_data_points
 
         # Perform some calculations to get new data
         time_values = [point["time_value"] for point in data_points]
-        pv_power_values = [point["pv_power_value"] for point in data_points]
-        power_usage_values = [-point["power_usage_value"] for point in data_points]
-        charge_values = [-point["charge_value"] for point in data_points]
-        discharge_values = [point["discharge_value"] for point in data_points]
-        soc_values = [point["soc_value"] for point in data_points]
-        grid_injection_values = [-point["grid_injection"] for point in data_points]
-        grid_extraction_values = [point["grid_extraction"] for point in data_points]
+        pv_power_sums = [point["pv_power_value"] for point in data_points]
+        power_usage_sums = [-point["power_usage_value"] for point in data_points]
+        charge_sums = [-point["charge_value"] for point in data_points]
+        discharge_sums = [point["discharge_value"] for point in data_points]
+        soc_sums = [point["soc_value"] for point in data_points]
+        grid_injection_sums = [-point["grid_injection"] for point in data_points]
+        grid_extraction_sums = [point["grid_extraction"] for point in data_points]
         prices_injection = [point["price_injection"] for point in data_points]
         prices_extraction = [point["price_extraction"] for point in data_points]
+        line_width = 0.01
 
         
         # Calculate cost for grid injection and grid extraction
-        grid_injection_costs = [x * y / 1000 for x, y in zip(grid_injection_values, prices_injection)]
-        grid_extraction_costs = [x * y / 1000 for x, y in zip(grid_extraction_values, prices_extraction)]
+        grid_injection_costs = [x * y / 1000 for x, y in zip(grid_injection_sums, prices_injection)]
+        grid_extraction_costs = [x * y / 1000 for x, y in zip(grid_extraction_sums, prices_extraction)]
 
         # Calculate sum of costs
         grid_injection_costs_total = sum(grid_injection_costs)
         grid_extraction_costs_total = sum(grid_extraction_costs)
         
-        grid_injection_sum = sum(grid_injection_values)
-        grid_extraction_sum = sum(grid_extraction_values)
+        grid_injection_sum = sum(grid_injection_sums)
+        grid_extraction_sum = sum(grid_extraction_sums)
         
-        return {
-        "time_values": time_values,
-        "pv_power_values": pv_power_values,
-        "power_usage_values": power_usage_values,
-        "charge_values": charge_values,
-        "discharge_values": discharge_values,
-        "soc_values": soc_values,
-        "injection_values": grid_injection_values,
-        "extraction_values": grid_extraction_values,
-        "grid_injection_prices": prices_injection,
-        "grid_extraction_prices": prices_extraction,
-        "grid_injection_sum": round(grid_injection_sum, 4),
-        "grid_extraction_sum": round(grid_extraction_sum, 4),
-        "grid_injection_cost": round(grid_injection_costs_total, 4),
-        "grid_extraction_cost": round(grid_extraction_costs_total, 4),
-        }
 
-    if scale == "MONTH":
+    if scale == "SPECIFIC WEEK":
          # Filter data points for the first month
-        first_month_data_points = [
+        month_data_points = [
             point
             for point in data_points
-            if point["time_value"].date().month == 1
+            if (point["time_value"].month, point["time_value"].day) == (1, 1) and 1 == int(specific_time)
+            or (point["time_value"].month, point["time_value"].day) != (1, 1) and point["time_value"].isocalendar()[1] == int(specific_time)
         ]  # Modify the date accordingly
-        data_points = first_month_data_points
+        data_points = month_data_points
+        print(data_points)
         
         # Assuming time_values contains datetime objects
         # If time_values contains strings, convert them to datetime objects first
@@ -201,26 +188,21 @@ def calculate_values(data_points, scale):
         soc_sums = [sums['soc'] for sums in daily_sums.values()]
         grid_injection_sums = [sums['grid_injection'] for sums in daily_sums.values()]
         grid_extraction_sums = [sums['grid_extraction'] for sums in daily_sums.values()]
-        unique_dates = list(daily_sums.keys())
+        time_values = list(daily_sums.keys())
+        line_width = 0.5
         
-        return {
-        "time_values": unique_dates,
-        "pv_power_values": pv_power_sums,
-        "power_usage_values": power_usage_sums,
-        "charge_values": charge_sums,
-        "discharge_values": discharge_sums,
-        "soc_values": soc_sums,
-        "injection_values": grid_injection_sums,
-        "extraction_values": grid_extraction_sums,
-        "grid_injection_prices": prices_injection,
-        "grid_extraction_prices": prices_extraction,
-        "grid_injection_sum": round(grid_injection_sum, 4),
-        "grid_extraction_sum": round(grid_extraction_sum, 4),
-        "grid_injection_cost": round(grid_injection_costs_total, 4),
-        "grid_extraction_cost": round(grid_extraction_costs_total, 4),
-        }
+        soc_sums = [x / 24 for x in soc_sums]
+    
+    
+    if scale == "SPECIFIC MONTH":
+         # Filter data points for the first month
+        month_data_points = [
+            point
+            for point in data_points
+            if point["time_value"].month == int(specific_time)
+        ]  # Modify the date accordingly
+        data_points = month_data_points
         
-    if scale == "YEAR":
         # Assuming time_values contains datetime objects
         # If time_values contains strings, convert them to datetime objects first
         time_values = [point["time_value"] for point in data_points]
@@ -271,10 +253,184 @@ def calculate_values(data_points, scale):
         soc_sums = [sums['soc'] for sums in daily_sums.values()]
         grid_injection_sums = [sums['grid_injection'] for sums in daily_sums.values()]
         grid_extraction_sums = [sums['grid_extraction'] for sums in daily_sums.values()]
-        unique_dates = list(daily_sums.keys())
+        time_values = list(daily_sums.keys())
+        line_width = 0.5
         
-        return {
-        "time_values": unique_dates,
+        soc_sums = [x / 24 for x in soc_sums]
+    
+    if scale == "PER YEAR":
+        # Assuming time_values contains datetime objects
+        # If time_values contains strings, convert them to datetime objects first
+        time_values = [point["time_value"] for point in data_points]
+        pv_power_values = [point["pv_power_value"] for point in data_points]
+        power_usage_values = [-point["power_usage_value"] for point in data_points]
+        charge_values = [-point["charge_value"] for point in data_points]
+        discharge_values = [point["discharge_value"] for point in data_points]
+        soc_values = [point["soc_value"] for point in data_points]
+        grid_injection_values = [-point["grid_injection"] for point in data_points]
+        grid_extraction_values = [point["grid_extraction"] for point in data_points]
+        prices_injection = [point["price_injection"] for point in data_points]
+        prices_extraction = [point["price_extraction"] for point in data_points]
+        
+        # Calculate cost for grid injection and grid extraction
+        grid_injection_costs = [x * y / 1000 for x, y in zip(grid_injection_values, prices_injection)]
+        grid_extraction_costs = [x * y / 1000 for x, y in zip(grid_extraction_values, prices_extraction)]
+
+        # Calculate sum of costs
+        grid_injection_costs_total = sum(grid_injection_costs)
+        grid_extraction_costs_total = sum(grid_extraction_costs)
+        
+        grid_injection_sum = sum(grid_injection_values)
+        grid_extraction_sum = sum(grid_extraction_values)
+        
+        # Create a defaultdict to store sums for each day
+        daily_sums = defaultdict(lambda: defaultdict(float))
+
+        # Iterate over the data_points and accumulate sums for each day
+        for time_value, pv_power, power_usage, charge, discharge, soc, grid_injection, grid_extraction in zip(
+            time_values, pv_power_values, power_usage_values, charge_values, discharge_values, soc_values, grid_injection_values, grid_extraction_values
+        ):
+        
+            year_year = time_value.year
+            
+            # Accumulate sums for each column for the corresponding day
+            daily_sums[year_year]['pv_power'] += pv_power
+            daily_sums[year_year]['power_usage'] += power_usage
+            daily_sums[year_year]['charge'] += charge
+            daily_sums[year_year]['discharge'] += discharge
+            daily_sums[year_year]['soc'] += soc
+            daily_sums[year_year]['grid_injection'] += grid_injection
+            daily_sums[year_year]['grid_extraction'] += grid_extraction
+
+        pv_power_sums = [sums['pv_power'] for sums in daily_sums.values()]
+        power_usage_sums = [sums['power_usage'] for sums in daily_sums.values()]
+        charge_sums = [sums['charge'] for sums in daily_sums.values()]
+        discharge_sums = [sums['discharge'] for sums in daily_sums.values()]
+        soc_sums = [sums['soc'] for sums in daily_sums.values()]
+        grid_injection_sums = [sums['grid_injection'] for sums in daily_sums.values()]
+        grid_extraction_sums = [sums['grid_extraction'] for sums in daily_sums.values()]
+        time_values = list(daily_sums.keys())
+        line_width = 2
+        
+        soc_sums = [x /(365*24) for x in soc_sums]
+        
+    if scale == "PER MONTH":
+        # Assuming time_values contains datetime objects
+        # If time_values contains strings, convert them to datetime objects first
+        time_values = [point["time_value"] for point in data_points]
+        pv_power_values = [point["pv_power_value"] for point in data_points]
+        power_usage_values = [-point["power_usage_value"] for point in data_points]
+        charge_values = [-point["charge_value"] for point in data_points]
+        discharge_values = [point["discharge_value"] for point in data_points]
+        soc_values = [point["soc_value"] for point in data_points]
+        grid_injection_values = [-point["grid_injection"] for point in data_points]
+        grid_extraction_values = [point["grid_extraction"] for point in data_points]
+        prices_injection = [point["price_injection"] for point in data_points]
+        prices_extraction = [point["price_extraction"] for point in data_points]
+        
+        # Calculate cost for grid injection and grid extraction
+        grid_injection_costs = [x * y / 1000 for x, y in zip(grid_injection_values, prices_injection)]
+        grid_extraction_costs = [x * y / 1000 for x, y in zip(grid_extraction_values, prices_extraction)]
+
+        # Calculate sum of costs
+        grid_injection_costs_total = sum(grid_injection_costs)
+        grid_extraction_costs_total = sum(grid_extraction_costs)
+        
+        grid_injection_sum = sum(grid_injection_values)
+        grid_extraction_sum = sum(grid_extraction_values)
+
+        # Create a defaultdict to store sums for each day
+        daily_sums = defaultdict(lambda: defaultdict(float))
+
+        # Iterate over the data_points and accumulate sums for each day
+        for time_value, pv_power, power_usage, charge, discharge, soc, grid_injection, grid_extraction in zip(
+            time_values, pv_power_values, power_usage_values, charge_values, discharge_values, soc_values, grid_injection_values, grid_extraction_values
+        ):
+        
+            year_month = time_value.month
+            
+            # Accumulate sums for each column for the corresponding day
+            daily_sums[year_month]['pv_power'] += pv_power
+            daily_sums[year_month]['power_usage'] += power_usage
+            daily_sums[year_month]['charge'] += charge
+            daily_sums[year_month]['discharge'] += discharge
+            daily_sums[year_month]['soc'] += soc
+            daily_sums[year_month]['grid_injection'] += grid_injection
+            daily_sums[year_month]['grid_extraction'] += grid_extraction
+
+        pv_power_sums = [sums['pv_power'] for sums in daily_sums.values()]
+        power_usage_sums = [sums['power_usage'] for sums in daily_sums.values()]
+        charge_sums = [sums['charge'] for sums in daily_sums.values()]
+        discharge_sums = [sums['discharge'] for sums in daily_sums.values()]
+        soc_sums = [sums['soc'] for sums in daily_sums.values()]
+        grid_injection_sums = [sums['grid_injection'] for sums in daily_sums.values()]
+        grid_extraction_sums = [sums['grid_extraction'] for sums in daily_sums.values()]
+        time_values = list(daily_sums.keys())
+        line_width = 0.4
+        
+        soc_sums = [x /(30.5*24) for x in soc_sums]
+        
+    if scale == "PER WEEK":
+        # Assuming time_values contains datetime objects
+        # If time_values contains strings, convert them to datetime objects first
+        time_values = [point["time_value"] for point in data_points]
+        pv_power_values = [point["pv_power_value"] for point in data_points]
+        power_usage_values = [-point["power_usage_value"] for point in data_points]
+        charge_values = [-point["charge_value"] for point in data_points]
+        discharge_values = [point["discharge_value"] for point in data_points]
+        soc_values = [point["soc_value"] for point in data_points]
+        grid_injection_values = [-point["grid_injection"] for point in data_points]
+        grid_extraction_values = [point["grid_extraction"] for point in data_points]
+        prices_injection = [point["price_injection"] for point in data_points]
+        prices_extraction = [point["price_extraction"] for point in data_points]
+        
+        # Calculate cost for grid injection and grid extraction
+        grid_injection_costs = [x * y / 1000 for x, y in zip(grid_injection_values, prices_injection)]
+        grid_extraction_costs = [x * y / 1000 for x, y in zip(grid_extraction_values, prices_extraction)]
+
+        # Calculate sum of costs
+        grid_injection_costs_total = sum(grid_injection_costs)
+        grid_extraction_costs_total = sum(grid_extraction_costs)
+        
+        grid_injection_sum = sum(grid_injection_values)
+        grid_extraction_sum = sum(grid_extraction_values)
+
+        # Create a defaultdict to store sums for each day
+        daily_sums = defaultdict(lambda: defaultdict(float))
+
+        # Iterate over the data_points and accumulate sums for each day
+        for time_value, pv_power, power_usage, charge, discharge, soc, grid_injection, grid_extraction in zip(
+            time_values, pv_power_values, power_usage_values, charge_values, discharge_values, soc_values, grid_injection_values, grid_extraction_values
+        ):
+            
+
+            year_week = time_value.isocalendar()[1]
+            if time_value.month == 1 and time_value.day == 1:
+                year_week = 1
+            
+            # Accumulate sums for each column for the corresponding day
+            daily_sums[year_week]['pv_power'] += pv_power
+            daily_sums[year_week]['power_usage'] += power_usage
+            daily_sums[year_week]['charge'] += charge
+            daily_sums[year_week]['discharge'] += discharge
+            daily_sums[year_week]['soc'] += soc
+            daily_sums[year_week]['grid_injection'] += grid_injection
+            daily_sums[year_week]['grid_extraction'] += grid_extraction
+
+        pv_power_sums = [sums['pv_power'] for sums in daily_sums.values()]
+        power_usage_sums = [sums['power_usage'] for sums in daily_sums.values()]
+        charge_sums = [sums['charge'] for sums in daily_sums.values()]
+        discharge_sums = [sums['discharge'] for sums in daily_sums.values()]
+        soc_sums = [sums['soc'] for sums in daily_sums.values()]
+        grid_injection_sums = [sums['grid_injection'] for sums in daily_sums.values()]
+        grid_extraction_sums = [sums['grid_extraction'] for sums in daily_sums.values()]
+        time_values = list(daily_sums.keys())
+        line_width = 0.4
+        
+        soc_sums = [x /(7*24) for x in soc_sums]
+        
+    return {
+        "time_values": time_values,
         "pv_power_values": pv_power_sums,
         "power_usage_values": power_usage_sums,
         "charge_values": charge_sums,
@@ -288,8 +444,25 @@ def calculate_values(data_points, scale):
         "grid_extraction_sum": round(grid_extraction_sum, 4),
         "grid_injection_cost": round(grid_injection_costs_total, 4),
         "grid_extraction_cost": round(grid_extraction_costs_total, 4),
+        "line_width": line_width
         }
 
 
+def scale_list(original_list, new_length):
+    scaled_list = []
+    old_length = len(original_list)
+    for i in range(new_length):
+        # Calculate the corresponding index in the original list
+        index = (i / (new_length - 1)) * (old_length - 1)
+        # Calculate the integer and fractional parts of the index
+        index_int = int(index)
+        index_frac = index - index_int
+        # Interpolate the value
+        if index_int == old_length - 1:
+            scaled_value = original_list[index_int]  # If it's the last element, take it directly
+        else:
+            scaled_value = (1 - index_frac) * original_list[index_int] + index_frac * original_list[index_int + 1]
+        scaled_list.append(scaled_value)
+    return scaled_list
 
     
