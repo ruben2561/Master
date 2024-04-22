@@ -124,6 +124,7 @@ class App(customtkinter.CTk):
         file_names = os.listdir(folder_path)
         file_names = [name.replace('profile_', '') for name in file_names]
         file_names = [name.replace('.csv', '') for name in file_names]
+        file_names = [name.replace('_', ', ') for name in file_names]
 
         # Option Menu for consumer profiles
         self.label_consumer = customtkinter.CTkLabel(
@@ -141,12 +142,12 @@ class App(customtkinter.CTk):
             row=8, column=0, columnspan=2, padx=20, pady=(5, 5)
         )
 
-        self.label_consumer = customtkinter.CTkLabel(
+        self.label_coordinates = customtkinter.CTkLabel(
             self.sidebar_frame,
             text="Latitude and Longitude",
             font=customtkinter.CTkFont(size=15),
         )
-        self.label_consumer.grid(row=9, column=0, columnspan=2, padx=5, pady=(5, 0))
+        self.label_coordinates.grid(row=9, column=0, columnspan=2, padx=5, pady=(5, 0))
         self.entry_latitude = customtkinter.CTkEntry(
             self.sidebar_frame, placeholder_text="Latitude"
         )
@@ -157,12 +158,12 @@ class App(customtkinter.CTk):
         )
         self.entry_longitude.grid(row=11, column=0, pady=(5, 10), columnspan=2)
 
-        self.label_consumer = customtkinter.CTkLabel(
+        self.label_start_date = customtkinter.CTkLabel(
             self.sidebar_frame,
             text="Start and end date",
             font=customtkinter.CTkFont(size=15),
         )
-        self.label_consumer.grid(row=12, column=0, columnspan=2, padx=5, pady=(5, 0))
+        self.label_start_date.grid(row=12, column=0, columnspan=2, padx=5, pady=(5, 0))
         self.entry_start_date = customtkinter.CTkEntry(
             self.sidebar_frame, placeholder_text="Start date"
         )
@@ -491,16 +492,19 @@ class App(customtkinter.CTk):
     def populate_battery_options(self):
         # Fetch battery data from the database
         battery_data = self.db_manager.fetch_battery_data()
+        print(battery_data)
         # Extract battery names
-        self.battery_options = [battery[1] for battery in battery_data]
+        battery_options = [battery[1] for battery in battery_data]
         # Update option menu with battery names
-        self.optionmenu_battery.configure(values=self.battery_options)
-        self.optionmenu_battery.set(self.battery_options[0])
+        self.optionmenu_battery.option_clear
+        self.optionmenu_battery.configure(values=battery_options)
+        self.optionmenu_battery.set(battery_options[0])
 
     def edit_battery(self):
         edit_dialog = BatteryManager(
             self.db_manager, callback=self.populate_battery_options
         )
+        self.populate_battery_options()
         
     def update_time_options(self, event):
         selected_scale = self.optionmenu_scale.get()

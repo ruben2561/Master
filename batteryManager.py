@@ -13,20 +13,7 @@ class BatteryManager(customtkinter.CTk):
         self.db_manager = db_manager
         self.callback = callback
 
-        w = 350  # width
-        h = 500  # height
 
-        # get screen width and height
-        ws = self.winfo_screenwidth()  # width of the screen
-        hs = self.winfo_screenheight()  # height of the screen
-
-        # calculate x and y coordinates for the CTk root window
-        x = (ws / 2) - (w / 2)
-        y = (hs / 2) - (h / 2)
-
-        # set the dimensions of the screen
-        # and where it is placed
-        self.geometry("%dx%d+%d+%d" % (w, h, x, y))
         self.title("Battery Manager")
 
         self.frame_3 = customtkinter.CTkFrame(master=self)
