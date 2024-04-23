@@ -143,6 +143,14 @@ class App(customtkinter.CTk):
         
         self.fig.patch.set_facecolor("#AEB74F")
         
+        # Hide the plots initially
+        #self.fig.patch.set_visible(False)
+        self.ax1.set_visible(False)
+        self.ax2.set_visible(False)
+        self.ax3.set_visible(False)
+        
+        
+        
         self.fig.tight_layout(pad=4.0)
         self.fig.subplots_adjust(right=0.85)
         
@@ -374,6 +382,10 @@ class App(customtkinter.CTk):
         self.ax1.clear()
         self.ax2.clear()
         self.ax3.clear()
+        
+        self.ax1.set_visible(True)
+        self.ax2.set_visible(True)
+        self.ax3.set_visible(True)
 
         calculated_values = calculate_values(data_points, self.optionmenu_time.get(), self.optionmenu_scale.get())
 
