@@ -1,6 +1,8 @@
+import math
 import time
 import tkinter
 import tkinter.messagebox
+from PIL import Image, ImageTk
 from CTkMessagebox import CTkMessagebox
 import customtkinter
 from customtkinter import *
@@ -29,12 +31,12 @@ import matplotlib.dates as mdates
 import datetime
 import numpy as np
 
-customtkinter.set_appearance_mode(
-    "System"
-)  # Modes: "System" (standard), "Dark", "Light"
-customtkinter.set_default_color_theme(
-    "blue"
-)  # Themes: "blue" (standard), "green", "dark-blue"
+from simulationDialog import SimulationDialog
+
+customtkinter.set_appearance_mode("Dark")
+# Set the default color theme to use the custom theme
+customtkinter.set_default_color_theme("MPTheme.json")
+
 
 
 class App(customtkinter.CTk):
@@ -49,162 +51,81 @@ class App(customtkinter.CTk):
         # self.geometry(f"{1280}x{760}")
 
         # configure grid layout (2x3)
-        self.grid_columnconfigure(0, weight=1)
+        self.grid_columnconfigure(0, weight=0)
         self.grid_columnconfigure(1, weight=1)
         self.grid_rowconfigure(0, weight=1)
         self.grid_rowconfigure(1, weight=0)
 
-        customtkinter.set_appearance_mode("Dark")
+        
+
 
         # create sidebar frame with widgets
         self.sidebar_frame = customtkinter.CTkFrame(
-            self, width=265, corner_radius=0, border_width=2
+            self, corner_radius=0, border_width=2
         )
-        self.sidebar_frame.grid(row=0, column=0, rowspan=2, sticky="nsew")
-        self.sidebar_frame.grid_rowconfigure(18, weight=1)
-        self.sidebar_frame.grid_propagate(False)  # Prevent resizing
-
-        self.logo_label = customtkinter.CTkLabel(
-            self.sidebar_frame,
-            text="Simulation Params",
-            font=customtkinter.CTkFont(size=20, weight="bold"),
-        )
-        self.logo_label.grid(row=0, column=0, padx=20, pady=(15, 15), columnspan=2)
-
-        # Option Menu for Battery
-        self.label_battery = customtkinter.CTkLabel(
-            self.sidebar_frame, text="Battery", font=customtkinter.CTkFont(size=15)
-        )
-        self.label_battery.grid(row=1, column=0, padx=5, pady=(5, 0))
-        self.optionmenu_battery = customtkinter.CTkOptionMenu(
-            self.sidebar_frame, dynamic_resizing=False
-        )
-        self.optionmenu_battery.grid(row=2, column=0, padx=20, pady=(0, 5))
-        self.edit_button_battery = customtkinter.CTkButton(
-            self.sidebar_frame, width=60, text="Edit", command=self.edit_battery
-        )
-        self.edit_button_battery.grid(row=2, column=1, padx=5, pady=(0, 5))
-        self.populate_battery_options()
-
-        # Option Menu for SolarPanel
-        self.label_solar_panel = customtkinter.CTkLabel(
-            self.sidebar_frame, text="Solar Panel", font=customtkinter.CTkFont(size=15)
-        )
-        self.label_solar_panel.grid(row=3, column=0, padx=5, pady=(5, 0))
-        self.optionmenu_solar_panel = customtkinter.CTkOptionMenu(
-            self.sidebar_frame,
-            dynamic_resizing=False,
-            values=["Monocrystalline", "Polycrystalline", "PERC", "Thin film", "..."],
-        )
-        self.optionmenu_solar_panel.grid(row=4, column=0, padx=5, pady=(0, 5))
-        self.edit_button_solar_panel = customtkinter.CTkButton(
-            self.sidebar_frame, width=60, text="Edit", command=self.edit_battery
-        )
-        self.edit_button_solar_panel.grid(row=4, column=1, padx=5, pady=(0, 5))
-
-        # Option Menu for EVCharger
-        self.label_ev_charger = customtkinter.CTkLabel(
-            self.sidebar_frame, text="EV Charger", font=customtkinter.CTkFont(size=15)
-        )
-        self.label_ev_charger.grid(row=5, column=0, padx=5, pady=(5, 0))
-        self.optionmenu_ev_charger = customtkinter.CTkOptionMenu(
-            self.sidebar_frame,
-            dynamic_resizing=False,
-            values=["Type 1", "Type 2", "Type 3"],
-        )
-        self.optionmenu_ev_charger.grid(row=6, column=0, padx=20, pady=(0, 5))
-        self.edit_button_ev_charger = customtkinter.CTkButton(
-            self.sidebar_frame, width=60, text="Edit", command=self.edit_battery
-        )
-        self.edit_button_ev_charger.grid(row=6, column=1, padx=5, pady=(0, 5))
+        self.sidebar_frame.grid(row=0, column=0, columnspan=2, sticky="nsew")
+        #self.sidebar_frame.grid_rowconfigure(18, weight=1)
+        #self.sidebar_frame.grid_propagate(False)  # Prevent resizing
         
-        current_directory = os.getcwd()
-        folder_name = 'consumptionProfile'
-        folder_path = os.path.join(current_directory, folder_name)
-        file_names = os.listdir(folder_path)
-        file_names = [name.replace('profile_', '') for name in file_names]
-        file_names = [name.replace('.csv', '') for name in file_names]
-        file_names = [name.replace('_', ', ') for name in file_names]
-
-        # Option Menu for consumer profiles
-        self.label_consumer = customtkinter.CTkLabel(
+        #####################################################
+        
+        self.sidebar_button_1 = customtkinter.CTkButton(
             self.sidebar_frame,
-            text="Consumer Profile",
-            font=customtkinter.CTkFont(size=15),
+            text="Start Simulation",
+            command=self.verify_parameters
+            ,
         )
-        self.label_consumer.grid(row=7, column=0, columnspan=2, padx=5, pady=(10, 5))
-        self.optionmenu_consumer = customtkinter.CTkOptionMenu(
+        self.sidebar_button_1.grid(row=0, column=0, pady=(10,10), padx=(20,20))
+        
+        ######################################################
+                        
+        try:
+            self.db_manager.delete_simulation_by_name("temp")
+        except:
+            pass
+        
+        self.sidebar_button_2 = customtkinter.CTkButton(
             self.sidebar_frame,
-            width=35,
-            values=file_names,
+            text="Simulation Parameters",
+            command=self.simulation_parameters,
         )
-        self.optionmenu_consumer.grid(
-            row=8, column=0, columnspan=2, padx=20, pady=(5, 5)
-        )
-
-        self.label_coordinates = customtkinter.CTkLabel(
-            self.sidebar_frame,
-            text="Latitude and Longitude",
-            font=customtkinter.CTkFont(size=15),
-        )
-        self.label_coordinates.grid(row=9, column=0, columnspan=2, padx=5, pady=(5, 0))
-        self.entry_latitude = customtkinter.CTkEntry(
-            self.sidebar_frame, placeholder_text="Latitude"
-        )
-        self.entry_latitude.grid(row=10, column=0, pady=(5, 5), columnspan=2)
-
-        self.entry_longitude = customtkinter.CTkEntry(
-            self.sidebar_frame, placeholder_text="Longitude"
-        )
-        self.entry_longitude.grid(row=11, column=0, pady=(5, 10), columnspan=2)
-
-        self.label_start_date = customtkinter.CTkLabel(
-            self.sidebar_frame,
-            text="Start and end date",
-            font=customtkinter.CTkFont(size=15),
-        )
-        self.label_start_date.grid(row=12, column=0, columnspan=2, padx=5, pady=(5, 0))
-        self.entry_start_date = customtkinter.CTkEntry(
-            self.sidebar_frame, placeholder_text="Start date"
-        )
-        self.entry_start_date.grid(row=13, column=0, padx=20, pady=(5, 5), columnspan=2)
-
-        self.entry_end_date = customtkinter.CTkEntry(
-            self.sidebar_frame, placeholder_text="End date"
-        )
-        self.entry_end_date.grid(row=14, column=0, padx=20, pady=(5, 0), columnspan=2)
-
+        self.sidebar_button_2.grid(row=0, column=1, padx=(20,20))
+        
+        ######################################################
+        
         # Option Menu for Simulation scale
         self.label_scale = customtkinter.CTkLabel(
             self.sidebar_frame,
-            text="Simulation Display",
-            font=customtkinter.CTkFont(size=15),
+            text="Visualisation:",
+            font=customtkinter.CTkFont(size=20, weight="bold"),
         )
-        self.label_scale.grid(row=15, column=0, padx=5, pady=(15, 0))
+        self.label_scale.grid(row=0, column=2, padx=(40,0))
+        
         self.optionmenu_scale = customtkinter.CTkOptionMenu(
-            self.sidebar_frame, dynamic_resizing=False, values=["PER YEAR", "PER MONTH", "PER WEEK", "SPECIFIC MONTH", "SPECIFIC WEEK", "SPECIFIC DAY"], command=self.update_time_options
+            self.sidebar_frame,
+            dynamic_resizing=False, values=["PER YEAR", "PER MONTH", "PER WEEK", "SPECIFIC MONTH", "SPECIFIC WEEK", "SPECIFIC DAY"],
+            command=self.update_time_options
         )
-        self.optionmenu_scale.grid(row=16, column=0, pady=(5, 0))
+        self.optionmenu_scale.grid(row=0, column=3, padx=(20,0))
         
         self.optionmenu_time = customtkinter.CTkOptionMenu(
-            self.sidebar_frame, width=60, values=[""]
-        )
-        self.optionmenu_time.grid(row=16, column=1, pady=(5, 0))
-
-
-        # self.sidebar_button_1 = customtkinter.CTkButton(self.sidebar_frame, text="battery", command=self.sidebar_button_event)
-        # self.sidebar_button_1.grid(row=2, column=0, padx=20, pady=10)
-        self.sidebar_button_2 = customtkinter.CTkButton(
             self.sidebar_frame,
-            text="Start Sim.",
-            command=lambda: self.start_process(
-                self.entry_latitude.get(),
-                self.entry_longitude.get(),
-                self.entry_start_date.get(),
-                self.entry_end_date.get()
-            ),
+            width=60,
+            values=[""]
         )
-        self.sidebar_button_2.grid(row=17, column=0, padx=20, pady=25, columnspan=2)
+        self.optionmenu_time.grid(row=0, column=4, padx=(20, 20))
+        
+        #######################################################
+        
+        self.image_uhasselt = customtkinter.CTkImage(dark_image=Image.open(os.path.join("images/uhasselt.png")), size=(80 * 1.5, 19 * 1.5))
+        label_uhasselt = customtkinter.CTkLabel(self.sidebar_frame, image=self.image_uhasselt, text='')
+        label_uhasselt.grid(row=0, column=5, padx=(300,0), sticky="e")
+        
+        self.image_ilumen = customtkinter.CTkImage(dark_image=Image.open(os.path.join("images/ilumen.png")), size=(72.4 * 1.4 , 29.2 * 1.4))
+        label_ilumen = customtkinter.CTkLabel(self.sidebar_frame, image=self.image_ilumen, text='')
+        label_ilumen.grid(row=0, column=6, padx=(20,0), sticky="e")
+
+        #######################################################
 
         # Update layout after adding widgets
         self.sidebar_frame.update_idletasks()
@@ -216,143 +137,227 @@ class App(customtkinter.CTk):
         # set default values
         customtkinter.set_appearance_mode("Dark")
 
+        #######################################################
+    
         # create Matplotlib graphs
         self.fig, (self.ax1, self.ax2) = plt.subplots(
-            2, 1, figsize=(15, 7), gridspec_kw={"height_ratios": [2, 1]}
+            2, 1, figsize=(13, 7), gridspec_kw={"height_ratios": [2, 1]}
         )
+        self.fig.subplots_adjust(right=0.85)
+        
+        self.fig.patch.set_facecolor("#AEB74F")
+        
+        self.ax1.set_facecolor("#FCFBF3")  # Change to your desired color
+        self.ax2.set_facecolor("#FCFBF3")  # Change to your desired color
+
         self.canvas1 = FigureCanvasTkAgg(self.fig, master=self)
 
-        #self.ax3 = self.ax2.twinx()
-
-        # self.ax1.set_xlabel("Time")
-        # self.ax1.set_ylabel("kWh")
-
-        # self.ax2.set_xlabel("Time")
-        # self.ax2.set_ylabel("Charge (kWh)")
-
         self.canvas1.get_tk_widget().grid(
-            row=0, column=1, padx=(5, 5), pady=(5, 5), sticky="nsew"
+            row=1, column=0, padx=(5, 5), pady=(5, 5), sticky="nsew"
         )
 
         # Adjust layout to add space between subplots
         plt.subplots_adjust(hspace=0.4)
+        
+        ######################################################
 
         # create sidebar frame with widgets
         self.sidebar_frame2 = customtkinter.CTkFrame(
             self, corner_radius=0, border_width=2
         )
         self.sidebar_frame2.grid(row=1, column=1, sticky="nsew")
-        self.sidebar_frame2.grid_rowconfigure(10, weight=1)
         
         
-        self.logo_label2 = customtkinter.CTkLabel(
+        self.logo_label1 = customtkinter.CTkLabel(
             self.sidebar_frame2,
             text="Sim Results",
             font=customtkinter.CTkFont(size=20, weight="bold"),
         )
-        self.logo_label2.grid(row=0, column=0, padx=20, pady=(20, 5), columnspan=4)
-
-
-        self.label_result1 = customtkinter.CTkLabel(
+        self.logo_label1.grid(row=0, column=0, pady=(20,20), columnspan=3)
+        
+        self.logo_label2 = customtkinter.CTkLabel(
             self.sidebar_frame2,
-            text="Grid Extraction:",
+            text="Default",
             font=customtkinter.CTkFont(size=15),
         )
-        self.label_result1.grid(row=1, column=0, padx=20, pady=(5, 5))
-        self.label_result1 = customtkinter.CTkLabel(
-            self.sidebar_frame2, text="...", font=customtkinter.CTkFont(size=15)
-        )
-        self.label_result1.grid(row=1, column=1, padx=(0, 30), pady=(5, 0))
-
-
-        self.label_result2 = customtkinter.CTkLabel(
+        self.logo_label2.grid(row=1, column=1, padx=(0,10))
+        
+        self.logo_label3 = customtkinter.CTkLabel(
             self.sidebar_frame2,
-            text="Grid Injection:",
+            text="Optimized",
             font=customtkinter.CTkFont(size=15),
         )
-        self.label_result2.grid(row=2, column=0, padx=20, pady=(5, 20))
-        self.label_result2 = customtkinter.CTkLabel(
-            self.sidebar_frame2, text="...", font=customtkinter.CTkFont(size=15)
-        )
-        self.label_result2.grid(row=2, column=1, padx=(0, 30), pady=(5, 20))
+        self.logo_label3.grid(row=1, column=2, padx=(0,20))
 
+        ############################################################
 
-        self.label_result3 = customtkinter.CTkLabel(
-            self.sidebar_frame2, text="Total Cost:", font=customtkinter.CTkFont(size=15)
-        )
-        self.label_result3.grid(row=1, column=2, padx=5, pady=(5, 0))
-        self.label_result3 = customtkinter.CTkLabel(
-            self.sidebar_frame2, text="...", font=customtkinter.CTkFont(size=15)
-        )
-        self.label_result3.grid(row=1, column=3, padx=(0, 15), pady=(5, 0))
-
-
-        self.label_result4 = customtkinter.CTkLabel(
+        self.label_extraction = customtkinter.CTkLabel(
             self.sidebar_frame2,
-            text="Total Earning:",
+            text="Total Grid Extraction:",
             font=customtkinter.CTkFont(size=15),
         )
-        self.label_result4.grid(row=2, column=2, padx=5, pady=(5, 20))
-        self.label_result4 = customtkinter.CTkLabel(
-            self.sidebar_frame2, text="...", font=customtkinter.CTkFont(size=15)
+        self.label_extraction.grid(row=2, column=0, padx=20, pady=(5, 0), sticky="w")
+        
+        self.label_extraction_result_1 = customtkinter.CTkLabel(
+            self.sidebar_frame2, text="...", font=customtkinter.CTkFont(size=12)
         )
-        self.label_result4.grid(row=2, column=3, padx=(0, 15), pady=(5, 20))
+        self.label_extraction_result_1.grid(row=2, column=1, pady=(5, 0) , padx=(0,10))
         
-        
-        self.label_result5 = customtkinter.CTkLabel(
+        self.label_extraction_result_2 = customtkinter.CTkLabel(
+            self.sidebar_frame2, text="...", font=customtkinter.CTkFont(size=12)
+        )
+        self.label_extraction_result_2.grid(row=2, column=2, pady=(5, 0) )
+
+        ############################################################
+
+        self.label_injection = customtkinter.CTkLabel(
             self.sidebar_frame2,
-            text="Total PV Prod:",
+            text="Total Grid Injection:",
             font=customtkinter.CTkFont(size=15),
         )
-        self.label_result5.grid(row=1, column=4, padx=20, pady=(5, 0))
-        self.label_result5 = customtkinter.CTkLabel(
-            self.sidebar_frame2, text="...", font=customtkinter.CTkFont(size=15)
+        self.label_injection.grid(row=3, column=0, padx=20, pady=(5, 0) , sticky="w")
+        
+        self.label_injection_result_1 = customtkinter.CTkLabel(
+            self.sidebar_frame2, text="...", font=customtkinter.CTkFont(size=12)
         )
-        self.label_result5.grid(row=1, column=5, padx=(0, 15), pady=(5, 0))
+        self.label_injection_result_1.grid(row=3, column=1, pady=(5, 0) , padx=(0,10))
         
+        self.label_injection_result_2 = customtkinter.CTkLabel(
+            self.sidebar_frame2, text="...", font=customtkinter.CTkFont(size=12)
+        )
+        self.label_injection_result_2.grid(row=3, column=2, pady=(5, 0) )
+
+        ###########################################################
         
-        self.label_result6 = customtkinter.CTkLabel(
+        self.label_charge = customtkinter.CTkLabel(
+            self.sidebar_frame2,
+            text="Total Bat. Charge:",
+            anchor="w",
+            font=customtkinter.CTkFont(size=15),
+        )
+        self.label_charge.grid(row=4, column=0, padx=20, pady=(5, 0) , sticky="w")
+        
+        self.label_charge_result_1 = customtkinter.CTkLabel(
+            self.sidebar_frame2, text="...", font=customtkinter.CTkFont(size=12)
+        )
+        self.label_charge_result_1.grid(row=4, column=1, pady=(5, 0) , padx=(0,10))
+        
+        self.label_charge_result_2 = customtkinter.CTkLabel(
+            self.sidebar_frame2, text="...", font=customtkinter.CTkFont(size=12)
+        )
+        self.label_charge_result_2.grid(row=4, column=2, pady=(5, 0) )
+
+        ###########################################################
+        
+        self.label_discharge = customtkinter.CTkLabel(
+            self.sidebar_frame2,
+            text="Total Bat. Discharge:",
+            anchor="w",
+            font=customtkinter.CTkFont(size=15),
+        )
+        self.label_discharge.grid(row=5, column=0, padx=20, pady=(5, 0) , sticky="w")
+        
+        self.label_discharge_result_1 = customtkinter.CTkLabel(
+            self.sidebar_frame2, text="...", font=customtkinter.CTkFont(size=12)
+        )
+        self.label_discharge_result_1.grid(row=5, column=1, pady=(5, 0) , padx=(0,10))
+        
+        self.label_discharge_result_2 = customtkinter.CTkLabel(
+            self.sidebar_frame2, text="...", font=customtkinter.CTkFont(size=12)
+        )
+        self.label_discharge_result_2.grid(row=5, column=2, pady=(5, 0) )
+
+        ###########################################################
+        
+        self.label_pv_production = customtkinter.CTkLabel(
+            self.sidebar_frame2,
+            text="Total Pv Production:",
+            anchor="w",
+            font=customtkinter.CTkFont(size=15),
+        )
+        self.label_pv_production.grid(row=6, column=0, padx=20, pady=(5, 0) , sticky="w")
+        
+        self.label_pv_production_result_1 = customtkinter.CTkLabel(
+            self.sidebar_frame2, text="...", font=customtkinter.CTkFont(size=12)
+        )
+        self.label_pv_production_result_1.grid(row=6, column=1, pady=(5, 0) , padx=(0,10))
+        
+        self.label_pv_production_result_2 = customtkinter.CTkLabel(
+            self.sidebar_frame2, text="...", font=customtkinter.CTkFont(size=12)
+        )
+        self.label_pv_production_result_2.grid(row=6, column=2, pady=(5, 0) )
+
+        ###########################################################
+        
+        self.label_power_use = customtkinter.CTkLabel(
             self.sidebar_frame2,
             text="Total Power Use:",
+            anchor="w",
             font=customtkinter.CTkFont(size=15),
         )
-        self.label_result6.grid(row=2, column=4, padx=20, pady=(5, 20))
-        self.label_result6 = customtkinter.CTkLabel(
-            self.sidebar_frame2, text="...", font=customtkinter.CTkFont(size=15)
-        )
-        self.label_result6.grid(row=2, column=5, padx=(0, 15), pady=(5, 20))
+        self.label_power_use.grid(row=7, column=0, padx=20, pady=(5, 0) , sticky="w")
         
-        
-        self.label_result7 = customtkinter.CTkLabel(
-            self.sidebar_frame2,
-            text="Total Charge:",
-            font=customtkinter.CTkFont(size=15),
+        self.label_power_use_result_1 = customtkinter.CTkLabel(
+            self.sidebar_frame2, text="...", font=customtkinter.CTkFont(size=12)
         )
-        self.label_result7.grid(row=1, column=6, padx=5, pady=(5, 0))
-        self.label_result7 = customtkinter.CTkLabel(
-            self.sidebar_frame2, text="...", font=customtkinter.CTkFont(size=15)
-        )
-        self.label_result7.grid(row=1, column=7, padx=(0, 15), pady=(5, 0))
+        self.label_power_use_result_1.grid(row=7, column=1, pady=(5, 0) , padx=(0,10))
         
-        
-        self.label_result8 = customtkinter.CTkLabel(
-            self.sidebar_frame2,
-            text="Total Discharge:",
-            font=customtkinter.CTkFont(size=15),
+        self.label_power_use_result_2 = customtkinter.CTkLabel(
+            self.sidebar_frame2, text="...", font=customtkinter.CTkFont(size=12)
         )
-        self.label_result8.grid(row=2, column=6, padx=5, pady=(5, 20))
-        self.label_result8 = customtkinter.CTkLabel(
-            self.sidebar_frame2, text="...", font=customtkinter.CTkFont(size=15)
-        )
-        self.label_result8.grid(row=2, column=7, padx=(0, 15), pady=(5, 20))
-        
-        #set default values
-        self.entry_start_date.insert(tkinter.END, '2023-01-01')
-        self.entry_end_date.insert(tkinter.END, '2024-01-01')
-        self.entry_latitude.insert(tkinter.END, "50.92549")
-        self.entry_longitude.insert(tkinter.END, "5.39328")
-        self.optionmenu_time.set("/")
+        self.label_power_use_result_2.grid(row=7, column=2, pady=(5, 0) )
 
+        ###########################################################
+        
+        self.label_earning = customtkinter.CTkLabel(
+            self.sidebar_frame2,
+            text="Total Earning:",
+            anchor="w",
+            font=customtkinter.CTkFont(size=15),
+        )
+        self.label_earning.grid(row=8, column=0, padx=20, pady=(5, 0) , sticky="w")
+        
+        self.label_earning_result_1 = customtkinter.CTkLabel(
+            self.sidebar_frame2, text="...", font=customtkinter.CTkFont(size=12)
+        )
+        self.label_earning_result_1.grid(row=8, column=1, pady=(5, 0) , padx=(0,10))
+        
+        self.label_earning_result_2 = customtkinter.CTkLabel(
+            self.sidebar_frame2, text="...", font=customtkinter.CTkFont(size=12)
+        )
+        self.label_earning_result_2.grid(row=8, column=2, pady=(5, 0) )
+
+        ###########################################################
+        
+        self.label_cost = customtkinter.CTkLabel(
+            self.sidebar_frame2,
+            text="Total Cost:",
+            anchor="w",
+            font=customtkinter.CTkFont(size=15),
+        )
+        self.label_cost.grid(row=9, column=0, padx=20, pady=(5, 0) , sticky="w")
+        
+        self.label_cost_result_1 = customtkinter.CTkLabel(
+            self.sidebar_frame2, text="...", font=customtkinter.CTkFont(size=12)
+        )
+        self.label_cost_result_1.grid(row=9, column=1, pady=(5, 0) , padx=(0,10))
+        
+        self.label_cost_result_2 = customtkinter.CTkLabel(
+            self.sidebar_frame2, text="...", font=customtkinter.CTkFont(size=12)
+        )
+        self.label_cost_result_2.grid(row=9, column=2, pady=(5, 0) )
+
+        ###########################################################   
+        
+        self.optionmenu_time.set("/")
+        
+        self.protocol("WM_DELETE_WINDOW", self.on_close)
+        
+    def simulation_parameters(self):
+        simulation_dialog = SimulationDialog(self.db_manager)
+        simulation_dialog.mainloop()
+        
+    
     def update_graphs_with_new_data(self, data_points):
 
         calculated_values = calculate_values(data_points, self.optionmenu_time.get(), self.optionmenu_scale.get())
@@ -377,14 +382,15 @@ class App(customtkinter.CTk):
         grid_extraction_cost = calculated_values["grid_extraction_cost"]
 
         # code to display in text field
-        self.label_result1.configure(text=str(round(grid_extraction_sum, 4)) + " kWh")
-        self.label_result2.configure(text=str(abs(round(grid_injection_sum, 4))) + " kWh")
-        self.label_result3.configure(text=str(round(grid_extraction_cost, 4)) + " €")
-        self.label_result4.configure(text=str(abs(round(grid_injection_cost, 4))) + " €")
-        self.label_result5.configure(text=str(abs(round(sum(pv_power_values, 4)))) + " kWh")
-        self.label_result6.configure(text=str(abs(round(sum(power_usage_values, 4)))) + " kWh")
-        self.label_result7.configure(text=str(abs(round(sum(charge_values, 4)))) + " kWh")
-        self.label_result8.configure(text=str(abs(round(sum(discharge_values, 4)))) + " kWh")
+        self.label_extraction_result_1.configure(text=str(round(grid_extraction_sum, 3)) + " kWh")
+        self.label_injection_result_1.configure(text=str(abs(round(grid_injection_sum, 3))) + " kWh")
+        self.label_charge_result_1.configure(text=str(abs(round(sum(charge_values, 3)))) + " kWh")
+        self.label_discharge_result_1.configure(text=str(abs(round(sum(discharge_values, 3)))) + " kWh")
+        self.label_pv_production_result_1.configure(text=str(abs(round(sum(pv_power_values, 3)))) + " kWh")
+        self.label_power_use_result_1.configure(text=str(abs(round(sum(power_usage_values, 3)))) + " kWh")
+        self.label_cost_result_1.configure(text=str(round(grid_extraction_cost, 3)) + " €")
+        self.label_earning_result_1.configure(text=str(abs(round(grid_injection_cost, 3))) + " €")
+        
 
         # Clear existing plots
         self.ax1.clear()
@@ -403,6 +409,7 @@ class App(customtkinter.CTk):
             time_values, 
             pv_power_values, 
             color="y", 
+            label="PV Power",
             width=line_width
         )
         self.ax1.bar(
@@ -410,6 +417,7 @@ class App(customtkinter.CTk):
             discharge_values,
             bottom=pv_power_values,
             color="#FF0000",
+            label="Discharge",
             width=line_width,
         )
         self.ax1.bar(
@@ -417,6 +425,7 @@ class App(customtkinter.CTk):
             grid_extraction_values,
             bottom=bottom_extraction,
             color="b",
+            label="Grid Extraction",
             width=line_width,
         )
 
@@ -424,6 +433,7 @@ class App(customtkinter.CTk):
             time_values, 
             power_usage_values, 
             color="c", 
+            label="Power Usage",
             width=line_width
         )
         self.ax1.bar(
@@ -431,6 +441,7 @@ class App(customtkinter.CTk):
             charge_values,
             bottom=power_usage_values,
             color="#009600",
+            label="Charge",
             width=line_width,
         )
         self.ax1.bar(
@@ -438,31 +449,39 @@ class App(customtkinter.CTk):
             grid_injection_values,
             bottom=bottom_injection,
             color="#4C00A4",
+            label="Grid Injection",
             width=line_width,
         )
 
-        # Customize the plot
-        self.ax1.legend(
-            [
-                "PV Power",
-                "Discharge",
-                "Grid Extraction",
-                "Power Usage",
-                "Charge",
-                "Grid Injection",
-            ]
-        )
+        # # Customize the plot
+        # self.ax1.legend(
+        #     [
+        #         "PV Power",
+        #         "Discharge",
+        #         "Grid Extraction",
+        #         "Power Usage",
+        #         "Charge",
+        #         "Grid Injection",
+        #     ]
+        # )
+        
         self.ax1.axhline(y=0, color="k", linestyle="-", linewidth=0.1)
         self.ax1.set_ylabel("kWh")
+        
 
         new_soc_values = scale_list(soc_values, len(grid_extraction_prices))
         
         grid_injection_prices_scaled = scale_list(grid_injection_prices, 400)
         grid_extraction_prices_scaled = scale_list(grid_extraction_prices, 400)
         
+        average_price_1 = sum(grid_extraction_prices_scaled)/400
+        average_price_2 = sum(grid_extraction_prices_scaled)/400
+        average_price = (average_price_1+average_price_2)/2
+        
         # Plot injection and extraction prices with their y-axis on the left
-        self.ax2.plot(grid_injection_prices_scaled, color="y", label="Injection Prices", linewidth=0.5)
-        self.ax2.plot(grid_extraction_prices_scaled, color="g", label="Extraction Prices", linewidth=0.5)
+        self.ax2.plot(grid_injection_prices_scaled, color="#290BE1", label="Injection Prices", linewidth=0.8)
+        self.ax2.plot(grid_extraction_prices_scaled, color="r", label="Extraction Prices", linewidth=0.8)
+        self.ax2.axhline(y=average_price, color="black", label="Average Price", linestyle="--", linewidth=0.8)
         self.ax2.set_ylabel("Grid Prices per MWh")
         self.ax2.set_xlabel("Time")
         self.ax2.tick_params(axis='y', labelcolor="black")
@@ -473,7 +492,8 @@ class App(customtkinter.CTk):
         # self.ax3.tick_params(axis='y', labelcolor="black")  # Change y-axis label color to green
 
         # Add legend
-        self.ax2.legend(loc="upper left")
+        self.ax2.legend(loc='center left', bbox_to_anchor=(1, 0.5))
+        self.ax1.legend(loc='center left', bbox_to_anchor=(1, 0.5))
         #self.ax3.legend(loc="upper right")
         
 
@@ -487,24 +507,6 @@ class App(customtkinter.CTk):
 
         # Redraw canvas
         self.canvas1.draw()
-
-    # TODO this doesnt work yet
-    def populate_battery_options(self):
-        # Fetch battery data from the database
-        battery_data = self.db_manager.fetch_battery_data()
-        print(battery_data)
-        # Extract battery names
-        battery_options = [battery[1] for battery in battery_data]
-        # Update option menu with battery names
-        self.optionmenu_battery.option_clear
-        self.optionmenu_battery.configure(values=battery_options)
-        self.optionmenu_battery.set(battery_options[0])
-
-    def edit_battery(self):
-        edit_dialog = BatteryManager(
-            self.db_manager, callback=self.populate_battery_options
-        )
-        self.populate_battery_options()
         
     def update_time_options(self, event):
         selected_scale = self.optionmenu_scale.get()
@@ -530,22 +532,49 @@ class App(customtkinter.CTk):
         self.optionmenu_time.option_clear
         self.optionmenu_time.configure(values=time_options)
         self.optionmenu_time.set(time_options[0])
+        
+    def verify_parameters(self):
+        
+        try:
+            self.simulation_data = self.db_manager.fetch_simulation_by_name("temp")
+            
+            if(self.simulation_data):
+                self.battery_charge = self.simulation_data[2]
+                self.battery_discharge = self.simulation_data[3]
+                self.battery_capacity = self.simulation_data[4]
+                self.battery_efficiency = self.simulation_data[5]
+                self.solar_azimuth = self.simulation_data[6]
+                self.solar_tilt = self.simulation_data[7]
+                self.solar_number_of_panels = self.simulation_data[8]
+                self.solar_efficiency = self.simulation_data[9]
+                self.solar_length = self.simulation_data[10]
+                self.solar_width = self.simulation_data[11]
+                self.ev_charge = self.simulation_data[12]
+                self.ev_fast_charge = self.simulation_data[13]
+                self.ev_efficiency = self.simulation_data[14]
+                self.ev_capacity_car = self.simulation_data[15]
+                self.selected_consumer_profile = self.simulation_data[16]
+                self.general_latitude = self.simulation_data[17]
+                self.general_longitude = self.simulation_data[18]
+                self.general_start_date = self.simulation_data[19]
+        
+        except:
+            # Show some retry/cancel warnings
+            msg = CTkMessagebox(title="Warning Message!", message="Please Select Simulation Parameters",
+                        icon="warning", option_1="OK")
+            
+        self.start_process()
 
-    def start_process(self, latitude, longitude, start_date, end_date):
-
-        selected_battery = self.optionmenu_battery.get()
-        selected_battery_data = self.db_manager.fetch_battery_by_name(selected_battery)
-        selected_user_profile = self.optionmenu_consumer.get()
-
+    def start_process(self):    
         # Initialize battery using the retrieved data
         battery = Battery(
-            capacity=selected_battery_data[2],
+            capacity=self.battery_capacity,
             soc=1,
-            charge_power=selected_battery_data[3],
-            discharge_power=selected_battery_data[4],
-            max_soc=selected_battery_data[5],
-            min_dod=selected_battery_data[6],
-            efficiency=selected_battery_data[7],
+            charge_power=self.battery_charge,
+            discharge_power=self.battery_discharge,
+            max_soc=0.95,
+            min_dod=0.05,
+            efficiency=self.battery_efficiency,
         )
 
         # .battery = Battery(capacity=2, soc=2, charge_power=5.0, discharge_power=5.0, max_soc=0.95, min_dod=0.05, efficiency=0.90)
@@ -566,16 +595,24 @@ class App(customtkinter.CTk):
         # charge_value is in kWh and is positive when charged and negative when discharged
         # grid_usage is in kWh and is positive when extracted and is negative when injected
         
-        data_points = process_solar_data(latitude, longitude, start_date, end_date)
+        data_points = process_solar_data(self.general_latitude, self.general_longitude, self.general_start_date, "2024-01-01")
 
-        data_points = get_power_usage_values(data_points, selected_user_profile)
+        data_points = get_power_usage_values(data_points, self.selected_consumer_profile)
         
-        data_points = process_prices_data(data_points, latitude, longitude)
+        data_points = process_prices_data(data_points, self.general_latitude, self.general_longitude)
         
         data_points = process_data(data_points, battery, pybamm_battery)
 
         self.update_graphs_with_new_data(data_points)
-
+        
+    def on_close(self):
+        try:
+            self.db_manager.delete_simulation_by_name("temp")
+        except:
+            pass
+        self.destroy()
+        
+        
 if __name__ == "__main__":
     app = App()
     app.mainloop()

@@ -1,4 +1,5 @@
 import datetime
+from dateutil import parser
 import os
 import tkinter
 import customtkinter
@@ -9,6 +10,7 @@ from batteryCreateDialog import batteryCreateDialog
 from batteryManager import BatteryManager
 from databaseManager import DatabaseManager
 from batteryEditDialog import batteryEditDialog
+from CTkMessagebox import CTkMessagebox
 
 class SimulationDialog(customtkinter.CTk):
     def __init__(self, db_manager):
@@ -362,14 +364,18 @@ class SimulationDialog(customtkinter.CTk):
             text="Confirm",
             command=self.confirm_parameters,
         )
-        self.button_confirm.grid(row=19, column=0, pady=(0,25))
+        self.button_confirm.grid(row=19, column=1, pady=(0,25), sticky='e')
         
         self.button_confirm_save = customtkinter.CTkButton(
             self.frame_3,
             text="Confirm And Save",
             command=self.confirm_save_parameters,
         )
-        self.button_confirm_save.grid(row=19, column=2, pady=(0,25))
+        self.button_confirm_save.grid(row=19, column=2, pady=(0,25), sticky='w')
+        
+        self.checkbox_testing = customtkinter.CTkCheckBox(self.frame_3, text="Use API's", onvalue="on", offvalue="off")
+        self.checkbox_testing.grid(row=19, column=0, pady=(0,25))
+
         
         self.populate_simulation_options()
         self.populate_battery_options()
@@ -549,130 +555,103 @@ class SimulationDialog(customtkinter.CTk):
         )
         self.populate_battery_options()
         
+    def standardize_date(self, date_input):
+        try:
+            # Parse the date from the given date string
+            parsed_date = parser.parse(date_input)
+            # Format the date to YYYY-MM-DD
+            standardized_date = parsed_date.strftime('%Y-%m-%d')
+            return standardized_date
+        except ValueError:
+            return "Invalid date"
+        
         
     def confirm_save_parameters(self):
-        print("confirmed")
-        # Get values from all entry fields
-        battery_charge = self.entry_battery_charge.get()
-        battery_discharge = self.entry_battery_discharge.get()
-        battery_capacity = self.entry_battery_capacity.get()
-        battery_efficiency = self.entry_battery_efficiency.get()
+        # Collect all entries
+        entries = {
+            "Battery Charge": self.entry_battery_charge.get(),
+            "Battery Discharge": self.entry_battery_discharge.get(),
+            "Battery Capacity": self.entry_battery_capacity.get(),
+            "Battery Efficiency": self.entry_battery_efficiency.get(),
+            "Solar Azimuth": self.entry_solar_azimuth.get(),
+            "Solar Tilt": self.entry_solar_tilt.get(),
+            "Number of Solar Panels": self.entry_solar_number_of_panels.get(),
+            "Solar Efficiency": self.entry_solar_efficiency.get(),
+            "Solar Length": self.entry_solar_length.get(),
+            "Solar Width": self.entry_solar_width.get(),
+            "EV Charge": self.entry_ev_charge.get(),
+            "EV Fast Charge": self.entry_ev_fast_charge.get(),
+            "EV Efficiency": self.entry_ev_efficiency.get(),
+            "EV Car Capacity": self.entry_ev_capacity_car.get(),
+            "Consumer Profile": self.optionmenu_consumer_profile.get().replace(', ', '_'),
+            "Latitude": self.entry_general_latitude.get(),
+            "Longitude": self.entry_general_longitude.get(),
+            "Start Date": self.standardize_date(self.entry_general_start_date.get())
+        }
 
-        solar_azimuth = self.entry_solar_azimuth.get()
-        solar_tilt = self.entry_solar_tilt.get()
-        solar_number_of_panels = self.entry_solar_number_of_panels.get()
-        solar_efficiency = self.entry_solar_efficiency.get()
-        solar_length = self.entry_solar_length.get()
-        solar_width = self.entry_solar_width.get()
+        # Check for empty fields
+        empty_fields = [key for key, value in entries.items() if not value.strip()]
 
-        ev_charge = self.entry_ev_charge.get()
-        ev_fast_charge = self.entry_ev_fast_charge.get()
-        ev_efficiency = self.entry_ev_efficiency.get()
-        ev_capacity_car = self.entry_ev_capacity_car.get()
-        
-        consumer_profile = self.optionmenu_consumer_profile.get()
-
-        general_latitude = self.entry_general_latitude.get()
-        general_longitude = self.entry_general_longitude.get()
-        general_start_date = self.entry_general_start_date.get()
+        #TODO fixen dat ook consumer en datum checkt
+        if empty_fields:
+            # Show a warning with the fields that are empty
+            warning_message = "Please fill in the following fields: " + ", ".join(empty_fields)
+            CTkMessagebox(title="Warning", message=warning_message)
+            return  # Stop further processing
         
         dialog = customtkinter.CTkInputDialog(text="Choose a name:", title="Name")
-    
+
+        # If all fields are filled, continue with the operation
         self.db_manager.add_simulation(
-            str(dialog.get_input()), 
-            battery_charge,
-            battery_discharge,
-            battery_capacity,
-            battery_efficiency,
-            solar_azimuth,
-            solar_tilt,
-            solar_number_of_panels,
-            solar_efficiency,
-            solar_length,
-            solar_width,
-            ev_charge,
-            ev_fast_charge,
-            ev_efficiency,
-            ev_capacity_car,
-            consumer_profile,
-            general_latitude,
-            general_longitude,
-            general_start_date)
-        
+            "temp", *entries.values()
+        )
         self.db_manager.add_simulation(
-            "temp", 
-            battery_charge,
-            battery_discharge,
-            battery_capacity,
-            battery_efficiency,
-            solar_azimuth,
-            solar_tilt,
-            solar_number_of_panels,
-            solar_efficiency,
-            solar_length,
-            solar_width,
-            ev_charge,
-            ev_fast_charge,
-            ev_efficiency,
-            ev_capacity_car,
-            consumer_profile,
-            general_latitude,
-            general_longitude,
-            general_start_date)
+            str(dialog.get_input()), *entries.values()
+        )
         
         self.destroy()
         return
 
     def confirm_parameters(self):
-        print("confirmed")
-        # Get values from all entry fields
-        battery_charge = self.entry_battery_charge.get()
-        battery_discharge = self.entry_battery_discharge.get()
-        battery_capacity = self.entry_battery_capacity.get()
-        battery_efficiency = self.entry_battery_efficiency.get()
+        # Collect all entries
+        entries = {
+            "Battery Charge": self.entry_battery_charge.get(),
+            "Battery Discharge": self.entry_battery_discharge.get(),
+            "Battery Capacity": self.entry_battery_capacity.get(),
+            "Battery Efficiency": self.entry_battery_efficiency.get(),
+            "Solar Azimuth": self.entry_solar_azimuth.get(),
+            "Solar Tilt": self.entry_solar_tilt.get(),
+            "Number of Solar Panels": self.entry_solar_number_of_panels.get(),
+            "Solar Efficiency": self.entry_solar_efficiency.get(),
+            "Solar Length": self.entry_solar_length.get(),
+            "Solar Width": self.entry_solar_width.get(),
+            "EV Charge": self.entry_ev_charge.get(),
+            "EV Fast Charge": self.entry_ev_fast_charge.get(),
+            "EV Efficiency": self.entry_ev_efficiency.get(),
+            "EV Car Capacity": self.entry_ev_capacity_car.get(),
+            "Consumer Profile": self.optionmenu_consumer_profile.get().replace(', ', '_'),
+            "Latitude": self.entry_general_latitude.get(),
+            "Longitude": self.entry_general_longitude.get(),
+            "Start Date": self.standardize_date(self.entry_general_start_date.get())
+        }
 
-        solar_azimuth = self.entry_solar_azimuth.get()
-        solar_tilt = self.entry_solar_tilt.get()
-        solar_number_of_panels = self.entry_solar_number_of_panels.get()
-        solar_efficiency = self.entry_solar_efficiency.get()
-        solar_length = self.entry_solar_length.get()
-        solar_width = self.entry_solar_width.get()
+        # Check for empty fields
+        empty_fields = [key for key, value in entries.items() if not value.strip()]
 
-        ev_charge = self.entry_ev_charge.get()
-        ev_fast_charge = self.entry_ev_fast_charge.get()
-        ev_efficiency = self.entry_ev_efficiency.get()
-        ev_capacity_car = self.entry_ev_capacity_car.get()
-        
-        consumer_profile = self.optionmenu_consumer_profile.get()
+        #TODO fixen dat ook consumer en datum checkt
+        if empty_fields:
+            # Show a warning with the fields that are empty
+            warning_message = "Please fill in the following fields: " + ", ".join(empty_fields)
+            CTkMessagebox(title="Warning", message=warning_message)
+            return  # Stop further processing
 
-        general_latitude = self.entry_general_latitude.get()
-        general_longitude = self.entry_general_longitude.get()
-        general_start_date = self.entry_general_start_date.get()
-        
+        # If all fields are filled, continue with the operation
         self.db_manager.add_simulation(
-            "temp", 
-            battery_charge,
-            battery_discharge,
-            battery_capacity,
-            battery_efficiency,
-            solar_azimuth,
-            solar_tilt,
-            solar_number_of_panels,
-            solar_efficiency,
-            solar_length,
-            solar_width,
-            ev_charge,
-            ev_fast_charge,
-            ev_efficiency,
-            ev_capacity_car,
-            consumer_profile,
-            general_latitude,
-            general_longitude,
-            general_start_date)
+            "temp", *entries.values()
+        )
         
         self.destroy()
         return
-        print("yyyyyyyyyyyyy")
 
 
 
