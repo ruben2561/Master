@@ -1,9 +1,3 @@
-# todo
-# add the solcast api and try showing wheater
-# add the fluvius live prices and try to show it
-# Peukert's law or the coulombic efficiency model bekijken
-#
-
 from collections import defaultdict
 import tkinter as tk
 from tkinter import ttk
@@ -16,6 +10,62 @@ import csv
 import matplotlib.dates as mdates
 import datetime
 
+def process_data_optimized(data_points, battery, pybamm_battery):
+    for i in range(len(data_points) - 1):
+        current_point = data_points[i]
+        next_point = data_points[i + 1]
+
+        pv_power_value = current_point.get("pv_power_value", 0)
+        power_usage_value = current_point.get("power_usage_value")
+        time_value = current_point.get("time_value")
+        extracton_price_value = current_point.get("price_extraction")
+        next_time = next_point.get("time_value")
+
+        if time_value and next_time:
+            # Calculate time difference in hours
+
+            time_difference_hours = (next_time - time_value).total_seconds() / 3600
+            # Charge the battery based on the time difference
+
+            charge_discharge_battery = pv_power_value - power_usage_value
+
+            current_point["soc_value"] = battery.soc
+
+            if charge_discharge_battery > 0:
+                charged, residue_to_much_energy = battery.charge(
+                    charge_discharge_battery, time_difference_hours
+                )
+                current_point["grid_injection"] = residue_to_much_energy
+                current_point["grid_extraction"] = 0
+                current_point["charge_value"] = charged
+                current_point["discharge_value"] = 0
+
+            elif charge_discharge_battery < 0:
+                discharged, residue_to_little_energy = battery.discharge(
+                    abs(charge_discharge_battery), time_difference_hours
+                )
+                current_point["grid_injection"] = 0
+                current_point["grid_extraction"] = residue_to_little_energy
+                current_point["charge_value"] = 0
+                current_point["discharge_value"] = discharged
+                    
+            else:
+                current_point["grid_injection"] = 0
+                current_point["grid_extraction"] = 0
+                current_point["charge_value"] = 0
+                current_point["discharge_value"] = 0
+                
+            if(extracton_price_value <= 50):
+                charged, residue_to_much_energy = battery.charge(100, time_difference_hours)
+                current_point["charge_value"] += charged
+                current_point["grid_extraction"] += charged
+
+            # pybamm_battery.charge(pv_power_value, time_difference_hours)
+            # pybamm_battery.discharge(power_usage_value, time_difference_hours)
+
+            # Add charge value to the data_point dictionary
+
+    return data_points
 
 def process_data(data_points, battery, pybamm_battery):
     for i in range(len(data_points) - 1):
@@ -69,7 +119,7 @@ def process_data(data_points, battery, pybamm_battery):
     return data_points
 
 
-def get_power_usage_values(data_points, selected_user_profile):
+def get_power_usage_values(data_points, selected_user_profile, use_api_bool):
     profile = "consumptionProfile/profile_" + selected_user_profile + ".csv"
     try:
         with open(profile, "r") as file:

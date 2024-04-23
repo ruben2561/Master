@@ -431,6 +431,8 @@ class SimulationDialog(customtkinter.CTk):
         self.entry_general_latitude.insert(0, selected_simulation_data[17])
         self.entry_general_longitude.insert(0, selected_simulation_data[18])
         self.entry_general_start_date.insert(0, selected_simulation_data[19])
+        #TODO fix this from database
+        #self.checkbox_testing.
         
     def update_battery_options(self, selected_battery):
         
@@ -586,7 +588,8 @@ class SimulationDialog(customtkinter.CTk):
             "Consumer Profile": self.optionmenu_consumer_profile.get().replace(', ', '_'),
             "Latitude": self.entry_general_latitude.get(),
             "Longitude": self.entry_general_longitude.get(),
-            "Start Date": self.standardize_date(self.entry_general_start_date.get())
+            "Start Date": self.standardize_date(self.entry_general_start_date.get()),
+            "Use Api": self.checkbox_testing.get()
         }
 
         # Check for empty fields
@@ -632,7 +635,8 @@ class SimulationDialog(customtkinter.CTk):
             "Consumer Profile": self.optionmenu_consumer_profile.get().replace(', ', '_'),
             "Latitude": self.entry_general_latitude.get(),
             "Longitude": self.entry_general_longitude.get(),
-            "Start Date": self.standardize_date(self.entry_general_start_date.get())
+            "Start Date": self.standardize_date(self.entry_general_start_date.get()),
+            "Use Api": self.checkbox_testing.get()
         }
 
         # Check for empty fields

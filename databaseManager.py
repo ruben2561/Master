@@ -152,9 +152,10 @@ class DatabaseManager:
             consumer_profile,
             general_latitude,
             general_longitude,
-            general_start_date):
+            general_start_date,
+            use_api):
         
-        query = "INSERT INTO Simulation (name, batteryCharge, batteryDischarge, batteryCapacity, batteryEfficiency, solarAzimuth, solarTilt, solarNumberOfPanels, solarEfficiency, solarLength, solarWidth, evCharge, evFastCharge, evEfficiency, evCapacityCar, consumerProfile, generalLatitude, generalLongitude, generalStartDate) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+        query = "INSERT INTO Simulation (name, batteryCharge, batteryDischarge, batteryCapacity, batteryEfficiency, solarAzimuth, solarTilt, solarNumberOfPanels, solarEfficiency, solarLength, solarWidth, evCharge, evFastCharge, evEfficiency, evCapacityCar, consumerProfile, generalLatitude, generalLongitude, generalStartDate, useApi) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
         
         self.cursor.execute(query, 
             (
@@ -176,7 +177,8 @@ class DatabaseManager:
             consumer_profile,
             general_latitude,
             general_longitude,
-            general_start_date))
+            general_start_date,
+            use_api))
         
         self.connection.commit()
 

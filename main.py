@@ -1,3 +1,4 @@
+import copy
 import math
 import time
 import tkinter
@@ -21,6 +22,7 @@ from process import (
     calculate_values,
     get_power_usage_values,
     process_data,
+    process_data_optimized,
     scale_list,
 )
 from processPVPower import process_solar_data
@@ -78,11 +80,6 @@ class App(customtkinter.CTk):
         self.sidebar_button_1.grid(row=0, column=0, pady=(10,10), padx=(20,20))
         
         ######################################################
-                        
-        try:
-            self.db_manager.delete_simulation_by_name("temp")
-        except:
-            pass
         
         self.sidebar_button_2 = customtkinter.CTkButton(
             self.sidebar_frame,
@@ -140,24 +137,27 @@ class App(customtkinter.CTk):
         #######################################################
     
         # create Matplotlib graphs
-        self.fig, (self.ax1, self.ax2) = plt.subplots(
-            2, 1, figsize=(13, 7), gridspec_kw={"height_ratios": [2, 1]}
+        self.fig, (self.ax1, self.ax2, self.ax3) = plt.subplots(
+            3, 1, figsize=(13, 7), gridspec_kw={"height_ratios": [2, 2, 1]}
         )
-        self.fig.subplots_adjust(right=0.85)
         
         self.fig.patch.set_facecolor("#AEB74F")
         
+        self.fig.tight_layout(pad=4.0)
+        self.fig.subplots_adjust(right=0.85)
+        
         self.ax1.set_facecolor("#FCFBF3")  # Change to your desired color
         self.ax2.set_facecolor("#FCFBF3")  # Change to your desired color
+        self.ax3.set_facecolor("#FCFBF3")  # Change to your desired color
 
         self.canvas1 = FigureCanvasTkAgg(self.fig, master=self)
 
         self.canvas1.get_tk_widget().grid(
-            row=1, column=0, padx=(5, 5), pady=(5, 5), sticky="nsew"
+            row=1, column=0, sticky="w"
         )
 
         # Adjust layout to add space between subplots
-        plt.subplots_adjust(hspace=0.4)
+        plt.subplots_adjust(hspace=0.6)
         
         ######################################################
 
@@ -170,7 +170,7 @@ class App(customtkinter.CTk):
         
         self.logo_label1 = customtkinter.CTkLabel(
             self.sidebar_frame2,
-            text="Sim Results",
+            text="Simulation Results",
             font=customtkinter.CTkFont(size=20, weight="bold"),
         )
         self.logo_label1.grid(row=0, column=0, pady=(20,20), columnspan=3)
@@ -350,15 +350,30 @@ class App(customtkinter.CTk):
         ###########################################################   
         
         self.optionmenu_time.set("/")
+        self.optionmenu_scale.set("PER MONTH")
         
         self.protocol("WM_DELETE_WINDOW", self.on_close)
         
     def simulation_parameters(self):
+        
+        try:
+            self.db_manager.delete_simulation_by_name("temp")
+        except:
+            pass
+        
         simulation_dialog = SimulationDialog(self.db_manager)
         simulation_dialog.mainloop()
         
+    #############################################################################
+    #############################################################################
+    #############################################################################
     
-    def update_graphs_with_new_data(self, data_points):
+    def update_graphs_with_new_data(self, data_points, data_points_optimized):
+        
+        # Clear existing plots
+        self.ax1.clear()
+        self.ax2.clear()
+        self.ax3.clear()
 
         calculated_values = calculate_values(data_points, self.optionmenu_time.get(), self.optionmenu_scale.get())
 
@@ -391,12 +406,6 @@ class App(customtkinter.CTk):
         self.label_cost_result_1.configure(text=str(round(grid_extraction_cost, 3)) + " €")
         self.label_earning_result_1.configure(text=str(abs(round(grid_injection_cost, 3))) + " €")
         
-
-        # Clear existing plots
-        self.ax1.clear()
-        self.ax2.clear()
-        #self.ax3.clear()
-
         # Calculate bottom values
         bottom_extraction = [x + y for x, y in zip(pv_power_values, discharge_values)]
         bottom_injection = [x + y for x, y in zip(power_usage_values, charge_values)]
@@ -452,23 +461,108 @@ class App(customtkinter.CTk):
             label="Grid Injection",
             width=line_width,
         )
-
-        # # Customize the plot
-        # self.ax1.legend(
-        #     [
-        #         "PV Power",
-        #         "Discharge",
-        #         "Grid Extraction",
-        #         "Power Usage",
-        #         "Charge",
-        #         "Grid Injection",
-        #     ]
-        # )
         
         self.ax1.axhline(y=0, color="k", linestyle="-", linewidth=0.1)
         self.ax1.set_ylabel("kWh")
         
+        ############################################################################
+        ############################################################################
+        ############################################################################
+        
+        calculated_values_optimized = calculate_values(data_points_optimized, self.optionmenu_time.get(), self.optionmenu_scale.get())
 
+        # Perform some calculations to get new data
+        time_values_optimized = calculated_values_optimized["time_values"]
+        pv_power_values_optimized = calculated_values_optimized["pv_power_values"]
+        power_usage_values_optimized = calculated_values_optimized["power_usage_values"]
+        charge_values_optimized = calculated_values_optimized["charge_values"]
+        discharge_values_optimized = calculated_values_optimized["discharge_values"]
+        soc_values_optimized = calculated_values_optimized["soc_values"]
+        grid_injection_values_optimized = calculated_values_optimized["injection_values"]
+        grid_extraction_values_optimized = calculated_values_optimized["extraction_values"]
+        
+        grid_injection_prices_optimized = calculated_values_optimized["grid_injection_prices"]
+        grid_extraction_prices_optimized = calculated_values_optimized["grid_extraction_prices"]
+
+        grid_injection_sum_optimized = calculated_values_optimized["grid_injection_sum"]
+        grid_extraction_sum_optimized = calculated_values_optimized["grid_extraction_sum"]
+
+        grid_injection_cost_optimized = calculated_values_optimized["grid_injection_cost"]
+        grid_extraction_cost_optimized = calculated_values_optimized["grid_extraction_cost"]
+
+        # code to display in text field
+        self.label_extraction_result_2.configure(text=str(round(grid_extraction_sum_optimized, 3)) + " kWh")
+        self.label_injection_result_2.configure(text=str(abs(round(grid_injection_sum_optimized, 3))) + " kWh")
+        self.label_charge_result_2.configure(text=str(abs(round(sum(charge_values_optimized, 3)))) + " kWh")
+        self.label_discharge_result_2.configure(text=str(abs(round(sum(discharge_values_optimized, 3)))) + " kWh")
+        self.label_pv_production_result_2.configure(text=str(abs(round(sum(pv_power_values_optimized, 3)))) + " kWh")
+        self.label_power_use_result_2.configure(text=str(abs(round(sum(power_usage_values_optimized, 3)))) + " kWh")
+        self.label_cost_result_2.configure(text=str(round(grid_extraction_cost_optimized, 3)) + " €")
+        self.label_earning_result_2.configure(text=str(abs(round(grid_injection_cost_optimized, 3))) + " €")
+
+        # Calculate bottom values
+        bottom_extraction_optimized = [x + y for x, y in zip(pv_power_values_optimized, discharge_values_optimized)]
+        bottom_injection_optimized = [x + y for x, y in zip(power_usage_values_optimized, charge_values_optimized)]
+
+        line_width_optimized = calculated_values_optimized["line_width"]
+        self.ax2.set_title(calculated_values_optimized["title"].replace('Not ', ''))
+        self.ax2.set_xlabel("Time")            
+
+        self.ax2.bar(
+            time_values_optimized, 
+            pv_power_values_optimized, 
+            color="y", 
+            label="PV Power",
+            width=line_width_optimized
+        )
+        self.ax2.bar(
+            time_values_optimized,
+            discharge_values_optimized,
+            bottom=pv_power_values_optimized,
+            color="#FF0000",
+            label="Discharge",
+            width=line_width_optimized,
+        )
+        self.ax2.bar(
+            time_values_optimized,
+            grid_extraction_values_optimized,
+            bottom=bottom_extraction_optimized,
+            color="b",
+            label="Grid Extraction",
+            width=line_width_optimized,
+        )
+
+        self.ax2.bar(
+            time_values_optimized, 
+            power_usage_values_optimized, 
+            color="c", 
+            label="Power Usage",
+            width=line_width_optimized
+        )
+        self.ax2.bar(
+            time_values_optimized,
+            charge_values_optimized,
+            bottom=power_usage_values_optimized,
+            color="#009600",
+            label="Charge",
+            width=line_width_optimized,
+        )
+        self.ax2.bar(
+            time_values_optimized,
+            grid_injection_values_optimized,
+            bottom=bottom_injection_optimized,
+            color="#4C00A4",
+            label="Grid Injection",
+            width=line_width_optimized,
+        )
+        
+        self.ax2.axhline(y=0, color="k", linestyle="-", linewidth=0.1)
+        self.ax2.set_ylabel("kWh")
+          
+        ############################################################################
+        ############################################################################
+        ############################################################################
+        
         new_soc_values = scale_list(soc_values, len(grid_extraction_prices))
         
         grid_injection_prices_scaled = scale_list(grid_injection_prices, 400)
@@ -479,31 +573,17 @@ class App(customtkinter.CTk):
         average_price = (average_price_1+average_price_2)/2
         
         # Plot injection and extraction prices with their y-axis on the left
-        self.ax2.plot(grid_injection_prices_scaled, color="#290BE1", label="Injection Prices", linewidth=0.8)
-        self.ax2.plot(grid_extraction_prices_scaled, color="r", label="Extraction Prices", linewidth=0.8)
-        self.ax2.axhline(y=average_price, color="black", label="Average Price", linestyle="--", linewidth=0.8)
-        self.ax2.set_ylabel("Grid Prices per MWh")
-        self.ax2.set_xlabel("Time")
-        self.ax2.tick_params(axis='y', labelcolor="black")
-
-        
-        # self.ax3.plot(new_soc_values, color="k", label="Battery Charge")
-        # self.ax3.set_ylabel("Battery Charge kWh")
-        # self.ax3.tick_params(axis='y', labelcolor="black")  # Change y-axis label color to green
+        self.ax3.plot(grid_injection_prices_scaled, color="#290BE1", label="Injection Prices", linewidth=0.8)
+        self.ax3.plot(grid_extraction_prices_scaled, color="r", label="Extraction Prices", linewidth=0.8)
+        self.ax3.axhline(y=average_price, color="black", label="Average Price", linestyle="--", linewidth=0.8)
+        self.ax3.set_ylabel("Grid Prices per MWh")
+        self.ax3.set_xlabel("Time")
+        self.ax3.tick_params(axis='y', labelcolor="black")
 
         # Add legend
+        self.ax3.legend(loc='center left', bbox_to_anchor=(1, 0.5))
         self.ax2.legend(loc='center left', bbox_to_anchor=(1, 0.5))
         self.ax1.legend(loc='center left', bbox_to_anchor=(1, 0.5))
-        #self.ax3.legend(loc="upper right")
-        
-
-        filtered_time_values = [
-            time_values[i] for i in range(len(time_values)) if i % 24 == 0
-        ]
-        # self.ax1.xaxis.set_major_formatter(
-        #     mdates.DateFormatter("%H:%M")
-        # )  # Format to display only hour and minute
-        # self.ax1.set_xticks(filtered_time_values)
 
         # Redraw canvas
         self.canvas1.draw()
@@ -557,6 +637,7 @@ class App(customtkinter.CTk):
                 self.general_latitude = self.simulation_data[17]
                 self.general_longitude = self.simulation_data[18]
                 self.general_start_date = self.simulation_data[19]
+                self.use_api = self.simulation_data[20]
         
         except:
             # Show some retry/cancel warnings
@@ -597,13 +678,31 @@ class App(customtkinter.CTk):
         
         data_points = process_solar_data(self.general_latitude, self.general_longitude, self.general_start_date, "2024-01-01")
 
-        data_points = get_power_usage_values(data_points, self.selected_consumer_profile)
+        data_points = get_power_usage_values(data_points, self.selected_consumer_profile, self.use_api)
         
         data_points = process_prices_data(data_points, self.general_latitude, self.general_longitude)
         
-        data_points = process_data(data_points, battery, pybamm_battery)
+        data_points_optimized = copy.deepcopy(data_points)  # Make a deep copy of the original data_points list
+        
+        data_points_complete_optimized = process_data_optimized(data_points_optimized, battery, pybamm_battery)
+        
+        data_points_complete = process_data(data_points, battery, pybamm_battery)
+        
+        
+        
+        
+        if len(data_points_complete) != len(data_points_complete_optimized):
+            print("The datasets have different lengths.")
+        else:
+            # Compare each tuple in the lists
+            for i in range(len(data_points_complete)):
+                if data_points_complete[i] != data_points_complete_optimized[i]:
+                    print("Datasets differ at index", i)
+                    break
+            else:
+                print("Datasets are identical.")
 
-        self.update_graphs_with_new_data(data_points)
+        self.update_graphs_with_new_data(data_points_complete, data_points_complete_optimized)
         
     def on_close(self):
         try:

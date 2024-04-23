@@ -33,7 +33,6 @@ def process_prices_data(data_points, latitude, longitude):
     reader = csv.DictReader(prices_data.splitlines())
     prices_list = list(reader)
     
-    #pv_data = calculate_pv_power(forecast_list, latitude, longitude, capacity_kW, number_of_panels, azimuth, tilt, efficiency_panels, efficiency_invertor)
     prices = Calculate_injection_and_extraction_prices(prices_list)
     
     for i in range(len(data_points) - 1):
