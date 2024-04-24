@@ -6,10 +6,7 @@ import customtkinter
 from CTkListbox import *
 import tkinter
 import customtkinter
-from batteryCreateDialog import batteryCreateDialog
-from batteryManager import BatteryManager
 from databaseManager import DatabaseManager
-from batteryEditDialog import batteryEditDialog
 from CTkMessagebox import CTkMessagebox
 
 class SimulationDialog(customtkinter.CTk):
@@ -26,19 +23,19 @@ class SimulationDialog(customtkinter.CTk):
         ###########################################################################
         ###########################################################################
 
-        self.logo_label = customtkinter.CTkLabel(
-            self.frame_3,
-            text="Load Simulation",
-            font=customtkinter.CTkFont(size=20, weight="bold"),
-        )
-        self.logo_label.grid(row=0, column=0, padx=25, pady=(25, 30), sticky="w")
+        # self.logo_label = customtkinter.CTkLabel(
+        #     self.frame_3,
+        #     text="Saved",
+        #     font=customtkinter.CTkFont(size=20, weight="bold"),
+        # )
+        # self.logo_label.grid(row=13, column=0, padx=25, pady=(25, 30), sticky="w")
         
         self.optionmenu_simulation = customtkinter.CTkOptionMenu(
             self.frame_3,
             command=self.update_simulation_options,
             dynamic_resizing=False
         )
-        self.optionmenu_simulation.grid(row=0, column=2, padx=(0,25), pady=(25,30))
+        self.optionmenu_simulation.grid(row=13, column=0, columnspan=2, pady=(0,25))
         
         ###########################################################################
         ###########################################################################
@@ -48,29 +45,29 @@ class SimulationDialog(customtkinter.CTk):
         self.label_battery = customtkinter.CTkLabel(
             self.frame_3, text="Battery", font=customtkinter.CTkFont(size=20, weight="bold")
         )
-        self.label_battery.grid(row=1, column=0, padx=25, pady=(0,0), sticky="w")
+        self.label_battery.grid(row=1, column=0, columnspan=2, pady=(25,0))
         self.optionmenu_battery = customtkinter.CTkOptionMenu(
             self.frame_3, dynamic_resizing=False, command=self.update_battery_options
         )
-        self.optionmenu_battery.grid(row=2, column=0, padx=25, pady=(0,0), sticky="w")
-        
-        self.edit_button_battery = customtkinter.CTkButton(
-            self.frame_3, width=60, text="Edit", command=self.edit_battery
-        )
-        self.edit_button_battery.grid(row=3, column=0, padx=25, pady=(0,0), sticky="w")
+        self.optionmenu_battery.grid(row=2, column=0, columnspan=2, pady=(0,15))
         
         #########################
+        
+        self.switch_battery = customtkinter.CTkSwitch(
+            self.frame_3, command=self.switch_battery_event, text="Battery?"
+        )
+        self.switch_battery.grid(row=0, column=0, columnspan=2)
         
         self.label_battery_charge = customtkinter.CTkLabel(
             self.frame_3,
             text="Max Charge (kW)",
             font=customtkinter.CTkFont(size=15),
         )
-        self.label_battery_charge.grid(row=1, column=1, padx=30, pady=(0,0), sticky='w')
-        self.entry_battery_charge = customtkinter.CTkEntry(
-            self.frame_3,
+        self.label_battery_charge.grid(row=3, column=0, padx=25, sticky='w')
+        self.entry_battery_charge = customtkinter.CTkEntry( 
+            self.frame_3, width=50,
         )
-        self.entry_battery_charge.grid(row=1, column=2, pady=(0,0), padx=(0,25))
+        self.entry_battery_charge.grid(row=3, column=1)
         
         #########################
         
@@ -79,11 +76,11 @@ class SimulationDialog(customtkinter.CTk):
             text="Max Discharge (kW)",
             font=customtkinter.CTkFont(size=15),
         )
-        self.label_battery_discharge.grid(row=2, column=1, padx=30, pady=(0,0), sticky='w')
+        self.label_battery_discharge.grid(row=4, column=0, padx=25, sticky='w')
         self.entry_battery_discharge = customtkinter.CTkEntry(
-            self.frame_3,
+            self.frame_3, width=50,
         )
-        self.entry_battery_discharge.grid(row=2, column=2, pady=(0,0), padx=(0,25))
+        self.entry_battery_discharge.grid(row=4, column=1)
         
         #########################
         
@@ -92,24 +89,24 @@ class SimulationDialog(customtkinter.CTk):
             text="Capacity (kWh)",
             font=customtkinter.CTkFont(size=15),
         )
-        self.label_battery_capacity.grid(row=3, column=1, padx=30, pady=(0,0), sticky='w')
+        self.label_battery_capacity.grid(row=5, column=0, padx=25, sticky='w')
         self.entry_battery_capacity = customtkinter.CTkEntry(
-            self.frame_3,
+            self.frame_3, width=50,
         )
-        self.entry_battery_capacity.grid(row=3, column=2, pady=(0,0), padx=(0,25))
+        self.entry_battery_capacity.grid(row=5, column=1)
         
         #########################
         
         self.label_battery_efficiency = customtkinter.CTkLabel(
             self.frame_3,
-            text="efficiency (%)",
+            text="Efficiency (%)",
             font=customtkinter.CTkFont(size=15),
         )
-        self.label_battery_efficiency.grid(row=4, column=1, padx=30, pady=(0,20), sticky='w')
+        self.label_battery_efficiency.grid(row=6, column=0, padx=25, sticky='w')
         self.entry_battery_efficiency = customtkinter.CTkEntry(
-            self.frame_3,
+            self.frame_3, width=50,
         )
-        self.entry_battery_efficiency.grid(row=4, column=2, pady=(0,20), padx=(0,25))
+        self.entry_battery_efficiency.grid(row=6, column=1)
         
         ###########################################################################
         ###########################################################################
@@ -119,30 +116,33 @@ class SimulationDialog(customtkinter.CTk):
         self.label_solar_panel = customtkinter.CTkLabel(
             self.frame_3, text="Solar Panel", font=customtkinter.CTkFont(size=20, weight="bold")
         )
-        self.label_solar_panel.grid(row=5, column=0, padx=25, pady=(0,0), sticky="w")
+        self.label_solar_panel.grid(row=1, column=2, columnspan=2, pady=(25,0))
         self.optionmenu_solar_panel = customtkinter.CTkOptionMenu(
             self.frame_3,
             dynamic_resizing=False,
             command=self.update_solarpanel_options,
         )
-        self.optionmenu_solar_panel.grid(row=6, column=0, padx=25, pady=(0,0), sticky="w")
-        self.edit_button_solar_panel = customtkinter.CTkButton(
-            self.frame_3, width=60, text="Edit", command=self.edit_battery
-        )
-        self.edit_button_solar_panel.grid(row=7, column=0, padx=25, pady=(0,0), sticky="w")
+        self.optionmenu_solar_panel.grid(row=2, column=2, columnspan=2, pady=(0,15))
         
         #########################
+        
+        self.switch_solar = customtkinter.CTkSwitch(
+            self.frame_3, command=self.switch_solar_event, text="Solar Panels??"
+        )
+        self.switch_solar.grid(row=0, column=2, columnspan=2)
+        
+        ########################
         
         self.label_solar_azimuth = customtkinter.CTkLabel(
             self.frame_3,
             text="Azimuth (°)",
             font=customtkinter.CTkFont(size=15),
         )
-        self.label_solar_azimuth.grid(row=5, column=1, padx=30, pady=(0,0), sticky='w')
+        self.label_solar_azimuth.grid(row=3, column=2, padx=30, sticky='w')
         self.entry_solar_azimuth = customtkinter.CTkEntry(
-            self.frame_3,
+            self.frame_3, width=50,
         )
-        self.entry_solar_azimuth.grid(row=5, column=2, pady=(0,0), padx=(0,25))
+        self.entry_solar_azimuth.grid(row=3, column=3)
         
         #########################
         
@@ -151,11 +151,11 @@ class SimulationDialog(customtkinter.CTk):
             text="Tilt (°)",
             font=customtkinter.CTkFont(size=15),
         )
-        self.label_solar_tilt.grid(row=6, column=1, padx=30, pady=(0,0), sticky='w')
+        self.label_solar_tilt.grid(row=4, column=2, padx=30, sticky='w')
         self.entry_solar_tilt = customtkinter.CTkEntry(
-            self.frame_3,
+            self.frame_3, width=50,
         )
-        self.entry_solar_tilt.grid(row=6, column=2, pady=(0,0), padx=(0,25))
+        self.entry_solar_tilt.grid(row=4, column=3)
         
         #########################
         
@@ -164,24 +164,24 @@ class SimulationDialog(customtkinter.CTk):
             text="Number Of Panels",
             font=customtkinter.CTkFont(size=15),
         )
-        self.label_solar_number_of_panels.grid(row=7, column=1, padx=30, pady=(0,0), sticky='w')
+        self.label_solar_number_of_panels.grid(row=5, column=2, padx=30, sticky='w')
         self.entry_solar_number_of_panels = customtkinter.CTkEntry(
-            self.frame_3,
+            self.frame_3, width=50,
         )
-        self.entry_solar_number_of_panels.grid(row=7, column=2, pady=(0,0), padx=(0,25))
+        self.entry_solar_number_of_panels.grid(row=5, column=3)
         
         #########################
         
         self.label_solar_efficiency = customtkinter.CTkLabel(
             self.frame_3,
-            text="efficiency (%)",
+            text="Efficiency (%)",
             font=customtkinter.CTkFont(size=15),
         )
-        self.label_solar_efficiency.grid(row=8, column=1, padx=30, pady=(0,0), sticky='w')
+        self.label_solar_efficiency.grid(row=6, column=2, padx=30, sticky='w')
         self.entry_solar_efficiency = customtkinter.CTkEntry(
-            self.frame_3,
+            self.frame_3, width=50,
         )
-        self.entry_solar_efficiency.grid(row=8, column=2, pady=(0,0), padx=(0,25))
+        self.entry_solar_efficiency.grid(row=6, column=3)
         
         #########################
         
@@ -190,11 +190,11 @@ class SimulationDialog(customtkinter.CTk):
             text="Length (m)",
             font=customtkinter.CTkFont(size=15),
         )
-        self.label_solar_length.grid(row=9, column=1, padx=30, pady=(0,0), sticky='w')
+        self.label_solar_length.grid(row=7, column=2, padx=30, sticky='w')
         self.entry_solar_length = customtkinter.CTkEntry(
-            self.frame_3,
+            self.frame_3, width=50,
         )
-        self.entry_solar_length.grid(row=9, column=2, pady=(0,0), padx=(0,25))
+        self.entry_solar_length.grid(row=7, column=3)
         
         #########################
         
@@ -203,11 +203,11 @@ class SimulationDialog(customtkinter.CTk):
             text="Width (m)",
             font=customtkinter.CTkFont(size=15),
         )
-        self.label_solar_width.grid(row=10, column=1, padx=(30,0), pady=(0,20), sticky='w')
+        self.label_solar_width.grid(row=8, column=2, padx=30, sticky='w')
         self.entry_solar_width = customtkinter.CTkEntry(
-            self.frame_3,
+            self.frame_3, width=50,
         )
-        self.entry_solar_width.grid(row=10, column=2, pady=(0,20), padx=(0,25))
+        self.entry_solar_width.grid(row=8, column=3)
         
         ###########################################################################
         ###########################################################################
@@ -217,30 +217,33 @@ class SimulationDialog(customtkinter.CTk):
         self.label_ev_charger = customtkinter.CTkLabel(
             self.frame_3, text="EV Charger", font=customtkinter.CTkFont(size=20, weight="bold")
         )
-        self.label_ev_charger.grid(row=11, column=0, padx=25, pady=(0,0), sticky="w")
+        self.label_ev_charger.grid(row=1, column=4, columnspan=2, pady=(25,0))
         self.optionmenu_ev_charger = customtkinter.CTkOptionMenu(
             self.frame_3,
             dynamic_resizing=False,
             command=self.update_ev_options,
         )
-        self.optionmenu_ev_charger.grid(row=12, column=0, padx=25, pady=(0,0), sticky="w")
-        self.edit_button_ev_charger = customtkinter.CTkButton(
-            self.frame_3, width=60, text="Edit", command=self.edit_battery
-        )
-        self.edit_button_ev_charger.grid(row=13, column=0, padx=25, pady=(0,0), sticky="w")
+        self.optionmenu_ev_charger.grid(row=2, column=4, columnspan=2, pady=(0,15))
         
         #########################
+        
+        self.switch_ev = customtkinter.CTkSwitch(
+            self.frame_3, command=self.switch_ev_event, text="EV Charger?"
+        )
+        self.switch_ev.grid(row=0, column=4, columnspan=2)
+        
+        ########################
         
         self.label_ev_charge = customtkinter.CTkLabel(
             self.frame_3,
             text="Max Charge (kW)",
             font=customtkinter.CTkFont(size=15),
         )
-        self.label_ev_charge.grid(row=11, column=1, padx=30, pady=(0,0), sticky='w')
+        self.label_ev_charge.grid(row=3, column=4, padx=30, sticky='w')
         self.entry_ev_charge = customtkinter.CTkEntry(
-            self.frame_3,
+            self.frame_3, width=50,
         )
-        self.entry_ev_charge.grid(row=11, column=2, pady=(0,0), padx=(0,25))
+        self.entry_ev_charge.grid(row=3, column=5)
         
         #########################
         
@@ -249,24 +252,11 @@ class SimulationDialog(customtkinter.CTk):
             text="Max Fast Charge (kW)",
             font=customtkinter.CTkFont(size=15),
         )
-        self.label_ev_fast_charge.grid(row=12, column=1, padx=30, pady=(0,0), sticky='w')
+        self.label_ev_fast_charge.grid(row=4, column=4, padx=30, sticky='w')
         self.entry_ev_fast_charge = customtkinter.CTkEntry(
-            self.frame_3,
+            self.frame_3, width=50,
         )
-        self.entry_ev_fast_charge.grid(row=12, column=2, pady=(0,0), padx=(0,25))
-        
-        #########################
-        
-        self.label_ev_efficiency = customtkinter.CTkLabel(
-            self.frame_3,
-            text="efficiency (%)",
-            font=customtkinter.CTkFont(size=15),
-        )
-        self.label_ev_efficiency.grid(row=13, column=1, padx=30, pady=(0,0), sticky='w')
-        self.entry_ev_efficiency = customtkinter.CTkEntry(
-            self.frame_3,
-        )
-        self.entry_ev_efficiency.grid(row=13, column=2, pady=(0,0), padx=(0,25))
+        self.entry_ev_fast_charge.grid(row=4, column=5)
         
         #########################
         
@@ -275,11 +265,26 @@ class SimulationDialog(customtkinter.CTk):
             text="Capacity Car (kWh)",
             font=customtkinter.CTkFont(size=15),
         )
-        self.label_ev_capacity_car.grid(row=14, column=1, padx=30, pady=(0,20), sticky='w')
+        self.label_ev_capacity_car.grid(row=5, column=4, padx=30, sticky='w')
         self.entry_ev_capacity_car = customtkinter.CTkEntry(
-            self.frame_3,
+            self.frame_3, width=50,
         )
-        self.entry_ev_capacity_car.grid(row=14, column=2, pady=(0,20), padx=(0,25))
+        self.entry_ev_capacity_car.grid(row=5, column=5)
+        
+        #########################
+        
+        self.label_ev_efficiency = customtkinter.CTkLabel(
+            self.frame_3,
+            text="Efficiency (%)",
+            font=customtkinter.CTkFont(size=15),
+        )
+        self.label_ev_efficiency.grid(row=6, column=4, padx=30, sticky='w')
+        self.entry_ev_efficiency = customtkinter.CTkEntry(
+            self.frame_3, width=50,
+        )
+        self.entry_ev_efficiency.grid(row=6, column=5)
+        
+        
         
         ###########################################################################
         ###########################################################################
@@ -292,29 +297,19 @@ class SimulationDialog(customtkinter.CTk):
         file_names = [name.replace('profile_', '') for name in file_names]
         file_names = [name.replace('.csv', '') for name in file_names]
         file_names = [name.replace('_', ', ') for name in file_names]
-
-        # Option Menu for consumer profiles
-        self.label_consumer_profile = customtkinter.CTkLabel(
-            self.frame_3, text="Consumer Profile", font=customtkinter.CTkFont(size=20, weight="bold")
-        )
-        self.label_consumer_profile.grid(row=15, column=0, padx=25, pady=(0,20), sticky="w")
-        
-        self.optionmenu_consumer_profile = customtkinter.CTkOptionMenu(
-            self.frame_3,
-        )
-        self.optionmenu_consumer_profile.grid(
-            row=15, column=2, pady=(0,20), padx=(0,25)
-        )
-        
-        ###########################################################################
-        ###########################################################################
-        ###########################################################################
         
         # Option Menu for General values
         self.label_general = customtkinter.CTkLabel(
             self.frame_3, text="General", font=customtkinter.CTkFont(size=20, weight="bold")
         )
-        self.label_general.grid(row=16, column=0, padx=25, pady=(0,0), sticky="w")
+        self.label_general.grid(row=1, column=6, columnspan=2, pady=(25,0))
+        
+        self.optionmenu_consumer_profile = customtkinter.CTkOptionMenu(
+            self.frame_3, width=100,
+        )
+        self.optionmenu_consumer_profile.grid(
+            row=2, column=6, columnspan=2, pady=(0,15)
+        )
 
         ########################
         
@@ -323,11 +318,11 @@ class SimulationDialog(customtkinter.CTk):
             text="Latitude",
             font=customtkinter.CTkFont(size=15),
         )
-        self.label_general_latitude.grid(row=16, column=1, padx=30, pady=(0,0), sticky='w')
+        self.label_general_latitude.grid(row=3, column=6, padx=30, sticky='w')
         self.entry_general_latitude = customtkinter.CTkEntry(
-            self.frame_3,
+            self.frame_3, width=50,
         )
-        self.entry_general_latitude.grid(row=16, column=2, pady=(0,0), padx=(0,25))
+        self.entry_general_latitude.grid(row=3, column=7, padx=(0,25))
         
         ########################
         
@@ -336,11 +331,11 @@ class SimulationDialog(customtkinter.CTk):
             text="Longitude",
             font=customtkinter.CTkFont(size=15),
         )
-        self.label_general_longitude.grid(row=17, column=1, padx=30, pady=(0,0), sticky='w')
+        self.label_general_longitude.grid(row=4, column=6, padx=30, sticky='w')
         self.entry_general_longitude = customtkinter.CTkEntry(
-            self.frame_3,
+            self.frame_3, width=50,
         )
-        self.entry_general_longitude.grid(row=17, column=2, pady=(0,0), padx=(0,25))
+        self.entry_general_longitude.grid(row=4, column=7, padx=(0,25))
         
         ########################
         
@@ -349,40 +344,90 @@ class SimulationDialog(customtkinter.CTk):
             text="Start Date",
             font=customtkinter.CTkFont(size=15),
         )
-        self.label_general_start_date.grid(row=18, column=1, padx=30, pady=(0, 25), sticky='w')
+        self.label_general_start_date.grid(row=5, column=6, padx=30, sticky='w')
         self.entry_general_start_date = customtkinter.CTkEntry(
-            self.frame_3,
+            self.frame_3, width=100,
         )
-        self.entry_general_start_date.grid(row=18, column=2, pady=(0, 25), padx=(0,25))
+        self.entry_general_start_date.grid(row=5, column=7, padx=(0,25))
         
         ###########################################################################
         ###########################################################################
         ###########################################################################
+        
+        self.checkbox_testing = customtkinter.CTkCheckBox(self.frame_3, text="Use Testing Data", onvalue="on", offvalue="off")
+        self.checkbox_testing.grid(row=11, column=6, columnspan=2, pady=(20,15))
         
         self.button_confirm = customtkinter.CTkButton(
             self.frame_3,
             text="Confirm",
             command=self.confirm_parameters,
         )
-        self.button_confirm.grid(row=19, column=1, pady=(0,25), sticky='e')
+        self.button_confirm.grid(row=12, column=6, columnspan=2)
         
         self.button_confirm_save = customtkinter.CTkButton(
             self.frame_3,
             text="Confirm And Save",
             command=self.confirm_save_parameters,
         )
-        self.button_confirm_save.grid(row=19, column=2, pady=(0,25), sticky='w')
-        
-        self.checkbox_testing = customtkinter.CTkCheckBox(self.frame_3, text="Use API's", onvalue="on", offvalue="off")
-        self.checkbox_testing.grid(row=19, column=0, pady=(0,25))
+        self.button_confirm_save.grid(row=13, column=6, columnspan=2, pady=(0,25))
 
-        
+        self.checkbox_testing.select()
+        self.switch_battery.select()
+        self.switch_solar.select()
+        self.switch_ev.select()
         self.populate_simulation_options()
         self.populate_battery_options()
         self.populate_solarpanel_options()
         self.populate_ev_options()
         self.populate_consumer_profile_options()
         
+    ###########################################################################
+    ###########################################################################
+    ###########################################################################
+    ###########################################################################
+    ###########################################################################
+    ###########################################################################
+    
+    def switch_battery_event(self):
+        if self.switch_battery.get() == 0:
+            self.label_battery_charge.configure(state = tkinter.DISABLED)
+            self.entry_battery_charge.configure(state = tkinter.DISABLED)
+            
+            
+        if self.switch_battery.get() == 1:
+            self.label_battery_charge.configure(state = tkinter.NORMAL)
+            self.entry_battery_charge.configure(state = tkinter.NORMAL)
+            
+            
+    ##############################
+    
+    
+    def switch_solar_event(self):
+        if self.switch_solar.get() == 0:
+            self.label_solar_azimuth.configure(state = tkinter.DISABLED)
+            self.entry_solar_azimuth.configure(state = tkinter.DISABLED)
+            
+            
+        if self.switch_solar.get() == 1:
+            self.label_solar_azimuth.configure(state = tkinter.NORMAL)
+            self.entry_solar_azimuth.configure(state = tkinter.NORMAL)
+            
+            
+    #############################
+    
+    
+    def switch_ev_event(self):
+        if self.switch_ev.get() == 0:
+            self.label_ev_charge.configure(state = tkinter.DISABLED)
+            self.entry_ev_charge.configure(state = tkinter.DISABLED)
+            
+            
+        if self.switch_ev.get() == 1:
+            self.label_ev_charge.configure(state = tkinter.NORMAL)
+            self.entry_ev_charge.configure(state = tkinter.NORMAL)
+    
+    
+    
     ###########################################################################
     ###########################################################################
     ###########################################################################
@@ -550,12 +595,6 @@ class SimulationDialog(customtkinter.CTk):
     ###########################################################################
     ###########################################################################
     ###########################################################################
-
-    def edit_battery(self):
-        edit_dialog = BatteryManager(
-            self.db_manager, callback=self.populate_battery_options
-        )
-        self.populate_battery_options()
         
     def standardize_date(self, date_input):
         try:
