@@ -55,7 +55,7 @@ def process_data_optimized(data_points, battery, pybamm_battery):
                 current_point["charge_value"] = 0
                 current_point["discharge_value"] = 0
                 
-            if(extracton_price_value <= 50):
+            if extracton_price_value <= 50:
                 charged, residue_to_much_energy = battery.charge(100, time_difference_hours)
                 current_point["charge_value"] += charged
                 current_point["grid_extraction"] += charged

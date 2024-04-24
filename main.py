@@ -17,7 +17,6 @@ from scipy.interpolate import interp1d
 import pandas as pd
 from battery import Battery
 from databaseManager import DatabaseManager
-from batteryManager import BatteryManager
 from process import (
     calculate_values,
     get_power_usage_values,
@@ -58,8 +57,7 @@ class App(customtkinter.CTk):
         self.grid_rowconfigure(0, weight=1)
         self.grid_rowconfigure(1, weight=0)
 
-        
-
+        self.data_available= False
 
         # create sidebar frame with widgets
         self.sidebar_frame = customtkinter.CTkFrame(
@@ -108,7 +106,7 @@ class App(customtkinter.CTk):
         self.optionmenu_time = customtkinter.CTkOptionMenu(
             self.sidebar_frame,
             width=60,
-            values=[""]
+            command=self.option_menu_time_event
         )
         self.optionmenu_time.grid(row=0, column=4, padx=(20, 20))
         
@@ -148,8 +146,6 @@ class App(customtkinter.CTk):
         self.ax1.set_visible(False)
         self.ax2.set_visible(False)
         self.ax3.set_visible(False)
-        
-        
         
         self.fig.tight_layout(pad=4.0)
         self.fig.subplots_adjust(right=0.85)
@@ -625,8 +621,14 @@ class App(customtkinter.CTk):
         self.optionmenu_time.configure(values=time_options)
         self.optionmenu_time.set(time_options[0])
         
-    def verify_parameters(self):
+        if self.data_available:
+            self.update_graphs_with_new_data(self.data_points_complete, self.data_points_complete_optimized)
+            
+    def option_menu_time_event(self, event):
+        if self.data_available:
+            self.update_graphs_with_new_data(self.data_points_complete, self.data_points_complete_optimized)
         
+    def verify_parameters(self):
         try:
             self.simulation_data = self.db_manager.fetch_simulation_by_name("temp")
             
@@ -696,25 +698,13 @@ class App(customtkinter.CTk):
         
         data_points_optimized = copy.deepcopy(data_points)  # Make a deep copy of the original data_points list
         
-        data_points_complete_optimized = process_data_optimized(data_points_optimized, battery, pybamm_battery)
+        self.data_points_complete_optimized = process_data_optimized(data_points_optimized, battery, pybamm_battery)
         
-        data_points_complete = process_data(data_points, battery, pybamm_battery)
-        
-        
-        
-        
-        if len(data_points_complete) != len(data_points_complete_optimized):
-            print("The datasets have different lengths.")
-        else:
-            # Compare each tuple in the lists
-            for i in range(len(data_points_complete)):
-                if data_points_complete[i] != data_points_complete_optimized[i]:
-                    print("Datasets differ at index", i)
-                    break
-            else:
-                print("Datasets are identical.")
+        self.data_points_complete = process_data(data_points, battery, pybamm_battery)
 
-        self.update_graphs_with_new_data(data_points_complete, data_points_complete_optimized)
+        self.update_graphs_with_new_data(self.data_points_complete, self.data_points_complete_optimized)
+        
+        self.data_available = True
         
     def on_close(self):
         try:
