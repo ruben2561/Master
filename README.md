@@ -18,27 +18,32 @@ The research is conducted in collaboration with "iLumen," a leading company in t
 To get started with this project, follow these steps:
 
 1. **Clone the repository**:
-    git clone <repository_url>
-
-2. **Navigate to the project directory**:
-    cd <project_directory>
-
-3. **Install requirements**:
-   pip install -r requirements.txt
-
+```
+git clone https://github.com/ruben2561/Master
+```
+3. **Navigate to the project directory**:
+```
+cd <project_directory>
+```
+4. **Install requirements**:
+```
+pip install -r requirements.txt
+```
 ## Usage
 
 To run the code, follow these steps:
 
 1. **Navigate to the project directory** if you're not already there:
+```
 cd <project_directory>
-
+```
 2. **Run the code**:
-python <filename.py>
-
+```
+python main.py
+```
 ## License
 
-[MIT License](link_to_license) - [Your Name]
+[MIT License](link_to_license) - [ruben2561]
 
 
 
