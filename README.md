@@ -43,7 +43,7 @@ python main.py
 ```
 ## License
 
-[MIT License](link_to_license) - [ruben2561]
+[MIT License](license) - [ruben2561]
 
 
 
