@@ -38,7 +38,7 @@ python <filename.py>
 
 ## License
 
-[License Name](link_to_license) - [Your Name]
+[MIT License](link_to_license) - [Your Name]
 
 
 
