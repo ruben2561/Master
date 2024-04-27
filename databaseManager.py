@@ -134,17 +134,20 @@ class DatabaseManager:
     
     def add_simulation(
             self, 
-            name, 
+            name,
+            battery, 
             battery_charge,
             battery_discharge,
             battery_capacity,
             battery_efficiency,
+            solar,
             solar_azimuth,
             solar_tilt,
             solar_number_of_panels,
             solar_efficiency,
             solar_length,
             solar_width,
+            ev,
             ev_charge,
             ev_fast_charge,
             ev_efficiency,
@@ -155,21 +158,24 @@ class DatabaseManager:
             general_start_date,
             use_api):
         
-        query = "INSERT INTO Simulation (name, batteryCharge, batteryDischarge, batteryCapacity, batteryEfficiency, solarAzimuth, solarTilt, solarNumberOfPanels, solarEfficiency, solarLength, solarWidth, evCharge, evFastCharge, evEfficiency, evCapacityCar, consumerProfile, generalLatitude, generalLongitude, generalStartDate, useApi) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+        query = "INSERT INTO Simulation (name, battery, batteryCharge, batteryDischarge, batteryCapacity, batteryEfficiency, solar, solarAzimuth, solarTilt, solarNumberOfPanels, solarEfficiency, solarLength, solarWidth, ev, evCharge, evFastCharge, evEfficiency, evCapacityCar, consumerProfile, generalLatitude, generalLongitude, generalStartDate, useApi) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
         
         self.cursor.execute(query, 
             (
             name,
+            battery,
             battery_charge,
             battery_discharge,
             battery_capacity,
             battery_efficiency,
+            solar,
             solar_azimuth,
             solar_tilt,
             solar_number_of_panels,
             solar_efficiency,
             solar_length,
             solar_width,
+            ev,
             ev_charge,
             ev_fast_charge,
             ev_efficiency,

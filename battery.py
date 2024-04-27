@@ -1,6 +1,6 @@
 # batterij gaat nooit 100% opladen of ontladen
 # aan de hand van de soc zal de oplading en ontlading anders worden
-# efficienty dus als we in theorie 100% geladen zijn gaat dit minder zijn
+# efficiency dus als we in theorie 100% geladen zijn gaat dit minder zijn
 # verschil ac en dc laden toevoegen
 # 
 # 
@@ -14,11 +14,11 @@ class Battery:
         self.max_soc = max_soc  # Maximum State of Charge in percentage (e.g., 1 for fully charged)
         self.min_dod = min_dod  # Minimum Depth of Discharge in percentage (e.g., 1 for fully charged)
         #self.max_charge_current = max_charge_current  # in A
-        self.efficienty = efficiency
+        self.efficiency = efficiency
         self.soc = soc  # in kWh, current charge level of the battery
 
-        if(self.efficienty > 1):
-            self.efficienty = self.efficienty/100
+        if(self.efficiency > 1):
+            self.efficiency = self.efficiency/100
 
 
     # TODO here still need to change error with the efficincy
@@ -30,7 +30,7 @@ class Battery:
         """
         if self.charge_power<=power: power = self.charge_power # make sure the power is not above the max charge power
 
-        energy_added = power * time * self.efficienty
+        energy_added = power * time * self.efficiency
 
         if(self.soc + energy_added <= self.capacity * self.max_soc):
             self.soc = self.soc + energy_added
@@ -46,7 +46,7 @@ class Battery:
         Simulate the charging of the battery while considering limitations.
         energy: kWh
         """
-        energy_added = energy * self.efficienty
+        energy_added = energy * self.efficiency
 
         if(self.soc + energy_added <= self.capacity * (self.max_soc)):
             self.soc = self.soc + energy_added
@@ -65,11 +65,11 @@ class Battery:
         """
         if self.discharge_power<=power: power = self.discharge_power # make sure the power is not above the max discharge charge power
 
-        energy_consumed = power * time / self.efficienty
+        energy_consumed = power * time / self.efficiency
 
         if(self.soc - energy_consumed >= self.capacity * self.min_dod):
             self.soc = self.soc - energy_consumed
-            return energy_consumed/self.efficienty, 0
+            return energy_consumed/self.efficiency, 0
         else:
             discharged = (self.soc - self.capacity * self.min_dod)
             insufficient = (energy_consumed - (self.soc - self.capacity * self.min_dod))
@@ -81,7 +81,7 @@ class Battery:
         Simulate the discharging of the battery while considering limitations.
         energy: kWh
         """
-        energy_consumed = energy * self.efficienty
+        energy_consumed = energy * self.efficiency
 
         if(self.soc - energy_consumed >= self.capacity * self.min_dod):
             self.soc = self.soc - energy_consumed

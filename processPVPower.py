@@ -117,6 +117,7 @@ def process_solar_data(latitude, longitude, start_date, end_date):
     # Iterate over the forecast data
     for data_point in pv_list:
         # Store data point as a dictionary
+        #TODO fix /2
         data_points.append(
             {
                 "pv_power_value": data_point['pv_power_value']/2,

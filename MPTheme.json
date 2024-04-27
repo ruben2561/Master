@@ -88,7 +88,7 @@
       "button_color": ["#9fa845", "#9fa845"],
       "button_hover_color": ["#0b6e3d", "#17472e"],
       "text_color": ["black", "black"],
-      "text_color_disabled": ["gray78", "gray68"]
+      "text_color_disabled": ["grey12", "grey12"]
     },
     "CTkComboBox": {
       "corner_radius": 6,

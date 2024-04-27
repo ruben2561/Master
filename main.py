@@ -57,7 +57,7 @@ class App(customtkinter.CTk):
         self.grid_rowconfigure(0, weight=1)
         self.grid_rowconfigure(1, weight=0)
 
-        self.data_available= False
+        self.data_available = False
 
         # create sidebar frame with widgets
         self.sidebar_frame = customtkinter.CTkFrame(
@@ -359,13 +359,8 @@ class App(customtkinter.CTk):
         self.protocol("WM_DELETE_WINDOW", self.on_close)
         
     def simulation_parameters(self):
-        
-        try:
-            self.db_manager.delete_simulation_by_name("temp")
-        except:
-            pass
-        
         simulation_dialog = SimulationDialog(self.db_manager)
+       
         simulation_dialog.mainloop()
         
     #############################################################################
@@ -633,25 +628,25 @@ class App(customtkinter.CTk):
             self.simulation_data = self.db_manager.fetch_simulation_by_name("temp")
             
             if(self.simulation_data):
-                self.battery_charge = self.simulation_data[2]
-                self.battery_discharge = self.simulation_data[3]
-                self.battery_capacity = self.simulation_data[4]
-                self.battery_efficiency = self.simulation_data[5]
-                self.solar_azimuth = self.simulation_data[6]
-                self.solar_tilt = self.simulation_data[7]
-                self.solar_number_of_panels = self.simulation_data[8]
-                self.solar_efficiency = self.simulation_data[9]
-                self.solar_length = self.simulation_data[10]
-                self.solar_width = self.simulation_data[11]
-                self.ev_charge = self.simulation_data[12]
-                self.ev_fast_charge = self.simulation_data[13]
-                self.ev_efficiency = self.simulation_data[14]
-                self.ev_capacity_car = self.simulation_data[15]
-                self.selected_consumer_profile = self.simulation_data[16]
-                self.general_latitude = self.simulation_data[17]
-                self.general_longitude = self.simulation_data[18]
-                self.general_start_date = self.simulation_data[19]
-                self.use_api = self.simulation_data[20]
+                self.battery_charge = self.simulation_data[3]
+                self.battery_discharge = self.simulation_data[4]
+                self.battery_capacity = self.simulation_data[5]
+                self.battery_efficiency = self.simulation_data[6]
+                self.solar_azimuth = self.simulation_data[8]
+                self.solar_tilt = self.simulation_data[9]
+                self.solar_number_of_panels = self.simulation_data[10]
+                self.solar_efficiency = self.simulation_data[11]
+                self.solar_length = self.simulation_data[12]
+                self.solar_width = self.simulation_data[13]
+                self.ev_charge = self.simulation_data[15]
+                self.ev_fast_charge = self.simulation_data[16]
+                self.ev_efficiency = self.simulation_data[17]
+                self.ev_capacity_car = self.simulation_data[18]
+                self.selected_consumer_profile = self.simulation_data[19]
+                self.general_latitude = self.simulation_data[20]
+                self.general_longitude = self.simulation_data[21]
+                self.general_start_date = self.simulation_data[22]
+                self.use_api = self.simulation_data[23]
         
         except:
             # Show some retry/cancel warnings

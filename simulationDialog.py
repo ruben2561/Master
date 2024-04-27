@@ -45,7 +45,7 @@ class SimulationDialog(customtkinter.CTk):
         self.label_battery = customtkinter.CTkLabel(
             self.frame_3, text="Battery", font=customtkinter.CTkFont(size=20, weight="bold")
         )
-        self.label_battery.grid(row=1, column=0, columnspan=2, pady=(25,0))
+        self.label_battery.grid(row=1, column=0, columnspan=2)
         self.optionmenu_battery = customtkinter.CTkOptionMenu(
             self.frame_3, dynamic_resizing=False, command=self.update_battery_options
         )
@@ -54,9 +54,9 @@ class SimulationDialog(customtkinter.CTk):
         #########################
         
         self.switch_battery = customtkinter.CTkSwitch(
-            self.frame_3, command=self.switch_battery_event, text="Battery?"
+            self.frame_3, text="Battery?", command=self.switch_battery_event
         )
-        self.switch_battery.grid(row=0, column=0, columnspan=2)
+        self.switch_battery.grid(row=0, column=0, columnspan=2, pady=(25,0))
         
         self.label_battery_charge = customtkinter.CTkLabel(
             self.frame_3,
@@ -116,7 +116,7 @@ class SimulationDialog(customtkinter.CTk):
         self.label_solar_panel = customtkinter.CTkLabel(
             self.frame_3, text="Solar Panel", font=customtkinter.CTkFont(size=20, weight="bold")
         )
-        self.label_solar_panel.grid(row=1, column=2, columnspan=2, pady=(25,0))
+        self.label_solar_panel.grid(row=1, column=2, columnspan=2)
         self.optionmenu_solar_panel = customtkinter.CTkOptionMenu(
             self.frame_3,
             dynamic_resizing=False,
@@ -129,7 +129,7 @@ class SimulationDialog(customtkinter.CTk):
         self.switch_solar = customtkinter.CTkSwitch(
             self.frame_3, command=self.switch_solar_event, text="Solar Panels??"
         )
-        self.switch_solar.grid(row=0, column=2, columnspan=2)
+        self.switch_solar.grid(row=0, column=2, columnspan=2, pady=(25,0))
         
         ########################
         
@@ -217,7 +217,7 @@ class SimulationDialog(customtkinter.CTk):
         self.label_ev_charger = customtkinter.CTkLabel(
             self.frame_3, text="EV Charger", font=customtkinter.CTkFont(size=20, weight="bold")
         )
-        self.label_ev_charger.grid(row=1, column=4, columnspan=2, pady=(25,0))
+        self.label_ev_charger.grid(row=1, column=4, columnspan=2)
         self.optionmenu_ev_charger = customtkinter.CTkOptionMenu(
             self.frame_3,
             dynamic_resizing=False,
@@ -230,7 +230,7 @@ class SimulationDialog(customtkinter.CTk):
         self.switch_ev = customtkinter.CTkSwitch(
             self.frame_3, command=self.switch_ev_event, text="EV Charger?"
         )
-        self.switch_ev.grid(row=0, column=4, columnspan=2)
+        self.switch_ev.grid(row=0, column=4, columnspan=2, pady=(25,0))
         
         ########################
         
@@ -302,7 +302,7 @@ class SimulationDialog(customtkinter.CTk):
         self.label_general = customtkinter.CTkLabel(
             self.frame_3, text="General", font=customtkinter.CTkFont(size=20, weight="bold")
         )
-        self.label_general.grid(row=1, column=6, columnspan=2, pady=(25,0))
+        self.label_general.grid(row=1, column=6, columnspan=2, pady=(0,0))
         
         self.optionmenu_consumer_profile = customtkinter.CTkOptionMenu(
             self.frame_3, width=100,
@@ -381,6 +381,24 @@ class SimulationDialog(customtkinter.CTk):
         self.populate_ev_options()
         self.populate_consumer_profile_options()
         
+        # Fetch simulation data from the database
+        self.simulation_data = self.db_manager.fetch_simulation_data()
+        # Extract simulation names
+        self.simulation_options = [simulation[1] for simulation in self.simulation_data]
+        
+        # Check if "temp" is in the list of simulation options
+        if "temp" in self.simulation_options:
+            print("There is an entry with the name 'temp' in the simulation options.")
+            self.populate_with_previous_data()
+        else:
+            print("There is no entry with the name 'temp' in the simulation options.")
+            
+        try:
+            self.db_manager.delete_simulation_by_name("temp")
+        except:
+            pass
+        
+        
     ###########################################################################
     ###########################################################################
     ###########################################################################
@@ -388,15 +406,29 @@ class SimulationDialog(customtkinter.CTk):
     ###########################################################################
     ###########################################################################
     
+    #TODO aparte functie maken
     def switch_battery_event(self):
         if self.switch_battery.get() == 0:
-            self.label_battery_charge.configure(state = tkinter.DISABLED)
-            self.entry_battery_charge.configure(state = tkinter.DISABLED)
-            
+            self.optionmenu_battery.configure(fg_color="grey20", button_color="grey20", state = "disabled")
+            self.entry_battery_charge.configure(fg_color="grey17", border_color="grey17", text_color="grey17", state = "disabled")
+            self.label_battery_charge.configure(text_color='grey17')
+            self.entry_battery_discharge.configure(fg_color="grey17", border_color="grey17", text_color="grey17", state = "disabled")
+            self.label_battery_discharge.configure(text_color='grey17')
+            self.entry_battery_capacity.configure(fg_color="grey17", border_color="grey17", text_color="grey17", state = "disabled")
+            self.label_battery_capacity.configure(text_color='grey17')
+            self.entry_battery_efficiency.configure(fg_color="grey17", border_color="grey17", text_color="grey17", state = "disabled")
+            self.label_battery_efficiency.configure(text_color='grey17')
             
         if self.switch_battery.get() == 1:
-            self.label_battery_charge.configure(state = tkinter.NORMAL)
-            self.entry_battery_charge.configure(state = tkinter.NORMAL)
+            self.optionmenu_battery.configure(fg_color="#AEB74F", button_color="#9fa845", state = "normal")
+            self.label_battery_charge.configure(text_color='#DCE4EE')
+            self.entry_battery_charge.configure(state = "normal", fg_color="#343638", text_color="#DCE4EE", border_color="#565B5E")
+            self.label_battery_discharge.configure(text_color='#DCE4EE')
+            self.entry_battery_discharge.configure(state = "normal", fg_color="#343638", text_color="#DCE4EE", border_color="#565B5E")
+            self.label_battery_capacity.configure(text_color='#DCE4EE')
+            self.entry_battery_capacity.configure(state = "normal", fg_color="#343638", text_color="#DCE4EE", border_color="#565B5E")
+            self.label_battery_efficiency.configure(text_color='#DCE4EE')
+            self.entry_battery_efficiency.configure(state = "normal", fg_color="#343638", text_color="#DCE4EE", border_color="#565B5E")
             
             
     ##############################
@@ -404,13 +436,35 @@ class SimulationDialog(customtkinter.CTk):
     
     def switch_solar_event(self):
         if self.switch_solar.get() == 0:
-            self.label_solar_azimuth.configure(state = tkinter.DISABLED)
-            self.entry_solar_azimuth.configure(state = tkinter.DISABLED)
+            self.optionmenu_solar_panel.configure(fg_color="grey20", button_color="grey20", state = "disabled")
+            self.entry_solar_azimuth.configure(fg_color="grey17", border_color="grey17", text_color="grey17", state = "disabled")
+            self.label_solar_azimuth.configure(text_color='grey17')
+            self.entry_solar_tilt.configure(fg_color="grey17", border_color="grey17", text_color="grey17", state = "disabled")
+            self.label_solar_tilt.configure(text_color='grey17')
+            self.entry_solar_number_of_panels.configure(fg_color="grey17", border_color="grey17", text_color="grey17", state = "disabled")
+            self.label_solar_number_of_panels.configure(text_color='grey17')
+            self.entry_solar_efficiency.configure(fg_color="grey17", border_color="grey17", text_color="grey17", state = "disabled")
+            self.label_solar_efficiency.configure(text_color='grey17')
+            self.entry_solar_length.configure(fg_color="grey17", border_color="grey17", text_color="grey17", state = "disabled")
+            self.label_solar_length.configure(text_color='grey17')
+            self.entry_solar_width.configure(fg_color="grey17", border_color="grey17", text_color="grey17", state = "disabled")
+            self.label_solar_width.configure(text_color='grey17')
             
             
         if self.switch_solar.get() == 1:
-            self.label_solar_azimuth.configure(state = tkinter.NORMAL)
-            self.entry_solar_azimuth.configure(state = tkinter.NORMAL)
+            self.optionmenu_solar_panel.configure(fg_color="#AEB74F", button_color="#9fa845", state = "normal")
+            self.label_solar_azimuth.configure(text_color='#DCE4EE')
+            self.entry_solar_azimuth.configure(state = "normal", fg_color="#343638", text_color="#DCE4EE", border_color="#565B5E")
+            self.label_solar_tilt.configure(text_color='#DCE4EE')
+            self.entry_solar_tilt.configure(state = "normal", fg_color="#343638", text_color="#DCE4EE", border_color="#565B5E")
+            self.label_solar_number_of_panels.configure(text_color='#DCE4EE')
+            self.entry_solar_number_of_panels.configure(state = "normal", fg_color="#343638", text_color="#DCE4EE", border_color="#565B5E")
+            self.label_solar_efficiency.configure(text_color='#DCE4EE')
+            self.entry_solar_efficiency.configure(state = "normal", fg_color="#343638", text_color="#DCE4EE", border_color="#565B5E")
+            self.label_solar_length.configure(text_color='#DCE4EE')
+            self.entry_solar_length.configure(state = "normal", fg_color="#343638", text_color="#DCE4EE", border_color="#565B5E")
+            self.label_solar_width.configure(text_color='#DCE4EE')
+            self.entry_solar_width.configure(state = "normal", fg_color="#343638", text_color="#DCE4EE", border_color="#565B5E")
             
             
     #############################
@@ -418,13 +472,27 @@ class SimulationDialog(customtkinter.CTk):
     
     def switch_ev_event(self):
         if self.switch_ev.get() == 0:
-            self.label_ev_charge.configure(state = tkinter.DISABLED)
-            self.entry_ev_charge.configure(state = tkinter.DISABLED)
+            self.optionmenu_ev_charger.configure(fg_color="grey20", button_color="grey20", state = "disabled")
+            self.entry_ev_charge.configure(fg_color="grey17", border_color="grey17", text_color="grey17", state = "disabled")
+            self.label_ev_charge.configure(text_color='grey17')
+            self.entry_ev_fast_charge.configure(fg_color="grey17", border_color="grey17", text_color="grey17", state = "disabled")
+            self.label_ev_fast_charge.configure(text_color='grey17')
+            self.entry_ev_capacity_car.configure(fg_color="grey17", border_color="grey17", text_color="grey17", state = "disabled")
+            self.label_ev_capacity_car.configure(text_color='grey17')
+            self.entry_ev_efficiency.configure(fg_color="grey17", border_color="grey17", text_color="grey17", state = "disabled")
+            self.label_ev_efficiency.configure(text_color='grey17')
             
             
         if self.switch_ev.get() == 1:
-            self.label_ev_charge.configure(state = tkinter.NORMAL)
-            self.entry_ev_charge.configure(state = tkinter.NORMAL)
+            self.optionmenu_ev_charger.configure(fg_color="#AEB74F", button_color="#9fa845", state = "normal")
+            self.label_ev_charge.configure(text_color='#DCE4EE')
+            self.entry_ev_charge.configure(state = "normal", fg_color="#343638", text_color="#DCE4EE", border_color="#565B5E")
+            self.label_ev_fast_charge.configure(text_color='#DCE4EE')
+            self.entry_ev_fast_charge.configure(state = "normal", fg_color="#343638", text_color="#DCE4EE", border_color="#565B5E")
+            self.label_ev_capacity_car.configure(text_color='#DCE4EE')
+            self.entry_ev_capacity_car.configure(state = "normal", fg_color="#343638", text_color="#DCE4EE", border_color="#565B5E")
+            self.label_ev_efficiency.configure(text_color='#DCE4EE')
+            self.entry_ev_efficiency.configure(state = "normal", fg_color="#343638", text_color="#DCE4EE", border_color="#565B5E")
     
     
     
@@ -458,24 +526,34 @@ class SimulationDialog(customtkinter.CTk):
         self.entry_general_longitude.delete(0, tkinter.END)
         self.entry_general_start_date.delete(0, tkinter.END)
         
-        self.entry_battery_charge.insert(0, selected_simulation_data[2])
-        self.entry_battery_discharge.insert(0, selected_simulation_data[3])
-        self.entry_battery_capacity.insert(0, selected_simulation_data[4])
-        self.entry_battery_efficiency.insert(0, selected_simulation_data[5])
-        self.entry_solar_azimuth.insert(0, selected_simulation_data[6])
-        self.entry_solar_tilt.insert(0, selected_simulation_data[7])
-        self.entry_solar_number_of_panels.insert(0, selected_simulation_data[8])
-        self.entry_solar_efficiency.insert(0, selected_simulation_data[9])
-        self.entry_solar_length.insert(0, selected_simulation_data[10])
-        self.entry_solar_width.insert(0, selected_simulation_data[11])
-        self.entry_ev_charge.insert(0, selected_simulation_data[12])
-        self.entry_ev_fast_charge.insert(0, selected_simulation_data[13])
-        self.entry_ev_efficiency.insert(0, selected_simulation_data[14])
-        self.entry_ev_capacity_car.insert(0, selected_simulation_data[15])
-        self.optionmenu_consumer_profile.set(selected_simulation_data[16])
-        self.entry_general_latitude.insert(0, selected_simulation_data[17])
-        self.entry_general_longitude.insert(0, selected_simulation_data[18])
-        self.entry_general_start_date.insert(0, selected_simulation_data[19])
+        self.entry_battery_charge.insert(0, selected_simulation_data[3])
+        self.entry_battery_discharge.insert(0, selected_simulation_data[4])
+        self.entry_battery_capacity.insert(0, selected_simulation_data[5])
+        self.entry_battery_efficiency.insert(0, selected_simulation_data[6])
+        self.entry_solar_azimuth.insert(0, selected_simulation_data[8])
+        self.entry_solar_tilt.insert(0, selected_simulation_data[9])
+        self.entry_solar_number_of_panels.insert(0, selected_simulation_data[10])
+        self.entry_solar_efficiency.insert(0, selected_simulation_data[11])
+        self.entry_solar_length.insert(0, selected_simulation_data[12])
+        self.entry_solar_width.insert(0, selected_simulation_data[13])
+        self.entry_ev_charge.insert(0, selected_simulation_data[15])
+        self.entry_ev_fast_charge.insert(0, selected_simulation_data[16])
+        self.entry_ev_efficiency.insert(0, selected_simulation_data[17])
+        self.entry_ev_capacity_car.insert(0, selected_simulation_data[18])
+        self.optionmenu_consumer_profile.set(selected_simulation_data[19])
+        self.entry_general_latitude.insert(0, selected_simulation_data[20])
+        self.entry_general_longitude.insert(0, selected_simulation_data[21])
+        self.entry_general_start_date.insert(0, selected_simulation_data[22])
+        
+        # Deselect switches if corresponding values are '0'
+        if selected_simulation_data[2] == '0':
+            self.switch_battery.deselect()
+        if selected_simulation_data[7] == '0':
+            self.switch_solar.deselect()
+        if selected_simulation_data[14] == '0':
+            self.switch_ev.deselect
+            
+            
         #TODO fix this from database
         #self.checkbox_testing.
         
@@ -539,7 +617,7 @@ class SimulationDialog(customtkinter.CTk):
         # Fetch simulation data from the database
         simulation_data = self.db_manager.fetch_simulation_data()
         # Extract simulation names
-        simulation_options = [simulation[1] for simulation in simulation_data]
+        simulation_options = [simulation[1] for simulation in simulation_data if simulation[1] != "temp"]
         # Update option menu with simulation names
         self.optionmenu_simulation.option_clear
         self.optionmenu_simulation.configure(values=simulation_options)
@@ -588,7 +666,40 @@ class SimulationDialog(customtkinter.CTk):
             self.optionmenu_consumer_profile.option_clear
             self.optionmenu_consumer_profile.configure(values=file_names)
             self.optionmenu_consumer_profile.set("Load Consumer Profile")
+            
+    def populate_with_previous_data(self):
         
+        previous_data = self.db_manager.fetch_simulation_by_name("temp")
+        print("prev data" + str(previous_data))
+        
+        self.entry_battery_charge.insert(0, previous_data[3])
+        self.entry_battery_discharge.insert(0, previous_data[4])
+        self.entry_battery_capacity.insert(0, previous_data[5])
+        self.entry_battery_efficiency.insert(0, previous_data[6])
+        self.entry_solar_azimuth.insert(0, previous_data[8])
+        self.entry_solar_tilt.insert(0, previous_data[9])
+        self.entry_solar_number_of_panels.insert(0, previous_data[10])
+        self.entry_solar_efficiency.insert(0, previous_data[11])
+        self.entry_solar_length.insert(0, previous_data[12])
+        self.entry_solar_width.insert(0, previous_data[13])
+        self.entry_ev_charge.insert(0, previous_data[15])
+        self.entry_ev_fast_charge.insert(0, previous_data[16])
+        self.entry_ev_efficiency.insert(0, previous_data[17])
+        self.entry_ev_capacity_car.insert(0, previous_data[18])
+        self.optionmenu_consumer_profile.set(previous_data[19])
+        self.entry_general_latitude.insert(0, previous_data[20])
+        self.entry_general_longitude.insert(0, previous_data[21])
+        self.entry_general_start_date.insert(0, previous_data[22])
+        
+        # Deselect switches if corresponding values are '0'
+        if previous_data[2] == '0':
+            self.switch_battery.deselect()
+        if previous_data[7] == '0':
+            self.switch_solar.deselect()
+        if previous_data[14] == '0':
+            self.switch_ev.deselect
+        
+            
     ###########################################################################
     ###########################################################################
     ###########################################################################
@@ -610,20 +721,23 @@ class SimulationDialog(customtkinter.CTk):
     def confirm_save_parameters(self):
         # Collect all entries
         entries = {
-            "Battery Charge": self.entry_battery_charge.get(),
-            "Battery Discharge": self.entry_battery_discharge.get(),
-            "Battery Capacity": self.entry_battery_capacity.get(),
-            "Battery Efficiency": self.entry_battery_efficiency.get(),
-            "Solar Azimuth": self.entry_solar_azimuth.get(),
-            "Solar Tilt": self.entry_solar_tilt.get(),
-            "Number of Solar Panels": self.entry_solar_number_of_panels.get(),
-            "Solar Efficiency": self.entry_solar_efficiency.get(),
-            "Solar Length": self.entry_solar_length.get(),
-            "Solar Width": self.entry_solar_width.get(),
-            "EV Charge": self.entry_ev_charge.get(),
-            "EV Fast Charge": self.entry_ev_fast_charge.get(),
-            "EV Efficiency": self.entry_ev_efficiency.get(),
-            "EV Car Capacity": self.entry_ev_capacity_car.get(),
+            "Battery": self.switch_battery.get(),
+            "Battery Charge": self.entry_battery_charge.get() if self.switch_battery.get() else "0",
+            "Battery Discharge": self.entry_battery_discharge.get() if self.switch_battery.get() else "0",
+            "Battery Capacity": self.entry_battery_capacity.get() if self.switch_battery.get() else "0",
+            "Battery Efficiency": self.entry_battery_efficiency.get() if self.switch_battery.get() else "0",
+            "Solar": self.switch_solar.get(),
+            "Solar Azimuth": self.entry_solar_azimuth.get() if self.switch_solar.get() else "0",
+            "Solar Tilt": self.entry_solar_tilt.get() if self.switch_solar.get() else "0",
+            "Number of Solar Panels": self.entry_solar_number_of_panels.get() if self.switch_solar.get() else "0",
+            "Solar Efficiency": self.entry_solar_efficiency.get() if self.switch_solar.get() else "0",
+            "Solar Length": self.entry_solar_length.get() if self.switch_solar.get() else "0",
+            "Solar Width": self.entry_solar_width.get() if self.switch_solar.get() else "0",
+            "Ev": self.switch_ev.get(),
+            "EV Charge": self.entry_ev_charge.get() if self.switch_ev.get() else "0",
+            "EV Fast Charge": self.entry_ev_fast_charge.get() if self.switch_ev.get() else "0",
+            "EV Efficiency": self.entry_ev_efficiency.get() if self.switch_ev.get() else "0",
+            "EV Car Capacity": self.entry_ev_capacity_car.get() if self.switch_ev.get() else "0",
             "Consumer Profile": self.optionmenu_consumer_profile.get().replace(', ', '_'),
             "Latitude": self.entry_general_latitude.get(),
             "Longitude": self.entry_general_longitude.get(),
@@ -631,8 +745,8 @@ class SimulationDialog(customtkinter.CTk):
             "Use Api": self.checkbox_testing.get()
         }
 
-        # Check for empty fields
-        empty_fields = [key for key, value in entries.items() if not value.strip()]
+        # Check for empty fields considering all values as strings
+        empty_fields = [key for key, value in entries.items() if not str(value).strip()]
 
         #TODO fixen dat ook consumer en datum checkt
         if empty_fields:
@@ -657,20 +771,23 @@ class SimulationDialog(customtkinter.CTk):
     def confirm_parameters(self):
         # Collect all entries
         entries = {
-            "Battery Charge": self.entry_battery_charge.get(),
-            "Battery Discharge": self.entry_battery_discharge.get(),
-            "Battery Capacity": self.entry_battery_capacity.get(),
-            "Battery Efficiency": self.entry_battery_efficiency.get(),
-            "Solar Azimuth": self.entry_solar_azimuth.get(),
-            "Solar Tilt": self.entry_solar_tilt.get(),
-            "Number of Solar Panels": self.entry_solar_number_of_panels.get(),
-            "Solar Efficiency": self.entry_solar_efficiency.get(),
-            "Solar Length": self.entry_solar_length.get(),
-            "Solar Width": self.entry_solar_width.get(),
-            "EV Charge": self.entry_ev_charge.get(),
-            "EV Fast Charge": self.entry_ev_fast_charge.get(),
-            "EV Efficiency": self.entry_ev_efficiency.get(),
-            "EV Car Capacity": self.entry_ev_capacity_car.get(),
+            "Battery": self.switch_battery.get(),
+            "Battery Charge": self.entry_battery_charge.get() if self.switch_battery.get() else "0",
+            "Battery Discharge": self.entry_battery_discharge.get() if self.switch_battery.get() else "0",
+            "Battery Capacity": self.entry_battery_capacity.get() if self.switch_battery.get() else "0",
+            "Battery Efficiency": self.entry_battery_efficiency.get() if self.switch_battery.get() else "0",
+            "Solar": self.switch_solar.get(),
+            "Solar Azimuth": self.entry_solar_azimuth.get() if self.switch_solar.get() else "0",
+            "Solar Tilt": self.entry_solar_tilt.get() if self.switch_solar.get() else "0",
+            "Number of Solar Panels": self.entry_solar_number_of_panels.get() if self.switch_solar.get() else "0",
+            "Solar Efficiency": self.entry_solar_efficiency.get() if self.switch_solar.get() else "0",
+            "Solar Length": self.entry_solar_length.get() if self.switch_solar.get() else "0",
+            "Solar Width": self.entry_solar_width.get() if self.switch_solar.get() else "0",
+            "Ev": self.switch_ev.get(),
+            "EV Charge": self.entry_ev_charge.get() if self.switch_ev.get() else "0",
+            "EV Fast Charge": self.entry_ev_fast_charge.get() if self.switch_ev.get() else "0",
+            "EV Efficiency": self.entry_ev_efficiency.get() if self.switch_ev.get() else "0",
+            "EV Car Capacity": self.entry_ev_capacity_car.get() if self.switch_ev.get() else "0",
             "Consumer Profile": self.optionmenu_consumer_profile.get().replace(', ', '_'),
             "Latitude": self.entry_general_latitude.get(),
             "Longitude": self.entry_general_longitude.get(),
@@ -678,8 +795,8 @@ class SimulationDialog(customtkinter.CTk):
             "Use Api": self.checkbox_testing.get()
         }
 
-        # Check for empty fields
-        empty_fields = [key for key, value in entries.items() if not value.strip()]
+        # Check for empty fields considering all values as strings
+        empty_fields = [key for key, value in entries.items() if not str(value).strip()]
 
         #TODO fixen dat ook consumer en datum checkt
         if empty_fields:
