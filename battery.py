@@ -13,9 +13,8 @@ class Battery:
         self.discharge_power = discharge_power  # in kW
         self.max_soc = max_soc  # Maximum State of Charge in percentage (e.g., 1 for fully charged)
         self.min_dod = min_dod  # Minimum Depth of Discharge in percentage (e.g., 1 for fully charged)
-        #self.max_charge_current = max_charge_current  # in A
         self.efficiency = efficiency
-        self.soc = soc  # in kWh, current charge level of the battery
+        self.soc = 1  # in kWh, current charge level of the battery
 
         if(self.efficiency > 1):
             self.efficiency = self.efficiency/100
@@ -28,34 +27,23 @@ class Battery:
         power: charging power in kW
         time: charging time in hours
         """
-        if self.charge_power<=power: power = self.charge_power # make sure the power is not above the max charge power
-
-        energy_added = power * time * self.efficiency
-
-        if(self.soc + energy_added <= self.capacity * self.max_soc):
-            self.soc = self.soc + energy_added
-            return energy_added, 0
-        else:
-            charged = ((self.capacity * self.max_soc) - self.soc)
-            extra = (energy_added + self.soc - (self.capacity * self.max_soc))
-            self.soc = self.capacity * self.max_soc
-            return  charged, extra
-
-    def charge_kWh(self, energy):
-        """
-        Simulate the charging of the battery while considering limitations.
-        energy: kWh
-        """
-        energy_added = energy * self.efficiency
-
-        if(self.soc + energy_added <= self.capacity * (self.max_soc)):
-            self.soc = self.soc + energy_added
-            return energy_added, 0
-        else:
-            charged = ((self.capacity * self.max_soc) - self.soc)
-            extra = (energy_added + self.soc - (self.capacity * self.max_soc))
-            self.soc = self.capacity * self.max_soc
-            return  charged, extra
+        if(self.capacity == 0):
+            return 0, time * power
+        
+        new_power = power
+        if self.charge_power <= new_power : new_power = self.charge_power # make sure the power is not above the max charge power
+        
+        efficiency = self._calculate_efficiency_factor()
+        
+        time_max = ((self.capacity*self.max_soc)-self.soc) / (new_power * efficiency) # max time battery can charge until full
+        
+        if(time_max >= 1):
+            self.soc += time * new_power * efficiency
+            return time * new_power * efficiency, 0
+        
+        elif(time_max <= 1):
+            self.soc += time_max * new_power * efficiency
+            return time_max * new_power * efficiency, (time-time_max) * power
 
     def discharge(self, power, time):
         """
@@ -63,34 +51,30 @@ class Battery:
         power: discharging power in kW
         time: discharging time in hours
         """
-        if self.discharge_power<=power: power = self.discharge_power # make sure the power is not above the max discharge charge power
-
-        energy_consumed = power * time / self.efficiency
-
-        if(self.soc - energy_consumed >= self.capacity * self.min_dod):
-            self.soc = self.soc - energy_consumed
-            return energy_consumed/self.efficiency, 0
-        else:
-            discharged = (self.soc - self.capacity * self.min_dod)
-            insufficient = (energy_consumed - (self.soc - self.capacity * self.min_dod))
-            self.soc = self.capacity * self.min_dod
-            return  discharged, insufficient
-
-    def discharge_kWh(self, energy):
+        if(self.capacity == 0):
+            return 0, time * power
+        
+        new_power = power
+        if self.discharge_power <= new_power : new_power = self.discharge_power # make sure the power is not above the max charge power
+        
+        efficiency = self._calculate_efficiency_factor()
+        
+        time_max = (self.soc - (self.capacity * self.min_dod)) / (new_power * efficiency) # max time battery can discharge until empty
+        
+        if(time_max >= 1):
+            self.soc -= time * new_power * efficiency
+            return time * new_power * efficiency, 0
+        
+        elif(time_max < 1):
+            self.soc -= time_max * new_power * efficiency
+            return time_max * new_power * efficiency, (time-time_max) * power
+        
+    def _calculate_efficiency_factor(self):
         """
-        Simulate the discharging of the battery while considering limitations.
-        energy: kWh
+        Calculate the efficiency factor based on the state of charge (SoC).
         """
-        energy_consumed = energy * self.efficiency
-
-        if(self.soc - energy_consumed >= self.capacity * self.min_dod):
-            self.soc = self.soc - energy_consumed
-            return 0
-        else:
-            discharged = (self.soc - self.capacity * self.min_dod)
-            insufficient = (energy_consumed - (self.soc - self.capacity * self.min_dod))
-            self.soc = self.capacity * self.min_dod
-            return  discharged, insufficient
+        soc_ratio = self.soc / (self.capacity * self.max_soc)
+        return self.efficiency - soc_ratio * (1 - 0.9)  # Example nonlinear efficiency curve
 
     def get_soc(self):
         """
@@ -103,6 +87,12 @@ class Battery:
         Check if the battery is fully charged.
         """
         return self.soc >= 1.0
+    
+    def get_max_charge(self):
+        return self.charge_power
+    
+    def get_max_discharge(self):
+        return self.discharge_power
 
     def is_empty(self):
         """

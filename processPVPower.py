@@ -3,8 +3,10 @@ import csv
 import datetime
 import json
 import math
+import numpy as np
+import pandas as pd
 import pvlib
-
+from datetime import datetime
 
 
 from APIWeather import get_solar_data_solcast
@@ -17,7 +19,7 @@ def get_sample_data_pv():
             values_list = list(reader)
             pv_list = []
             for point in values_list:
-                period_end = datetime.datetime.strptime(
+                period_end = datetime.strptime(
                     point["time_value"], "%Y-%m-%dT%H:%M:%S"
                 )  # Convert string to datetime
                 pv_list.append({
@@ -31,63 +33,39 @@ def get_sample_data_pv():
         return None
 
 def calculate_pv_power(forecast_list, latitude, longitude, number_of_panels, area, azimuth, tilt, efficiency_panels, efficiency_invertor):
-    
     pv_list = []
-    
-    for data_point in forecast_list:
-        period_end = datetime.datetime.strptime(
-            data_point["period_end"], "%Y-%m-%dT%H:%M"
-        )  # Convert string to datetime
-    
-        # Calculate solar position
-        solar_position = pvlib.solarposition.get_solarposition(period_end, latitude, longitude)
-        
-        #aoi = pvlib.irradiance.aoi(tilt, azimuth, solar_position['apparent_zenith'], solar_position['azimuth'])
-        
-        #dni = pvlib.irradiance.dni(float(data_point["ghi"]), float(data_point["ghi"]), solar_position['apparent_zenith'], clearsky_dni=None, clearsky_tolerance=1.1, zenith_threshold_for_zero_dni=88.0, zenith_threshold_for_clearsky_limit=80.0)
-        #dhi_value = float(data_point["ghi"]) - (float(data_point['dni']) * math.cos(aoi))
-        
-        #TODO fix this dhi issue
-        pvlib_poa = pvlib.irradiance.get_total_irradiance(
-            surface_tilt=tilt,
-            surface_azimuth=azimuth,
-            dni=float(data_point["DNI"]),
-            ghi=float(data_point["GHI"]),
-            dhi=float(data_point["DHI"]),
-            solar_zenith=solar_position['zenith'],
-            solar_azimuth=solar_position['azimuth']
-        )
-        
-        # print("global: " + str(pvlib_poa['poa_global'].values[0]))
-        # print("with area and number of: " + str(pvlib_poa['poa_global'].values[0] * area * number_of_panels))
-        # print("efficiency panels: " + str(pvlib_poa['poa_global'].values[0] * area * number_of_panels * efficiency_panels))
-        # print("both efficiencies: " + str(pvlib_poa['poa_global'].values[0] * area * number_of_panels * efficiency_panels * efficiency_invertor))
-        # print("devided by 1000: " + str((pvlib_poa['poa_global'].values[0] * area * number_of_panels * efficiency_panels * efficiency_invertor) / 1000))
-        
-        pv_estimate = (pvlib_poa['poa_global'].values[0] * area * number_of_panels * efficiency_panels * efficiency_invertor) / 1000
 
-        
+    if efficiency_panels > 1:
+        efficiency_panels /= 100
+    if efficiency_invertor > 1:
+        efficiency_invertor /= 100
+
+    solar_positions = pvlib.solarposition.get_solarposition(
+        pd.to_datetime([data_point["period_end"] for data_point in forecast_list]),
+        latitude, longitude
+    )
+
+    dnies = np.array([float(data_point["DNI"]) for data_point in forecast_list])
+    ghies = np.array([float(data_point["GHI"]) for data_point in forecast_list])
+    dhies = np.array([float(data_point["DHI"]) for data_point in forecast_list])
+    poa_globals = pvlib.irradiance.get_total_irradiance(
+        surface_tilt=tilt,
+        surface_azimuth=azimuth,
+        dni=dnies,
+        ghi=ghies,
+        dhi=dhies,
+        solar_zenith=solar_positions['zenith'].values,
+        solar_azimuth=solar_positions['azimuth'].values
+    )['poa_global']
+
+    pv_estimates = (poa_globals * area * number_of_panels * efficiency_panels * efficiency_invertor) / 1000
+
+    for i, data_point in enumerate(forecast_list):
         pv_list.append({
-            "pv_power_value": pv_estimate,
-            "time_value": period_end,
+            "pv_power_value": pv_estimates[i],
+            "time_value": datetime.strptime(data_point["period_end"], "%Y-%m-%dT%H:%M"),
         })
-        
-        
-    
-    
-    
-    
-    # for data_point in forecast_list:
-    #     pv_estimate = float(data_point["PvEstimate"])
-    #     period_end = datetime.datetime.strptime(
-    #         data_point["PeriodEnd"], "%Y-%m-%dT%H:%M:%SZ"
-    #     )  # Convert string to datetime
-        
-    #     pv_list.append({
-    #         "pv_power_value": pv_estimate,
-    #         "time_value": period_end,
-    #     })
-    
+
     return pv_list
         
 def read_pv_list_from_file(filename):
@@ -100,16 +78,20 @@ def read_pv_list_from_file(filename):
         print(f"Error reading PV list from file: {e}")
         return None
 
-def process_solar_data(latitude, longitude, start_date, end_date):
+def process_solar_data(latitude, longitude, start_date, number_of_panels, area, azimuth, tilt, efficiency_panels, efficiency_invertor, use_api):
+
+    # Calculate end date one year further
+    #end_date = start_date + pd.DateOffset(days=365)
+    #TODO fix end date
     forecast_data = get_solar_data_solcast(
-        latitude, longitude, start_date, end_date
+        latitude, longitude, start_date
     )
     
     reader = csv.DictReader(forecast_data.splitlines())
     forecast_list = list(reader)
     
-    #pv_list = calculate_pv_power(forecast_list, latitude, longitude, 10, 1, 260, 45, 0.9, 0.9)
-    pv_list = get_sample_data_pv()
+    pv_list = calculate_pv_power(forecast_list, latitude, longitude, number_of_panels, area, azimuth, tilt, efficiency_panels, efficiency_invertor)
+    #pv_list = get_sample_data_pv()
 
     # Initialize list to store data for plotting as tuples of (pv_power_value, time_value)
     data_points = []
@@ -126,10 +108,10 @@ def process_solar_data(latitude, longitude, start_date, end_date):
                 "charge_value": 0,
                 "discharge_value": 0,
                 "grid_injection": 0,
-                "grid_extraction": 0,
+                "grid_offtake": 0,
                 "power_usage_value": 0,
                 "price_injection": 0,
-                "price_extraction": 0,
+                "price_offtake": 0,
             }
         )
 

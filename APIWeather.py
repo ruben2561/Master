@@ -27,13 +27,19 @@ def get_sample_data_pv():
         return None
 
 # TODO change to automatic one year end date
-def get_solar_data_openmeteo(latitude, longitude, start_date, end_date):
+def get_solar_data_openmeteo(latitude, longitude, start_date):
     try:
+        raise Exception("openmeteo api doesnt work yet")
     
         # Setup the Open-Meteo API client with cache and retry on error
         cache_session = requests_cache.CachedSession('.cache', expire_after = -1)
         retry_session = retry(cache_session, retries = 5, backoff_factor = 0.2)
         openmeteo = openmeteo_requests.Client(session = retry_session)
+        
+        start_date = pd.to_datetime(start_date, "%Y-%m-%d")
+        
+        # Calculate end date one year further
+        end_date = start_date + datetime.timedelta(days=365)
 
         # Make sure all required weather variables are listed here
         # The order of variables in hourly or daily is important to assign them correctly below
@@ -41,8 +47,8 @@ def get_solar_data_openmeteo(latitude, longitude, start_date, end_date):
         params = {
             "latitude": latitude,
             "longitude": longitude,
-            "start_date": "2023-01-01",
-            "end_date": "2024-01-01",
+            "start_date": start_date,
+            "end_date": end_date,
             "hourly": ["temperature_2m", "shortwave_radiation", "diffuse_radiation", "direct_normal_irradiance"]
         }
         responses = openmeteo.weather_api(url, params=params)
@@ -75,17 +81,13 @@ def get_solar_data_openmeteo(latitude, longitude, start_date, end_date):
         hourly_dataframe = pd.DataFrame(data = hourly_data)
         print(hourly_dataframe)
     
-        
-
     except Exception as e:
         print(f"Error: {e}")
         return get_sample_data_pv()
     
     
-def get_solar_data_solcast(latitude, longitude, start_date, end_date):
+def get_solar_data_solcast(latitude, longitude, start_date):
     try:
-        raise Exception("Solcast api doesnt work yet")
-    
         # Solcast API endpoint for Global Horizontal Irradiance (GHI) forecast
         #if(type == "radiation"):
         #    endpoint = "https://api.solcast.com.au/weather_sites/f0c1-3849-a865-4bca/estimated_actuals?format=csvapi_key=w58k5_UUO4JxNP3ykI-gsRn8w65hJQQQ"
@@ -93,6 +95,8 @@ def get_solar_data_solcast(latitude, longitude, start_date, end_date):
         #elif(type == "pv"):
         #    endpoint = "https://api.solcast.com.au/rooftop_sites/2232-a658-4143-f02f/estimated_actuals?format=csv&api_key=w58k5_UUO4JxNP3ykI-gsRn8w65hJQQQ"
         #    print("trying to retrieve rooftop pv")
+        
+        #end_date = start_date + datetime.timedelta(days=365)
         
         # Convert to datetime object
         start_date_object = datetime.strptime(start_date, "%d/%m/%Y")
@@ -122,10 +126,10 @@ def get_solar_data_solcast(latitude, longitude, start_date, end_date):
         return get_sample_data_pv()
 
 
-# Example usage
-#forecast_data = get_solar_radiation_forecast(time)
-#if forecast_data:
+# #Example usage
+# forecast_data = get_solar_data_openmeteo(55.1, 5.5, "2023-01-01")
+# if forecast_data:
 #    print("Solar Radiation Data:")
 #    print(forecast_data)
-#else:
+# else:
 #    print("Failed to retrieve solar radiation forecast.")

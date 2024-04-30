@@ -127,7 +127,7 @@ class SimulationDialog(customtkinter.CTk):
         #########################
         
         self.switch_solar = customtkinter.CTkSwitch(
-            self.frame_3, command=self.switch_solar_event, text="Solar Panels??"
+            self.frame_3, command=self.switch_solar_event, text="Solar Panels?"
         )
         self.switch_solar.grid(row=0, column=2, columnspan=2, pady=(25,0))
         
@@ -304,11 +304,39 @@ class SimulationDialog(customtkinter.CTk):
         )
         self.label_general.grid(row=1, column=6, columnspan=2, pady=(0,0))
         
+        ########################
+        
+        self.label_consumer_profile = customtkinter.CTkLabel(
+            self.frame_3,
+            text="Consumer Profile",
+            font=customtkinter.CTkFont(size=15),
+        )
+        self.label_consumer_profile.grid(row=3, column=6, padx=30, sticky='w')
         self.optionmenu_consumer_profile = customtkinter.CTkOptionMenu(
-            self.frame_3, width=100,
+            self.frame_3,
+            dynamic_resizing=False,
+            width=100,
         )
         self.optionmenu_consumer_profile.grid(
-            row=2, column=6, columnspan=2, pady=(0,15)
+            row=3, column=7, padx=(0,25)
+        )
+        
+        ########################
+        
+        self.label_provider = customtkinter.CTkLabel(
+            self.frame_3,
+            text="Provider",
+            font=customtkinter.CTkFont(size=15),
+        )
+        self.label_provider.grid(row=4, column=6, padx=30, sticky='w')
+        self.optionmenu_provider = customtkinter.CTkOptionMenu(
+            self.frame_3,
+            dynamic_resizing=False,
+            width=100,
+            values=["Ecopower", "Engie Dynamic", "Octa+Dynamic"],
+        )
+        self.optionmenu_provider.grid(
+            row=4, column=7, padx=(0,25)
         )
 
         ########################
@@ -318,11 +346,11 @@ class SimulationDialog(customtkinter.CTk):
             text="Latitude",
             font=customtkinter.CTkFont(size=15),
         )
-        self.label_general_latitude.grid(row=3, column=6, padx=30, sticky='w')
+        self.label_general_latitude.grid(row=5, column=6, padx=30, sticky='w')
         self.entry_general_latitude = customtkinter.CTkEntry(
             self.frame_3, width=50,
         )
-        self.entry_general_latitude.grid(row=3, column=7, padx=(0,25))
+        self.entry_general_latitude.grid(row=5, column=7, padx=(0,25))
         
         ########################
         
@@ -331,11 +359,11 @@ class SimulationDialog(customtkinter.CTk):
             text="Longitude",
             font=customtkinter.CTkFont(size=15),
         )
-        self.label_general_longitude.grid(row=4, column=6, padx=30, sticky='w')
+        self.label_general_longitude.grid(row=6, column=6, padx=30, sticky='w')
         self.entry_general_longitude = customtkinter.CTkEntry(
             self.frame_3, width=50,
         )
-        self.entry_general_longitude.grid(row=4, column=7, padx=(0,25))
+        self.entry_general_longitude.grid(row=6, column=7, padx=(0,25))
         
         ########################
         
@@ -344,11 +372,11 @@ class SimulationDialog(customtkinter.CTk):
             text="Start Date",
             font=customtkinter.CTkFont(size=15),
         )
-        self.label_general_start_date.grid(row=5, column=6, padx=30, sticky='w')
+        self.label_general_start_date.grid(row=7, column=6, padx=30, sticky='w')
         self.entry_general_start_date = customtkinter.CTkEntry(
             self.frame_3, width=100,
         )
-        self.entry_general_start_date.grid(row=5, column=7, padx=(0,25))
+        self.entry_general_start_date.grid(row=7, column=7, padx=(0,25))
         
         ###########################################################################
         ###########################################################################
@@ -386,12 +414,8 @@ class SimulationDialog(customtkinter.CTk):
         # Extract simulation names
         self.simulation_options = [simulation[1] for simulation in self.simulation_data]
         
-        # Check if "temp" is in the list of simulation options
         if "temp" in self.simulation_options:
-            print("There is an entry with the name 'temp' in the simulation options.")
             self.populate_with_previous_data()
-        else:
-            print("There is no entry with the name 'temp' in the simulation options.")
             
         try:
             self.db_manager.delete_simulation_by_name("temp")
@@ -541,17 +565,32 @@ class SimulationDialog(customtkinter.CTk):
         self.entry_ev_efficiency.insert(0, selected_simulation_data[17])
         self.entry_ev_capacity_car.insert(0, selected_simulation_data[18])
         self.optionmenu_consumer_profile.set(selected_simulation_data[19])
-        self.entry_general_latitude.insert(0, selected_simulation_data[20])
-        self.entry_general_longitude.insert(0, selected_simulation_data[21])
-        self.entry_general_start_date.insert(0, selected_simulation_data[22])
+        self.optionmenu_provider.set(selected_simulation_data[20])
+        self.entry_general_latitude.insert(0, selected_simulation_data[21])
+        self.entry_general_longitude.insert(0, selected_simulation_data[22])
+        self.entry_general_start_date.insert(0, selected_simulation_data[23])
         
-        # Deselect switches if corresponding values are '0'
-        if selected_simulation_data[2] == '0':
+        # Select the switch if selected_simulation_data value is 1
+        if selected_simulation_data[2] == 1:
+            self.switch_battery.select()
+        # Deselect the switch if selected_simulation_data value is 0
+        else:
             self.switch_battery.deselect()
-        if selected_simulation_data[7] == '0':
+
+        # Repeat the process for switch_solar and switch_ev
+        if selected_simulation_data[7] == 1:
+            self.switch_solar.select()
+        else:
             self.switch_solar.deselect()
-        if selected_simulation_data[14] == '0':
-            self.switch_ev.deselect
+
+        if selected_simulation_data[14] == 1:
+            self.switch_ev.select()
+        else:
+            self.switch_ev.deselect()
+        
+        self.switch_battery_event()
+        self.switch_solar_event()
+        self.switch_ev_event()
             
             
         #TODO fix this from database
@@ -670,7 +709,6 @@ class SimulationDialog(customtkinter.CTk):
     def populate_with_previous_data(self):
         
         previous_data = self.db_manager.fetch_simulation_by_name("temp")
-        print("prev data" + str(previous_data))
         
         self.entry_battery_charge.insert(0, previous_data[3])
         self.entry_battery_discharge.insert(0, previous_data[4])
@@ -687,17 +725,32 @@ class SimulationDialog(customtkinter.CTk):
         self.entry_ev_efficiency.insert(0, previous_data[17])
         self.entry_ev_capacity_car.insert(0, previous_data[18])
         self.optionmenu_consumer_profile.set(previous_data[19])
-        self.entry_general_latitude.insert(0, previous_data[20])
-        self.entry_general_longitude.insert(0, previous_data[21])
-        self.entry_general_start_date.insert(0, previous_data[22])
+        self.optionmenu_provider.set(previous_data[20])
+        self.entry_general_latitude.insert(0, previous_data[21])
+        self.entry_general_longitude.insert(0, previous_data[22])
+        self.entry_general_start_date.insert(0, previous_data[23])
         
-        # Deselect switches if corresponding values are '0'
-        if previous_data[2] == '0':
+        # Select the switch if selected_simulation_data value is 1
+        if previous_data[2] == 1:
+            self.switch_battery.select()
+        # Deselect the switch if selected_simulation_data value is 0
+        else:
             self.switch_battery.deselect()
-        if previous_data[7] == '0':
+
+        # Repeat the process for switch_solar and switch_ev
+        if previous_data[7] == 1:
+            self.switch_solar.select()
+        else:
             self.switch_solar.deselect()
-        if previous_data[14] == '0':
-            self.switch_ev.deselect
+
+        if previous_data[14] == 1:
+            self.switch_ev.select()
+        else:
+            self.switch_ev.deselect()
+            
+        self.switch_battery_event()
+        self.switch_solar_event()
+        self.switch_ev_event()
         
             
     ###########################################################################
@@ -739,22 +792,42 @@ class SimulationDialog(customtkinter.CTk):
             "EV Efficiency": self.entry_ev_efficiency.get() if self.switch_ev.get() else "0",
             "EV Car Capacity": self.entry_ev_capacity_car.get() if self.switch_ev.get() else "0",
             "Consumer Profile": self.optionmenu_consumer_profile.get().replace(', ', '_'),
+            "Provider": self.optionmenu_provider.get(),
             "Latitude": self.entry_general_latitude.get(),
             "Longitude": self.entry_general_longitude.get(),
             "Start Date": self.standardize_date(self.entry_general_start_date.get()),
             "Use Api": self.checkbox_testing.get()
         }
-
+        
         # Check for empty fields considering all values as strings
         empty_fields = [key for key, value in entries.items() if not str(value).strip()]
-
-        #TODO fixen dat ook consumer en datum checkt
+        
+        # Check if any fields are empty
         if empty_fields:
             # Show a warning with the fields that are empty
             warning_message = "Please fill in the following fields: " + ", ".join(empty_fields)
             CTkMessagebox(title="Warning", message=warning_message)
             return  # Stop further processing
-        
+
+        # Check for zero values for battery, EV, and solar when their respective switches are selected
+        if self.switch_battery.get():
+            if float(entries["Battery Charge"]) <= 0 or float(entries["Battery Discharge"]) <= 0 or float(entries["Battery Capacity"]) <= 0 or float(entries["Battery Efficiency"]) <= 0:
+                warning_message = "Battery fields cannot be zero when Battery is selected."
+                CTkMessagebox(title="Warning", message=warning_message)
+                return  # Stop further processing
+
+        if self.switch_solar.get():
+            if float(entries["Solar Azimuth"]) <= 0 or float(entries["Solar Tilt"]) <= 0 or float(entries["Number of Solar Panels"]) <= 0 or float(entries["Solar Efficiency"]) <= 0 or float(entries["Solar Length"]) <= 0 or float(entries["Solar Width"]) <= 0:
+                warning_message = "Solar fields cannot be zero when Solar is selected."
+                CTkMessagebox(title="Warning", message=warning_message)
+                return  # Stop further processing
+
+        if self.switch_ev.get():
+            if float(entries["EV Charge"]) <= 0 or float(entries["EV Fast Charge"]) <= 0 or float(entries["EV Efficiency"]) <= 0 or float(entries["EV Car Capacity"]) <= 0:
+                warning_message = "EV fields cannot be zero when EV is selected."
+                CTkMessagebox(title="Warning", message=warning_message)
+                return  # Stop further processing
+
         dialog = customtkinter.CTkInputDialog(text="Choose a name:", title="Name")
 
         # If all fields are filled, continue with the operation
@@ -789,27 +862,51 @@ class SimulationDialog(customtkinter.CTk):
             "EV Efficiency": self.entry_ev_efficiency.get() if self.switch_ev.get() else "0",
             "EV Car Capacity": self.entry_ev_capacity_car.get() if self.switch_ev.get() else "0",
             "Consumer Profile": self.optionmenu_consumer_profile.get().replace(', ', '_'),
+            "Provider": self.optionmenu_provider.get(),
             "Latitude": self.entry_general_latitude.get(),
             "Longitude": self.entry_general_longitude.get(),
             "Start Date": self.standardize_date(self.entry_general_start_date.get()),
             "Use Api": self.checkbox_testing.get()
         }
-
         # Check for empty fields considering all values as strings
         empty_fields = [key for key, value in entries.items() if not str(value).strip()]
+        
+        # Check if any fields are empty
+        if empty_fields:
+            # Show a warning with the fields that are empty
+            warning_message = "Please fill in the following fields: " + ", ".join(empty_fields)
+            CTkMessagebox(title="Warning", message=warning_message)
+            return  # Stop further processing
+        
+        # Check for zero values for battery, EV, and solar when their respective switches are selected
+        if self.switch_battery.get():
+            if float(entries["Battery Charge"]) <= 0 or float(entries["Battery Discharge"]) <= 0 or float(entries["Battery Capacity"]) <= 0 or float(entries["Battery Efficiency"]) <= 0:
+                warning_message = "Battery fields cannot be zero when Battery is selected."
+                CTkMessagebox(title="Warning", message=warning_message)
+                return  # Stop further processing
 
+        if self.switch_solar.get():
+            if float(entries["Solar Azimuth"]) <= 0 or float(entries["Solar Tilt"]) <= 0 or float(entries["Number of Solar Panels"]) <= 0 or float(entries["Solar Efficiency"]) <= 0 or float(entries["Solar Length"]) <= 0 or float(entries["Solar Width"]) <= 0:
+                warning_message = "Solar fields cannot be zero when Solar is selected."
+                CTkMessagebox(title="Warning", message=warning_message)
+                return  # Stop further processing
+
+        if self.switch_ev.get():
+            if float(entries["EV Charge"]) <= 0 or float(entries["EV Fast Charge"]) <= 0 or float(entries["EV Efficiency"]) <= 0 or float(entries["EV Car Capacity"]) <= 0:
+                warning_message = "EV fields cannot be zero when EV is selected."
+                CTkMessagebox(title="Warning", message=warning_message)
+                return  # Stop further processing
+        
         #TODO fixen dat ook consumer en datum checkt
         if empty_fields:
             # Show a warning with the fields that are empty
             warning_message = "Please fill in the following fields: " + ", ".join(empty_fields)
             CTkMessagebox(title="Warning", message=warning_message)
             return  # Stop further processing
-
         # If all fields are filled, continue with the operation
         self.db_manager.add_simulation(
             "temp", *entries.values()
         )
-        
         self.destroy()
         return
 
