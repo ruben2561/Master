@@ -112,6 +112,7 @@ def process_solar_data(latitude, longitude, start_date, number_of_panels, area, 
                 "power_usage_value": 0,
                 "price_injection": 0,
                 "price_offtake": 0,
+                "ev_charge_value": 0,
             }
         )
 

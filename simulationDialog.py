@@ -247,29 +247,29 @@ class SimulationDialog(customtkinter.CTk):
         
         #########################
         
-        self.label_ev_fast_charge = customtkinter.CTkLabel(
+        self.label_ev_number_of_cars = customtkinter.CTkLabel(
             self.frame_3,
-            text="Max Fast Charge (kW)",
+            text="Number of Cars",
             font=customtkinter.CTkFont(size=15),
         )
-        self.label_ev_fast_charge.grid(row=4, column=4, padx=30, sticky='w')
-        self.entry_ev_fast_charge = customtkinter.CTkEntry(
+        self.label_ev_number_of_cars.grid(row=4, column=4, padx=30, sticky='w')
+        self.entry_ev_number_of_cars = customtkinter.CTkEntry(
             self.frame_3, width=50,
         )
-        self.entry_ev_fast_charge.grid(row=4, column=5)
+        self.entry_ev_number_of_cars.grid(row=4, column=5)
         
         #########################
         
-        self.label_ev_capacity_car = customtkinter.CTkLabel(
+        self.label_ev_distance_year = customtkinter.CTkLabel(
             self.frame_3,
-            text="Capacity Car (kWh)",
+            text="Distance Year (km)",
             font=customtkinter.CTkFont(size=15),
         )
-        self.label_ev_capacity_car.grid(row=5, column=4, padx=30, sticky='w')
-        self.entry_ev_capacity_car = customtkinter.CTkEntry(
+        self.label_ev_distance_year.grid(row=5, column=4, padx=30, sticky='w')
+        self.entry_ev_distance_year = customtkinter.CTkEntry(
             self.frame_3, width=50,
         )
-        self.entry_ev_capacity_car.grid(row=5, column=5)
+        self.entry_ev_distance_year.grid(row=5, column=5)
         
         #########################
         
@@ -499,10 +499,10 @@ class SimulationDialog(customtkinter.CTk):
             self.optionmenu_ev_charger.configure(fg_color="grey20", button_color="grey20", state = "disabled")
             self.entry_ev_charge.configure(fg_color="grey17", border_color="grey17", text_color="grey17", state = "disabled")
             self.label_ev_charge.configure(text_color='grey17')
-            self.entry_ev_fast_charge.configure(fg_color="grey17", border_color="grey17", text_color="grey17", state = "disabled")
-            self.label_ev_fast_charge.configure(text_color='grey17')
-            self.entry_ev_capacity_car.configure(fg_color="grey17", border_color="grey17", text_color="grey17", state = "disabled")
-            self.label_ev_capacity_car.configure(text_color='grey17')
+            self.entry_ev_number_of_cars.configure(fg_color="grey17", border_color="grey17", text_color="grey17", state = "disabled")
+            self.label_ev_number_of_cars.configure(text_color='grey17')
+            self.entry_ev_distance_year.configure(fg_color="grey17", border_color="grey17", text_color="grey17", state = "disabled")
+            self.label_ev_distance_year.configure(text_color='grey17')
             self.entry_ev_efficiency.configure(fg_color="grey17", border_color="grey17", text_color="grey17", state = "disabled")
             self.label_ev_efficiency.configure(text_color='grey17')
             
@@ -511,10 +511,10 @@ class SimulationDialog(customtkinter.CTk):
             self.optionmenu_ev_charger.configure(fg_color="#AEB74F", button_color="#9fa845", state = "normal")
             self.label_ev_charge.configure(text_color='#DCE4EE')
             self.entry_ev_charge.configure(state = "normal", fg_color="#343638", text_color="#DCE4EE", border_color="#565B5E")
-            self.label_ev_fast_charge.configure(text_color='#DCE4EE')
-            self.entry_ev_fast_charge.configure(state = "normal", fg_color="#343638", text_color="#DCE4EE", border_color="#565B5E")
-            self.label_ev_capacity_car.configure(text_color='#DCE4EE')
-            self.entry_ev_capacity_car.configure(state = "normal", fg_color="#343638", text_color="#DCE4EE", border_color="#565B5E")
+            self.label_ev_number_of_cars.configure(text_color='#DCE4EE')
+            self.entry_ev_number_of_cars.configure(state = "normal", fg_color="#343638", text_color="#DCE4EE", border_color="#565B5E")
+            self.label_ev_distance_year.configure(text_color='#DCE4EE')
+            self.entry_ev_distance_year.configure(state = "normal", fg_color="#343638", text_color="#DCE4EE", border_color="#565B5E")
             self.label_ev_efficiency.configure(text_color='#DCE4EE')
             self.entry_ev_efficiency.configure(state = "normal", fg_color="#343638", text_color="#DCE4EE", border_color="#565B5E")
     
@@ -543,9 +543,9 @@ class SimulationDialog(customtkinter.CTk):
         self.entry_solar_length.delete(0, tkinter.END)
         self.entry_solar_width.delete(0, tkinter.END)
         self.entry_ev_charge.delete(0, tkinter.END)
-        self.entry_ev_fast_charge.delete(0, tkinter.END)
+        self.entry_ev_number_of_cars.delete(0, tkinter.END)
         self.entry_ev_efficiency.delete(0, tkinter.END)
-        self.entry_ev_capacity_car.delete(0, tkinter.END)
+        self.entry_ev_distance_year.delete(0, tkinter.END)
         self.entry_general_latitude.delete(0, tkinter.END)
         self.entry_general_longitude.delete(0, tkinter.END)
         self.entry_general_start_date.delete(0, tkinter.END)
@@ -561,9 +561,9 @@ class SimulationDialog(customtkinter.CTk):
         self.entry_solar_length.insert(0, selected_simulation_data[12])
         self.entry_solar_width.insert(0, selected_simulation_data[13])
         self.entry_ev_charge.insert(0, selected_simulation_data[15])
-        self.entry_ev_fast_charge.insert(0, selected_simulation_data[16])
+        self.entry_ev_number_of_cars.insert(0, selected_simulation_data[16])
         self.entry_ev_efficiency.insert(0, selected_simulation_data[17])
-        self.entry_ev_capacity_car.insert(0, selected_simulation_data[18])
+        self.entry_ev_distance_year.insert(0, selected_simulation_data[18])
         self.optionmenu_consumer_profile.set(selected_simulation_data[19])
         self.optionmenu_provider.set(selected_simulation_data[20])
         self.entry_general_latitude.insert(0, selected_simulation_data[21])
@@ -636,14 +636,14 @@ class SimulationDialog(customtkinter.CTk):
         selected_ev_data = self.db_manager.fetch_ev_charger_by_name(selected_ev)
         
         self.entry_ev_charge.delete(0, tkinter.END)
-        self.entry_ev_fast_charge.delete(0, tkinter.END)
+        self.entry_ev_number_of_cars.delete(0, tkinter.END)
         self.entry_ev_efficiency.delete(0, tkinter.END)
-        self.entry_ev_capacity_car.delete(0, tkinter.END)
+        self.entry_ev_distance_year.delete(0, tkinter.END)
         
         self.entry_ev_charge.insert(0, selected_ev_data[2])
-        self.entry_ev_fast_charge.insert(0, selected_ev_data[3])
+        self.entry_ev_number_of_cars.insert(0, selected_ev_data[3])
         self.entry_ev_efficiency.insert(0, selected_ev_data[4])
-        self.entry_ev_capacity_car.insert(0, selected_ev_data[5])
+        self.entry_ev_distance_year.insert(0, selected_ev_data[5])
         
     ###########################################################################
     ###########################################################################
@@ -721,9 +721,9 @@ class SimulationDialog(customtkinter.CTk):
         self.entry_solar_length.insert(0, previous_data[12])
         self.entry_solar_width.insert(0, previous_data[13])
         self.entry_ev_charge.insert(0, previous_data[15])
-        self.entry_ev_fast_charge.insert(0, previous_data[16])
+        self.entry_ev_number_of_cars.insert(0, previous_data[16])
         self.entry_ev_efficiency.insert(0, previous_data[17])
-        self.entry_ev_capacity_car.insert(0, previous_data[18])
+        self.entry_ev_distance_year.insert(0, previous_data[18])
         self.optionmenu_consumer_profile.set(previous_data[19])
         self.optionmenu_provider.set(previous_data[20])
         self.entry_general_latitude.insert(0, previous_data[21])
@@ -788,9 +788,9 @@ class SimulationDialog(customtkinter.CTk):
             "Solar Width": self.entry_solar_width.get() if self.switch_solar.get() else "0",
             "Ev": self.switch_ev.get(),
             "EV Charge": self.entry_ev_charge.get() if self.switch_ev.get() else "0",
-            "EV Fast Charge": self.entry_ev_fast_charge.get() if self.switch_ev.get() else "0",
+            "EV Number of Cars": self.entry_ev_number_of_cars.get() if self.switch_ev.get() else "0",
             "EV Efficiency": self.entry_ev_efficiency.get() if self.switch_ev.get() else "0",
-            "EV Car Capacity": self.entry_ev_capacity_car.get() if self.switch_ev.get() else "0",
+            "EV Distance Year": self.entry_ev_distance_year.get() if self.switch_ev.get() else "0",
             "Consumer Profile": self.optionmenu_consumer_profile.get().replace(', ', '_'),
             "Provider": self.optionmenu_provider.get(),
             "Latitude": self.entry_general_latitude.get(),
@@ -798,6 +798,39 @@ class SimulationDialog(customtkinter.CTk):
             "Start Date": self.standardize_date(self.entry_general_start_date.get()),
             "Use Api": self.checkbox_testing.get()
         }
+        
+        # Define ranges for various entries
+        ranges = {
+            "Battery Charge": (0, 100),
+            "Battery Discharge": (0, 100),
+            "Battery Capacity": (0, 1000),
+            "Battery Efficiency": (0, 100),
+            "Solar Azimuth": (0, 360),
+            "Solar Tilt": (0, 90),
+            "Number of Solar Panels": (0, 200),
+            "Solar Efficiency": (0, 100),
+            "Solar Length": (0, 20),
+            "Solar Width": (0, 10),
+            "EV Charge": (0, 100),
+            "EV Number of Cars": (0, 10),
+            "EV Efficiency": (0, 100),
+            "EV Distance Year": (0, 25000),
+            "Latitude": (-90, 90),
+            "Longitude": (-180, 180)
+        }
+
+        # Check for empty or out-of-range fields in one pass
+        invalid_fields = {}
+        for key, value in entries.items():
+            if not str(value).strip():
+                invalid_fields[key] = "Empty"
+            elif key in ranges and not self.is_within_range(value, *ranges[key]):
+                invalid_fields[key] = f"must be between the values: {ranges[key][0]} and {ranges[key][1]}"
+                
+        if invalid_fields:      
+            message = "\n".join([f"{key.replace('_', ' ')} {reason}" for key, reason in invalid_fields.items()])
+            CTkMessagebox(title="Warning", message=message)   
+            return
         
         # Check for empty fields considering all values as strings
         empty_fields = [key for key, value in entries.items() if not str(value).strip()]
@@ -823,7 +856,7 @@ class SimulationDialog(customtkinter.CTk):
                 return  # Stop further processing
 
         if self.switch_ev.get():
-            if float(entries["EV Charge"]) <= 0 or float(entries["EV Fast Charge"]) <= 0 or float(entries["EV Efficiency"]) <= 0 or float(entries["EV Car Capacity"]) <= 0:
+            if float(entries["EV Charge"]) <= 0 or float(entries["EV Number of Cars"]) <= 0 or float(entries["EV Efficiency"]) <= 0 or float(entries["EV Distance Year"]) <= 0:
                 warning_message = "EV fields cannot be zero when EV is selected."
                 CTkMessagebox(title="Warning", message=warning_message)
                 return  # Stop further processing
@@ -865,9 +898,9 @@ class SimulationDialog(customtkinter.CTk):
             "Solar Width": self.entry_solar_width.get() if self.switch_solar.get() else "0",
             "Ev": self.switch_ev.get(),
             "EV Charge": self.entry_ev_charge.get() if self.switch_ev.get() else "0",
-            "EV Fast Charge": self.entry_ev_fast_charge.get() if self.switch_ev.get() else "0",
+            "EV Number of Cars": self.entry_ev_number_of_cars.get() if self.switch_ev.get() else "0",
             "EV Efficiency": self.entry_ev_efficiency.get() if self.switch_ev.get() else "0",
-            "EV Car Capacity": self.entry_ev_capacity_car.get() if self.switch_ev.get() else "0",
+            "EV Distance Year": self.entry_ev_distance_year.get() if self.switch_ev.get() else "0",
             "Consumer Profile": self.optionmenu_consumer_profile.get().replace(', ', '_'),
             "Provider": self.optionmenu_provider.get(),
             "Latitude": self.entry_general_latitude.get(),
@@ -889,9 +922,9 @@ class SimulationDialog(customtkinter.CTk):
             "Solar Length": (0, 20),
             "Solar Width": (0, 10),
             "EV Charge": (0, 100),
-            "EV Fast Charge": (0, 100),
+            "EV Number of Cars": (0, 10),
             "EV Efficiency": (0, 100),
-            "EV Car Capacity": (0, 2000),
+            "EV Distance Year": (0, 25000),
             "Latitude": (-90, 90),
             "Longitude": (-180, 180)
         }
@@ -933,7 +966,7 @@ class SimulationDialog(customtkinter.CTk):
                 return  # Stop further processing
 
         if self.switch_ev.get():
-            if float(entries["EV Charge"]) <= 0 or float(entries["EV Fast Charge"]) <= 0 or float(entries["EV Efficiency"]) <= 0 or float(entries["EV Car Capacity"]) <= 0:
+            if float(entries["EV Charge"]) <= 0 or float(entries["EV Number of Cars"]) <= 0 or float(entries["EV Efficiency"]) <= 0 or float(entries["EV Distance Year"]) <= 0:
                 warning_message = "EV fields cannot be zero when EV is selected."
                 CTkMessagebox(title="Warning", message=warning_message)
                 return  # Stop further processing

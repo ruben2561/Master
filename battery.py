@@ -19,8 +19,6 @@ class Battery:
         if(self.efficiency > 1):
             self.efficiency = self.efficiency/100
 
-
-    # TODO here still need to change error with the efficincy
     def charge(self, power, time):
         """
         Simulate the charging of the battery while considering limitations.
@@ -55,7 +53,9 @@ class Battery:
             return 0, time * power
         
         new_power = power
-        if self.discharge_power <= new_power : new_power = self.discharge_power # make sure the power is not above the max charge power
+        if self.discharge_power <= new_power : 
+            print("oei oei discharge power hoger dan mogelijk woepsie")
+            new_power = self.discharge_power # make sure the power is not above the max charge power
         
         efficiency = self._calculate_efficiency_factor()
         
