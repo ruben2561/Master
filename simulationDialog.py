@@ -840,6 +840,13 @@ class SimulationDialog(customtkinter.CTk):
         
         self.destroy()
         return
+    
+    def is_within_range(self, value, min_val, max_val):
+        try:
+            num_value = float(value)
+            return min_val <= num_value <= max_val
+        except ValueError:
+            return False
 
     def confirm_parameters(self):
         # Collect all entries
@@ -868,6 +875,40 @@ class SimulationDialog(customtkinter.CTk):
             "Start Date": self.standardize_date(self.entry_general_start_date.get()),
             "Use Api": self.checkbox_testing.get()
         }
+        
+        # Define ranges for various entries
+        ranges = {
+            "Battery Charge": (0, 100),
+            "Battery Discharge": (0, 100),
+            "Battery Capacity": (0, 1000),
+            "Battery Efficiency": (0, 100),
+            "Solar Azimuth": (0, 360),
+            "Solar Tilt": (0, 90),
+            "Number of Solar Panels": (0, 200),
+            "Solar Efficiency": (0, 100),
+            "Solar Length": (0, 20),
+            "Solar Width": (0, 10),
+            "EV Charge": (0, 100),
+            "EV Fast Charge": (0, 100),
+            "EV Efficiency": (0, 100),
+            "EV Car Capacity": (0, 2000),
+            "Latitude": (-90, 90),
+            "Longitude": (-180, 180)
+        }
+
+        # Check for empty or out-of-range fields in one pass
+        invalid_fields = {}
+        for key, value in entries.items():
+            if not str(value).strip():
+                invalid_fields[key] = "Empty"
+            elif key in ranges and not self.is_within_range(value, *ranges[key]):
+                invalid_fields[key] = f"must be between the values: {ranges[key][0]} and {ranges[key][1]}"
+                
+        if invalid_fields:      
+            message = "\n".join([f"{key.replace('_', ' ')} {reason}" for key, reason in invalid_fields.items()])
+            CTkMessagebox(title="Warning", message=message)   
+            return
+        
         # Check for empty fields considering all values as strings
         empty_fields = [key for key, value in entries.items() if not str(value).strip()]
         
