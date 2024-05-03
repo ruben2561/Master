@@ -69,15 +69,15 @@ def process_point_optimized(time_difference_hours, time_value, pv_power_values, 
     ### Algoritm code below #######################################
     ###############################################################
     
-    algoritm_to_use = 2
+    algoritm_to_use = 1
     
     ##111111111####################################################
     if algoritm_to_use == 1:
         
         ev_charged = 0
             
-        if(time_value.hour >= 17 or time_value.hour <= 8):
-            ev_charged, ev_residue = ev_battery.charge(100, time_difference_hours)
+        if(time_value.hour > 17 or time_value.hour < 8):
+            ev_charged, ev_residue = ev_battery.charge(ev_battery.get_max_charge(), time_difference_hours)
             charge_discharge_battery = pv_power_values[0] - power_usage_values[0] - ev_charged
         else:
             charge_discharge_battery = pv_power_values[0] - power_usage_values[0]
@@ -88,9 +88,12 @@ def process_point_optimized(time_difference_hours, time_value, pv_power_values, 
             charge_value = charged
 
         elif charge_discharge_battery < 0:
-            discharged, residue_to_little_energy = battery.discharge(abs(charge_discharge_battery), time_difference_hours)
+            discharged, residue_to_little_energy = battery.discharge(
+                abs(charge_discharge_battery), time_difference_hours
+            )
             grid_offtake = residue_to_little_energy
             discharge_value = discharged
+            ev_charge_value = ev_charged
             
         if offtake_price_values[0] <= 50:
             charged, residue_to_much_energy = battery.charge(battery.get_max_charge(), time_difference_hours)
@@ -103,8 +106,8 @@ def process_point_optimized(time_difference_hours, time_value, pv_power_values, 
         
         ev_charged = 0
             
-        if(time_value.hour >= 17 or time_value.hour <= 8):
-            ev_charged, ev_residue = ev_battery.charge(100, time_difference_hours)
+        if(time_value.hour > 17 or time_value.hour < 8):
+            ev_charged, ev_residue = ev_battery.charge(ev_battery.get_max_charge(), time_difference_hours)
             charge_discharge_battery = pv_power_values[0] - power_usage_values[0] - ev_charged
         else:
             charge_discharge_battery = pv_power_values[0] - power_usage_values[0]
@@ -113,11 +116,14 @@ def process_point_optimized(time_difference_hours, time_value, pv_power_values, 
             charged, residue_to_much_energy = battery.charge(charge_discharge_battery, time_difference_hours)
             grid_injection = residue_to_much_energy
             charge_value = charged
-
+            
         elif charge_discharge_battery < 0:
-            discharged, residue_to_little_energy = battery.discharge(abs(charge_discharge_battery), time_difference_hours)
+            discharged, residue_to_little_energy = battery.discharge(
+                abs(charge_discharge_battery), time_difference_hours
+            )
             grid_offtake = residue_to_little_energy
             discharge_value = discharged
+            ev_charge_value = ev_charged
         
         if offtake_price_values[0] <= 100 and sum(offtake_price_values[5:10])/len(offtake_price_values[5:10]) > 120 and sum(pv_power_values)/len(pv_power_values) < sum(power_usage_values)/len(power_usage_values):
                 
@@ -147,10 +153,13 @@ def process_data_optimized(data_points, battery, ev_battery, ev_total_distance):
         soc_value = battery.get_soc()
         next_time = current_points[1].get("time_value")
         
-        car_charge_day = ((ev_total_distance/100) * 15) / 365  #average car uses 15kWh/100km
+        ev_charge_value = current_point.get("ev_charge_value")
         
-        if time_value.hour == 0 and time_value.minute == 0:
-            ev_battery.discharge(15, (car_charge_day / 15))
+        
+        #if time is 12:00 discharge the car an average amount to simulate car usage
+        if time_value.hour == 12 and time_value.minute == 0:
+            ev_battery.discharge(ev_charge_value, 1)
+            current_point["ev_charge_value"] = 0
 
         if time_value and next_time:
             time_difference_hours = (next_time - time_value).total_seconds() / 3600
@@ -175,11 +184,13 @@ def process_data(data_points, battery, ev_battery, ev_total_distance):
         power_usage_value = current_point.get("power_usage_value")
         time_value = current_point.get("time_value")
         next_time = next_point.get("time_value")
+        ev_charge_value = current_point.get("ev_charge_value")
         
-        car_charge_day = ((ev_total_distance/100) * 15) / 365  #average car uses 15kWh/100km
-        
-        if time_value.hour == 0 and time_value.minute == 0:
-            ev_battery.discharge(15, (car_charge_day / 15))
+
+        #if time is 12:00 discharge the car an average amount to simulate car usage
+        if time_value.hour == 12 and time_value.minute == 0:
+            ev_battery.discharge(ev_charge_value, 1)
+            current_point["ev_charge_value"] = 0
 
         if time_value and next_time:
             # Calculate time difference in hours
@@ -189,8 +200,9 @@ def process_data(data_points, battery, ev_battery, ev_total_distance):
             
             ev_charged = 0
             
-            if(time_value.hour >= 17 or time_value.hour <= 8):
-                ev_charged, ev_residue = ev_battery.charge(100, time_difference_hours)
+            #check if car is home so it can charge
+            if(time_value.hour > 17 or time_value.hour < 8):
+                ev_charged, ev_residue = ev_battery.charge(ev_battery.get_max_charge(), time_difference_hours)
                 charge_discharge_battery = pv_power_value - power_usage_value - ev_charged
             else:
                 charge_discharge_battery = pv_power_value - power_usage_value
@@ -239,7 +251,10 @@ def get_power_usage_values(data_points, selected_user_profile):
                 samples_list = list(reader)
 
             for i in range(len(data_points) - 1):
-                data_points[i]["power_usage_value"] = float(samples_list[i]["Power"]) + float(samples_list[i]["Power"]) * random.uniform(-0.1, 0.1)
+                number = random.choice([1,1,1,1,1,1,2,2,3])
+                if number == 1: data_points[i]["power_usage_value"] = float(samples_list[i]["Power"]) + float(samples_list[i]["Power"]) * random.uniform(-0.1, 0.1)
+                if number == 2: data_points[i]["power_usage_value"] = float(samples_list[i]["Power"]) + float(samples_list[i]["Power"]) * random.uniform(-0.3, 0.3)
+                if number == 3: data_points[i]["power_usage_value"] = float(samples_list[i]["Power"]) + float(samples_list[i]["Power"]) * random.uniform(-0.7, 0.7)
             
 
         return data_points
@@ -247,6 +262,17 @@ def get_power_usage_values(data_points, selected_user_profile):
     except Exception as e:
         print(f"Error reading sample data power usage: {e}")
         return None
+    
+def get_ev_charge_values(data_points, ev_distance_year, ev_number_of_cars):
+    car_charge_day = (((ev_distance_year * ev_number_of_cars) / 100) * 15) / 365  #average car uses 15kWh/100km
+    for i in range(len(data_points) - 1):
+        if data_points[i]["time_value"].hour == 12 and data_points[i]["time_value"].minute == 0 and ev_number_of_cars != 0:
+            number = random.choice([1,1,1,1,1,2,2,3])
+            if number == 1: data_points[i]["ev_charge_value"] = car_charge_day + car_charge_day * random.uniform(-0.1, 0.1)
+            if number == 2: data_points[i]["ev_charge_value"] = car_charge_day + car_charge_day * random.uniform(-0.4, 0.4)
+            if number == 3: data_points[i]["ev_charge_value"] = car_charge_day + car_charge_day * random.uniform(-1, 1)
+            
+    return data_points
 
 
 def calculate_values(data_points, specific_time, scale):

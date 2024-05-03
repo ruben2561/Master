@@ -19,6 +19,7 @@ from battery import Battery
 from databaseManager import DatabaseManager
 from process import (
     calculate_values,
+    get_ev_charge_values,
     get_power_usage_values,
     process_data,
     process_data_optimized,
@@ -200,85 +201,7 @@ class App(customtkinter.CTk):
             font=customtkinter.CTkFont(size=15),
         )
         self.logo_label3.grid(row=1, column=2, padx=(0,20))
-
-        ############################################################
-
-        self.label_offtake = customtkinter.CTkLabel(
-            self.sidebar_frame2,
-            text="Total Grid Offtake:",
-            font=customtkinter.CTkFont(size=15),
-        )
-        self.label_offtake.grid(row=2, column=0, padx=20, pady=(5, 0), sticky="w")
         
-        self.label_offtake_result_1 = customtkinter.CTkLabel(
-            self.sidebar_frame2, text="...", font=customtkinter.CTkFont(size=12)
-        )
-        self.label_offtake_result_1.grid(row=2, column=1, pady=(5, 0) , padx=(0,10))
-        
-        self.label_offtake_result_2 = customtkinter.CTkLabel(
-            self.sidebar_frame2, text="...", font=customtkinter.CTkFont(size=12)
-        )
-        self.label_offtake_result_2.grid(row=2, column=2, pady=(5, 0) )
-
-        ############################################################
-
-        self.label_injection = customtkinter.CTkLabel(
-            self.sidebar_frame2,
-            text="Total Grid Injection:",
-            font=customtkinter.CTkFont(size=15),
-        )
-        self.label_injection.grid(row=3, column=0, padx=20, pady=(5, 0) , sticky="w")
-        
-        self.label_injection_result_1 = customtkinter.CTkLabel(
-            self.sidebar_frame2, text="...", font=customtkinter.CTkFont(size=12)
-        )
-        self.label_injection_result_1.grid(row=3, column=1, pady=(5, 0) , padx=(0,10))
-        
-        self.label_injection_result_2 = customtkinter.CTkLabel(
-            self.sidebar_frame2, text="...", font=customtkinter.CTkFont(size=12)
-        )
-        self.label_injection_result_2.grid(row=3, column=2, pady=(5, 0) )
-
-        ###########################################################
-        
-        self.label_charge = customtkinter.CTkLabel(
-            self.sidebar_frame2,
-            text="Total Bat. Charge:",
-            anchor="w",
-            font=customtkinter.CTkFont(size=15),
-        )
-        self.label_charge.grid(row=4, column=0, padx=20, pady=(5, 0) , sticky="w")
-        
-        self.label_charge_result_1 = customtkinter.CTkLabel(
-            self.sidebar_frame2, text="...", font=customtkinter.CTkFont(size=12)
-        )
-        self.label_charge_result_1.grid(row=4, column=1, pady=(5, 0) , padx=(0,10))
-        
-        self.label_charge_result_2 = customtkinter.CTkLabel(
-            self.sidebar_frame2, text="...", font=customtkinter.CTkFont(size=12)
-        )
-        self.label_charge_result_2.grid(row=4, column=2, pady=(5, 0) )
-
-        ###########################################################
-        
-        self.label_discharge = customtkinter.CTkLabel(
-            self.sidebar_frame2,
-            text="Total Bat. Discharge:",
-            anchor="w",
-            font=customtkinter.CTkFont(size=15),
-        )
-        self.label_discharge.grid(row=5, column=0, padx=20, pady=(5, 0) , sticky="w")
-        
-        self.label_discharge_result_1 = customtkinter.CTkLabel(
-            self.sidebar_frame2, text="...", font=customtkinter.CTkFont(size=12)
-        )
-        self.label_discharge_result_1.grid(row=5, column=1, pady=(5, 0) , padx=(0,10))
-        
-        self.label_discharge_result_2 = customtkinter.CTkLabel(
-            self.sidebar_frame2, text="...", font=customtkinter.CTkFont(size=12)
-        )
-        self.label_discharge_result_2.grid(row=5, column=2, pady=(5, 0) )
-
         ###########################################################
         
         self.label_pv_production = customtkinter.CTkLabel(
@@ -287,17 +210,12 @@ class App(customtkinter.CTk):
             anchor="w",
             font=customtkinter.CTkFont(size=15),
         )
-        self.label_pv_production.grid(row=6, column=0, padx=20, pady=(5, 0) , sticky="w")
+        self.label_pv_production.grid(row=2, column=0, padx=20, pady=(5, 0) , sticky="w")
         
         self.label_pv_production_result_1 = customtkinter.CTkLabel(
             self.sidebar_frame2, text="...", font=customtkinter.CTkFont(size=12)
         )
-        self.label_pv_production_result_1.grid(row=6, column=1, pady=(5, 0) , padx=(0,10))
-        
-        self.label_pv_production_result_2 = customtkinter.CTkLabel(
-            self.sidebar_frame2, text="...", font=customtkinter.CTkFont(size=12)
-        )
-        self.label_pv_production_result_2.grid(row=6, column=2, pady=(5, 0) )
+        self.label_pv_production_result_1.grid(row=2, column=1, columnspan=2, pady=(5, 0) , padx=(0,10))
 
         ###########################################################
         
@@ -307,17 +225,12 @@ class App(customtkinter.CTk):
             anchor="w",
             font=customtkinter.CTkFont(size=15),
         )
-        self.label_power_use.grid(row=7, column=0, padx=20, pady=(5, 0) , sticky="w")
+        self.label_power_use.grid(row=3, column=0, padx=20, pady=(5, 0) , sticky="w")
         
         self.label_power_use_result_1 = customtkinter.CTkLabel(
             self.sidebar_frame2, text="...", font=customtkinter.CTkFont(size=12)
         )
-        self.label_power_use_result_1.grid(row=7, column=1, pady=(5, 0) , padx=(0,10))
-        
-        self.label_power_use_result_2 = customtkinter.CTkLabel(
-            self.sidebar_frame2, text="...", font=customtkinter.CTkFont(size=12)
-        )
-        self.label_power_use_result_2.grid(row=7, column=2, pady=(5, 0) )
+        self.label_power_use_result_1.grid(row=3, column=1, columnspan=2, pady=(5, 0) , padx=(0,10))
         
         ###########################################################
         
@@ -327,17 +240,90 @@ class App(customtkinter.CTk):
             anchor="w",
             font=customtkinter.CTkFont(size=15),
         )
-        self.label_ev_charge.grid(row=8, column=0, padx=20, pady=(5, 0) , sticky="w")
+        self.label_ev_charge.grid(row=4, column=0, padx=20, pady=(5, 0) , sticky="w")
         
         self.label_ev_charge_result_1 = customtkinter.CTkLabel(
             self.sidebar_frame2, text="...", font=customtkinter.CTkFont(size=12)
         )
-        self.label_ev_charge_result_1.grid(row=8, column=1, pady=(5, 0) , padx=(0,10))
+        self.label_ev_charge_result_1.grid(row=4, column=1, columnspan=2, pady=(5, 0) , padx=(0,10))
         
-        self.label_ev_charge_result_2 = customtkinter.CTkLabel(
+         ###########################################################
+        
+        self.label_charge = customtkinter.CTkLabel(
+            self.sidebar_frame2,
+            text="Total Bat. Charge:",
+            anchor="w",
+            font=customtkinter.CTkFont(size=15),
+        )
+        self.label_charge.grid(row=5, column=0, padx=20, pady=(5, 0) , sticky="w")
+        
+        self.label_charge_result_1 = customtkinter.CTkLabel(
             self.sidebar_frame2, text="...", font=customtkinter.CTkFont(size=12)
         )
-        self.label_ev_charge_result_2.grid(row=8, column=2, pady=(5, 0) )
+        self.label_charge_result_1.grid(row=5, column=1, pady=(5, 0) , padx=(0,10))
+        
+        self.label_charge_result_2 = customtkinter.CTkLabel(
+            self.sidebar_frame2, text="...", font=customtkinter.CTkFont(size=12)
+        )
+        self.label_charge_result_2.grid(row=5, column=2, pady=(5, 0) )
+
+        ###########################################################
+        
+        self.label_discharge = customtkinter.CTkLabel(
+            self.sidebar_frame2,
+            text="Total Bat. Discharge:",
+            anchor="w",
+            font=customtkinter.CTkFont(size=15),
+        )
+        self.label_discharge.grid(row=6, column=0, padx=20, pady=(5, 0) , sticky="w")
+        
+        self.label_discharge_result_1 = customtkinter.CTkLabel(
+            self.sidebar_frame2, text="...", font=customtkinter.CTkFont(size=12)
+        )
+        self.label_discharge_result_1.grid(row=6, column=1, pady=(5, 0) , padx=(0,10))
+        
+        self.label_discharge_result_2 = customtkinter.CTkLabel(
+            self.sidebar_frame2, text="...", font=customtkinter.CTkFont(size=12)
+        )
+        self.label_discharge_result_2.grid(row=6, column=2, pady=(5, 0) )
+
+        ############################################################
+
+        self.label_offtake = customtkinter.CTkLabel(
+            self.sidebar_frame2,
+            text="Total Grid Offtake:",
+            font=customtkinter.CTkFont(size=15),
+        )
+        self.label_offtake.grid(row=7, column=0, padx=20, pady=(5, 0), sticky="w")
+        
+        self.label_offtake_result_1 = customtkinter.CTkLabel(
+            self.sidebar_frame2, text="...", font=customtkinter.CTkFont(size=12)
+        )
+        self.label_offtake_result_1.grid(row=7, column=1, pady=(5, 0) , padx=(0,10))
+        
+        self.label_offtake_result_2 = customtkinter.CTkLabel(
+            self.sidebar_frame2, text="...", font=customtkinter.CTkFont(size=12)
+        )
+        self.label_offtake_result_2.grid(row=7, column=2, pady=(5, 0) )
+
+        ############################################################
+
+        self.label_injection = customtkinter.CTkLabel(
+            self.sidebar_frame2,
+            text="Total Grid Injection:",
+            font=customtkinter.CTkFont(size=15),
+        )
+        self.label_injection.grid(row=8, column=0, padx=20, pady=(5, 0) , sticky="w")
+        
+        self.label_injection_result_1 = customtkinter.CTkLabel(
+            self.sidebar_frame2, text="...", font=customtkinter.CTkFont(size=12)
+        )
+        self.label_injection_result_1.grid(row=8, column=1, pady=(5, 0) , padx=(0,10))
+        
+        self.label_injection_result_2 = customtkinter.CTkLabel(
+            self.sidebar_frame2, text="...", font=customtkinter.CTkFont(size=12)
+        )
+        self.label_injection_result_2.grid(row=8, column=2, pady=(5, 0) )
 
         ###########################################################
         
@@ -480,12 +466,14 @@ class App(customtkinter.CTk):
 
         line_width = calculated_values["line_width"]
         self.ax1.set_title(calculated_values["title"])
-        self.ax1.set_xlabel("Time")            
+        self.ax1.set_xlabel("Time")   
+        self.ax1.grid(axis='y', zorder=0) 
+        self.ax1.set_axisbelow(True)        
 
         self.ax1.bar(
             time_values, 
             pv_power_values, 
-            color="y", 
+            color="#FFA500", 
             label="PV Power",
             width=line_width
         )
@@ -509,7 +497,7 @@ class App(customtkinter.CTk):
         self.ax1.bar(
             time_values, 
             power_usage_values, 
-            color="c", 
+            color="#808080", 
             label="Power Usage",
             width=line_width
         )
@@ -517,7 +505,7 @@ class App(customtkinter.CTk):
             time_values, 
             ev_charge_values,
             bottom=power_usage_values, 
-            color="black", 
+            color="#add8e6", 
             label="Ev Charge",
             width=line_width
         )
@@ -573,9 +561,6 @@ class App(customtkinter.CTk):
         self.label_injection_result_2.configure(text=str(abs(round(grid_injection_sum_optimized, 3))) + " kWh")
         self.label_charge_result_2.configure(text=str(abs(round(sum(charge_values_optimized), 3))) + " kWh")
         self.label_discharge_result_2.configure(text=str(abs(round(sum(discharge_values_optimized), 3))) + " kWh")
-        self.label_pv_production_result_2.configure(text=str(abs(round(sum(pv_power_values_optimized), 3))) + " kWh")
-        self.label_power_use_result_2.configure(text=str(abs(round(sum(power_usage_values_optimized), 3))) + " kWh")
-        self.label_ev_charge_result_2.configure(text=str(abs(round(sum(ev_charge_values_optimized), 3))) + " kWh")
         self.label_cost_result_2.configure(text=str(round(grid_offtake_cost_optimized, 3)) + " €")
         self.label_earning_result_2.configure(text=str(abs(round(grid_injection_cost_optimized, 3))) + " €")
 
@@ -586,7 +571,9 @@ class App(customtkinter.CTk):
 
         line_width_optimized = calculated_values_optimized["line_width"]
         self.ax2.set_title(calculated_values_optimized["title"].replace('Not ', ''))
-        self.ax2.set_xlabel("Time")            
+        self.ax2.set_xlabel("Time")       
+        self.ax2.grid(axis='y', zorder=0) 
+        self.ax2.set_axisbelow(True)
 
         self.ax2.bar(
             time_values_optimized, 
@@ -615,7 +602,7 @@ class App(customtkinter.CTk):
         self.ax2.bar(
             time_values_optimized, 
             power_usage_values_optimized, 
-            color="c", 
+            color="#808080", 
             label="Power Usage",
             width=line_width_optimized
         )
@@ -623,7 +610,7 @@ class App(customtkinter.CTk):
             time_values_optimized, 
             ev_charge_values_optimized,
             bottom=power_usage_values_optimized, 
-            color="black", 
+            color="#add8e6", 
             label="Ev Charge",
             width=line_width
         )
@@ -668,6 +655,7 @@ class App(customtkinter.CTk):
         self.ax3.plot(grid_offtake_prices_scaled, color="r", label="Offtake Prices", linewidth=0.8)
         self.ax3.axhline(y=average_price, color="black", label="Average Price", linewidth=0.8)
         self.ax3.set_ylabel("Grid Prices per MWh")
+        self.ax3.grid(axis='y')
         self.ax3.set_xlabel("Time")
         self.ax3.tick_params(axis='y', labelcolor="black")
         
@@ -806,6 +794,7 @@ class App(customtkinter.CTk):
             # Show some retry/cancel warnings
             msg = CTkMessagebox(title="Warning Message!", message="Please Select Simulation Parameters",
                         icon="warning", option_1="OK")
+            return
             
         self.start_process()
 
@@ -823,9 +812,9 @@ class App(customtkinter.CTk):
         
         battery_car_1 = Battery(
             capacity=40,
-            soc=0,
+            soc=38,
             charge_power=self.ev_charge,
-            discharge_power=15,
+            discharge_power=100,
             max_soc=0.95,
             min_dod=0.05,
             efficiency=self.ev_efficiency,
@@ -843,9 +832,9 @@ class App(customtkinter.CTk):
         
         battery_car_2 = Battery(
             capacity=40,
-            soc=0,
+            soc=38,
             charge_power=self.ev_charge,
-            discharge_power=15,
+            discharge_power=100,
             max_soc=0.95,
             min_dod=0.05,
             efficiency=self.ev_efficiency,
@@ -861,6 +850,8 @@ class App(customtkinter.CTk):
         data_points = process_solar_data(self.general_latitude, self.general_longitude, self.general_start_date, self.solar_number_of_panels, self.solar_width*self.solar_length, self.solar_azimuth, self.solar_tilt, self.solar_efficiency, self.solar_efficiency, self.use_api)
 
         data_points = get_power_usage_values(data_points, self.selected_consumer_profile)
+        
+        data_points = get_ev_charge_values(data_points, self.ev_distance_year, self.ev_number_of_cars)
         
         data_points = process_prices_data(data_points, self.general_latitude, self.general_longitude, self.general_start_date, self.selected_provider, self.use_api)
         
