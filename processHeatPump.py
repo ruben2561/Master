@@ -9,10 +9,11 @@ def calculate_needed_power(area, COP_base, temp_in_desired, temp_in, U, temp_out
     
     k = 0.025
     
-    Q = (1.225 * 1005 * area * 2.4 * abs(temp_in_desired - temp_in))/3600 # 2.4 = standard ceiling height
+    Q = (1.225 * 1005 * area * 2.4 * abs(temp_in_desired - temp_in)) / 3600 # 2.4 = standard ceiling height
     Q_loss = U * area * abs(temp_out - temp_in)
     
-    COP = COP_base - k * abs(temp_in - temp_out)
+    COP = COP_base - k * (temp_in - temp_out) if (temp_in - temp_out) <= 15 else max(COP_base / 2, 2)  # Ensuring COP doesn't go unrealistically low
+    print(str(COP))
     
     power_needed = ((Q + Q_loss) / COP)/1000 # * 3600 nodig?
     
@@ -57,19 +58,20 @@ def calculate_indoor_temperature(temp_out, temp_in_initial, U, area, timestep=0.
         dT_dt = Q_loss / (mass_air * c_p)
         
         # Update the indoor temperature
-        temp_in += dT_dt * timestep_seconds
+        temp_in -= dT_dt * timestep_seconds
         
     return temp_in
 
 def process_heat_pump_data(data_points, area, cop, temp_desired, building):
-    if building == "new":
-        U = 0.175
-    elif building == "+-2010":
-        U = 0.25
-    elif building == "+-2000":
-        U = 0.375
-    elif building == "-1995":
-        U = 0.525
+    building_U_values = {
+        "new": 0.175,
+        "+-2010": 0.25,
+        "+-2000": 0.375,
+        "-1995": 0.525
+    }
+    
+    U = building_U_values.get(building, 0.3)  # Default U value if building type not found
+
         
     #TODO toevoegen temp verlies snacht 
     # alleen doen if time = overdag
