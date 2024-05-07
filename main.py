@@ -17,6 +17,7 @@ from scipy.interpolate import interp1d
 import pandas as pd
 from battery import Battery
 from databaseManager import DatabaseManager
+from processHeatPump import process_heat_pump_data
 from process import (
     calculate_values,
     get_ev_charge_values,
@@ -121,11 +122,15 @@ class App(customtkinter.CTk):
         
         self.image_uhasselt = customtkinter.CTkImage(dark_image=Image.open(os.path.join("images/uhasselt.png")), size=(80 * 1.5, 19 * 1.5))
         label_uhasselt = customtkinter.CTkLabel(self.sidebar_frame, image=self.image_uhasselt, text='')
-        label_uhasselt.grid(row=0, column=6, padx=(200,0), sticky="e")
+        label_uhasselt.grid(row=0, column=6, padx=(160,0), sticky="e")
+        
+        self.image_uhasselt = customtkinter.CTkImage(dark_image=Image.open(os.path.join("images/kuleuven.png")), size=(12.80 * 6.2, 4.62 * 6.2))
+        label_uhasselt = customtkinter.CTkLabel(self.sidebar_frame, image=self.image_uhasselt, text='')
+        label_uhasselt.grid(row=0, column=7, padx=(20,0), sticky="e")
         
         self.image_ilumen = customtkinter.CTkImage(dark_image=Image.open(os.path.join("images/ilumen.png")), size=(72.4 * 1.4 , 29.2 * 1.4))
         label_ilumen = customtkinter.CTkLabel(self.sidebar_frame, image=self.image_ilumen, text='')
-        label_ilumen.grid(row=0, column=7, padx=(20,0), sticky="e")
+        label_ilumen.grid(row=0, column=8, padx=(15,0), sticky="e")
 
         #######################################################
 
@@ -234,18 +239,33 @@ class App(customtkinter.CTk):
         
         ###########################################################
         
+        self.label_heat_pump_usage = customtkinter.CTkLabel(
+            self.sidebar_frame2,
+            text="Total Heat Pump Usage:",
+            anchor="w",
+            font=customtkinter.CTkFont(size=15),
+        )
+        self.label_heat_pump_usage.grid(row=4, column=0, padx=20, pady=(5, 0) , sticky="w")
+        
+        self.label_heat_pump_usage_result_1 = customtkinter.CTkLabel(
+            self.sidebar_frame2, text="...", font=customtkinter.CTkFont(size=12)
+        )
+        self.label_heat_pump_usage_result_1.grid(row=4, column=1, columnspan=2, pady=(5, 0) , padx=(0,10))
+        
+        ###########################################################
+        
         self.label_ev_charge = customtkinter.CTkLabel(
             self.sidebar_frame2,
             text="Total Ev Charge:",
             anchor="w",
             font=customtkinter.CTkFont(size=15),
         )
-        self.label_ev_charge.grid(row=4, column=0, padx=20, pady=(5, 0) , sticky="w")
+        self.label_ev_charge.grid(row=5, column=0, padx=20, pady=(5, 0) , sticky="w")
         
         self.label_ev_charge_result_1 = customtkinter.CTkLabel(
             self.sidebar_frame2, text="...", font=customtkinter.CTkFont(size=12)
         )
-        self.label_ev_charge_result_1.grid(row=4, column=1, columnspan=2, pady=(5, 0) , padx=(0,10))
+        self.label_ev_charge_result_1.grid(row=5, column=1, columnspan=2, pady=(5, 0) , padx=(0,10))
         
          ###########################################################
         
@@ -255,17 +275,17 @@ class App(customtkinter.CTk):
             anchor="w",
             font=customtkinter.CTkFont(size=15),
         )
-        self.label_charge.grid(row=5, column=0, padx=20, pady=(5, 0) , sticky="w")
+        self.label_charge.grid(row=6, column=0, padx=20, pady=(5, 0) , sticky="w")
         
         self.label_charge_result_1 = customtkinter.CTkLabel(
             self.sidebar_frame2, text="...", font=customtkinter.CTkFont(size=12)
         )
-        self.label_charge_result_1.grid(row=5, column=1, pady=(5, 0) , padx=(0,10))
+        self.label_charge_result_1.grid(row=6, column=1, pady=(5, 0) , padx=(0,10))
         
         self.label_charge_result_2 = customtkinter.CTkLabel(
             self.sidebar_frame2, text="...", font=customtkinter.CTkFont(size=12)
         )
-        self.label_charge_result_2.grid(row=5, column=2, pady=(5, 0) )
+        self.label_charge_result_2.grid(row=6, column=2, pady=(5, 0) )
 
         ###########################################################
         
@@ -275,17 +295,17 @@ class App(customtkinter.CTk):
             anchor="w",
             font=customtkinter.CTkFont(size=15),
         )
-        self.label_discharge.grid(row=6, column=0, padx=20, pady=(5, 0) , sticky="w")
+        self.label_discharge.grid(row=7, column=0, padx=20, pady=(5, 0) , sticky="w")
         
         self.label_discharge_result_1 = customtkinter.CTkLabel(
             self.sidebar_frame2, text="...", font=customtkinter.CTkFont(size=12)
         )
-        self.label_discharge_result_1.grid(row=6, column=1, pady=(5, 0) , padx=(0,10))
+        self.label_discharge_result_1.grid(row=7, column=1, pady=(5, 0) , padx=(0,10))
         
         self.label_discharge_result_2 = customtkinter.CTkLabel(
             self.sidebar_frame2, text="...", font=customtkinter.CTkFont(size=12)
         )
-        self.label_discharge_result_2.grid(row=6, column=2, pady=(5, 0) )
+        self.label_discharge_result_2.grid(row=7, column=2, pady=(5, 0) )
 
         ############################################################
 
@@ -294,17 +314,17 @@ class App(customtkinter.CTk):
             text="Total Grid Offtake:",
             font=customtkinter.CTkFont(size=15),
         )
-        self.label_offtake.grid(row=7, column=0, padx=20, pady=(5, 0), sticky="w")
+        self.label_offtake.grid(row=8, column=0, padx=20, pady=(5, 0), sticky="w")
         
         self.label_offtake_result_1 = customtkinter.CTkLabel(
             self.sidebar_frame2, text="...", font=customtkinter.CTkFont(size=12)
         )
-        self.label_offtake_result_1.grid(row=7, column=1, pady=(5, 0) , padx=(0,10))
+        self.label_offtake_result_1.grid(row=8, column=1, pady=(5, 0) , padx=(0,10))
         
         self.label_offtake_result_2 = customtkinter.CTkLabel(
             self.sidebar_frame2, text="...", font=customtkinter.CTkFont(size=12)
         )
-        self.label_offtake_result_2.grid(row=7, column=2, pady=(5, 0) )
+        self.label_offtake_result_2.grid(row=8, column=2, pady=(5, 0) )
 
         ############################################################
 
@@ -313,17 +333,17 @@ class App(customtkinter.CTk):
             text="Total Grid Injection:",
             font=customtkinter.CTkFont(size=15),
         )
-        self.label_injection.grid(row=8, column=0, padx=20, pady=(5, 0) , sticky="w")
+        self.label_injection.grid(row=9, column=0, padx=20, pady=(5, 0) , sticky="w")
         
         self.label_injection_result_1 = customtkinter.CTkLabel(
             self.sidebar_frame2, text="...", font=customtkinter.CTkFont(size=12)
         )
-        self.label_injection_result_1.grid(row=8, column=1, pady=(5, 0) , padx=(0,10))
+        self.label_injection_result_1.grid(row=9, column=1, pady=(5, 0) , padx=(0,10))
         
         self.label_injection_result_2 = customtkinter.CTkLabel(
             self.sidebar_frame2, text="...", font=customtkinter.CTkFont(size=12)
         )
-        self.label_injection_result_2.grid(row=8, column=2, pady=(5, 0) )
+        self.label_injection_result_2.grid(row=9, column=2, pady=(5, 0) )
 
         ###########################################################
         
@@ -333,17 +353,17 @@ class App(customtkinter.CTk):
             anchor="w",
             font=customtkinter.CTkFont(size=15),
         )
-        self.label_earning.grid(row=9, column=0, padx=20, pady=(5, 0) , sticky="w")
+        self.label_earning.grid(row=10, column=0, padx=20, pady=(5, 0) , sticky="w")
         
         self.label_earning_result_1 = customtkinter.CTkLabel(
             self.sidebar_frame2, text="...", font=customtkinter.CTkFont(size=12)
         )
-        self.label_earning_result_1.grid(row=9, column=1, pady=(5, 0) , padx=(0,10))
+        self.label_earning_result_1.grid(row=10, column=1, pady=(5, 0) , padx=(0,10))
         
         self.label_earning_result_2 = customtkinter.CTkLabel(
             self.sidebar_frame2, text="...", font=customtkinter.CTkFont(size=12)
         )
-        self.label_earning_result_2.grid(row=9, column=2, pady=(5, 0) )
+        self.label_earning_result_2.grid(row=10, column=2, pady=(5, 0) )
 
         ###########################################################
         
@@ -353,17 +373,17 @@ class App(customtkinter.CTk):
             anchor="w",
             font=customtkinter.CTkFont(size=15),
         )
-        self.label_cost.grid(row=10, column=0, padx=20, pady=(5, 0) , sticky="w")
+        self.label_cost.grid(row=11, column=0, padx=20, pady=(5, 0) , sticky="w")
         
         self.label_cost_result_1 = customtkinter.CTkLabel(
             self.sidebar_frame2, text="...", font=customtkinter.CTkFont(size=12)
         )
-        self.label_cost_result_1.grid(row=10, column=1, pady=(5, 0) , padx=(0,10))
+        self.label_cost_result_1.grid(row=11, column=1, pady=(5, 0) , padx=(0,10))
         
         self.label_cost_result_2 = customtkinter.CTkLabel(
             self.sidebar_frame2, text="...", font=customtkinter.CTkFont(size=12)
         )
-        self.label_cost_result_2.grid(row=10, column=2, pady=(5, 0) )
+        self.label_cost_result_2.grid(row=11, column=2, pady=(5, 0) )
 
         ########################################################### 
         
@@ -373,12 +393,12 @@ class App(customtkinter.CTk):
             anchor="w",
             font=customtkinter.CTkFont(size=15, weight='bold'),
         )
-        self.label_saved.grid(row=11, column=0, padx=20, pady=(15, 0) , sticky="w")
+        self.label_saved.grid(row=12, column=0, padx=20, pady=(15, 0) , sticky="w")
         
         self.label_saved_result_1 = customtkinter.CTkLabel(
             self.sidebar_frame2, text="...", font=customtkinter.CTkFont(size=12, weight='bold')
         )
-        self.label_saved_result_1.grid(row=11, column=1, columnspan=2, pady=(15, 0) , padx=(0,10))
+        self.label_saved_result_1.grid(row=12, column=1, columnspan=2, pady=(15, 0) , padx=(0,10))
         
         ########################################################### 
         
@@ -391,6 +411,7 @@ class App(customtkinter.CTk):
         self.protocol("WM_DELETE_WINDOW", self.on_close)
         
     def simulation_parameters(self):
+        
         simulation_dialog = SimulationDialog(self.db_manager)
         simulation_dialog.mainloop()
         
@@ -431,6 +452,7 @@ class App(customtkinter.CTk):
         grid_offtake_cost = calculated_values["grid_offtake_cost"]
         
         ev_charge_values = calculated_values["ev_charge_values"]
+        heat_pump_values = calculated_values["heat_pump_values"]
         
         # Create a DataFrame from the calculated values
         df = pd.DataFrame({
@@ -442,7 +464,8 @@ class App(customtkinter.CTk):
             "SoC": scale_list(soc_values, len(power_usage_values)) if len(power_usage_values) > 1 else soc_values,
             "Grid Injection": grid_injection_values,
             "Grid Offtake": grid_offtake_values,
-            "Ev Charge Values": ev_charge_values
+            "Ev Charge Values": ev_charge_values,
+            "heat pump use": heat_pump_values,
         })
 
         # Print the DataFrame
@@ -455,14 +478,16 @@ class App(customtkinter.CTk):
         self.label_discharge_result_1.configure(text=str(abs(round(sum(discharge_values), 3))) + " kWh")
         self.label_pv_production_result_1.configure(text=str(abs(round(sum(pv_power_values), 3))) + " kWh")
         self.label_power_use_result_1.configure(text=str(abs(round(sum(power_usage_values), 3))) + " kWh")
+        self.label_heat_pump_usage_result_1.configure(text=str(abs(round(sum(heat_pump_values), 3))) + " kWh")
         self.label_ev_charge_result_1.configure(text=str(abs(round(sum(ev_charge_values), 3))) + " kWh")
         self.label_cost_result_1.configure(text=str(round(grid_offtake_cost, 3)) + " €")
         self.label_earning_result_1.configure(text=str(abs(round(grid_injection_cost, 3))) + " €")
         
         # Calculate bottom values
         bottom_offtake = [x + y for x, y in zip(pv_power_values, discharge_values)]
-        bottom_charge = [x + y for x, y in zip(power_usage_values, ev_charge_values)]
-        bottom_injection = [x + y + z for x, y, z in zip(power_usage_values, ev_charge_values, charge_values)]
+        bottom_ev = [x + y for x, y in zip(power_usage_values, heat_pump_values)]
+        bottom_charge = [x + y + z for x, y, z in zip(power_usage_values, heat_pump_values, ev_charge_values)]
+        bottom_injection = [x + y + z + a for x, y, z, a in zip(power_usage_values, heat_pump_values, ev_charge_values, charge_values)]
 
         line_width = calculated_values["line_width"]
         self.ax1.set_title(calculated_values["title"])
@@ -503,8 +528,16 @@ class App(customtkinter.CTk):
         )
         self.ax1.bar(
             time_values, 
-            ev_charge_values,
+            heat_pump_values,
             bottom=power_usage_values, 
+            color="#FADCC3", 
+            label="Heat Pump Usage",
+            width=line_width
+        )
+        self.ax1.bar(
+            time_values, 
+            ev_charge_values,
+            bottom=bottom_ev, 
             color="#add8e6", 
             label="Ev Charge",
             width=line_width
@@ -555,6 +588,7 @@ class App(customtkinter.CTk):
         grid_offtake_cost_optimized = calculated_values_optimized["grid_offtake_cost"]
         
         ev_charge_values_optimized = calculated_values_optimized["ev_charge_values"]
+        heat_pump_values_optimized = calculated_values_optimized["heat_pump_values"]
 
         # code to display in text field
         self.label_offtake_result_2.configure(text=str(round(grid_offtake_sum_optimized, 3)) + " kWh")
@@ -566,8 +600,9 @@ class App(customtkinter.CTk):
 
         # Calculate bottom values
         bottom_offtake_optimized = [x + y for x, y in zip(pv_power_values_optimized, discharge_values_optimized)]
-        bottom_charge_optimized = [x + y for x, y in zip(power_usage_values_optimized, ev_charge_values_optimized)]
-        bottom_injection_optimized = [x + y + z for x, y, z in zip(power_usage_values_optimized, ev_charge_values_optimized, charge_values_optimized)]
+        bottom_ev_optimized = [x + y for x, y in zip(power_usage_values_optimized, heat_pump_values_optimized)]
+        bottom_charge_optimized = [x + y + z for x, y, z in zip(power_usage_values_optimized, heat_pump_values_optimized, ev_charge_values_optimized)]
+        bottom_injection_optimized = [x + y + z + a for x, y, z, a in zip(power_usage_values_optimized, heat_pump_values_optimized, ev_charge_values_optimized, charge_values_optimized)]
 
         line_width_optimized = calculated_values_optimized["line_width"]
         self.ax2.set_title(calculated_values_optimized["title"].replace('Not ', ''))
@@ -578,7 +613,7 @@ class App(customtkinter.CTk):
         self.ax2.bar(
             time_values_optimized, 
             pv_power_values_optimized, 
-            color="y", 
+            color="#FFA500", 
             label="PV Power",
             width=line_width_optimized
         )
@@ -608,10 +643,18 @@ class App(customtkinter.CTk):
         )
         self.ax2.bar(
             time_values_optimized, 
-            ev_charge_values_optimized,
+            heat_pump_values_optimized,
             bottom=power_usage_values_optimized, 
-            color="#add8e6", 
+            color="#FADCC3", 
             label="Ev Charge",
+            width=line_width
+        )
+        self.ax2.bar(
+            time_values_optimized, 
+            ev_charge_values_optimized,
+            bottom=bottom_ev_optimized, 
+            color="#add8e6", 
+            label="Heat Pump usage",
             width=line_width
         )
         self.ax2.bar(
@@ -782,13 +825,17 @@ class App(customtkinter.CTk):
                 self.ev_charge = self.simulation_data[15]
                 self.ev_number_of_cars = self.simulation_data[16]
                 self.ev_efficiency = self.simulation_data[17]
-                self.ev_distance_year = self.simulation_data[18]
-                self.selected_consumer_profile = self.simulation_data[19]
-                self.selected_provider = self.simulation_data[20]
-                self.general_latitude = self.simulation_data[21]
-                self.general_longitude = self.simulation_data[22]
-                self.general_start_date = self.simulation_data[23]
-                self.use_api = self.simulation_data[24]
+                self.ev_distance_year = self.simulation_data[18]               
+                self.heat_building = self.simulation_data[20]
+                self.heat_area = self.simulation_data[21]
+                self.heat_cop = self.simulation_data[22]
+                self.heat_temp = self.simulation_data[23]
+                self.selected_consumer_profile = self.simulation_data[24]
+                self.selected_provider = self.simulation_data[25]
+                self.general_latitude = self.simulation_data[26]
+                self.general_longitude = self.simulation_data[27]
+                self.general_start_date = self.simulation_data[28]
+                self.use_api = self.simulation_data[29]
         
         except:
             # Show some retry/cancel warnings
@@ -819,26 +866,9 @@ class App(customtkinter.CTk):
             min_dod=0.05,
             efficiency=self.ev_efficiency,
         )
-        
-        battery_home_2 = Battery(
-            capacity=self.battery_capacity,
-            soc=0,
-            charge_power=self.battery_charge,
-            discharge_power=self.battery_discharge,
-            max_soc=0.95,
-            min_dod=0.05,
-            efficiency=self.battery_efficiency,
-        )
-        
-        battery_car_2 = Battery(
-            capacity=40,
-            soc=38,
-            charge_power=self.ev_charge,
-            discharge_power=100,
-            max_soc=0.95,
-            min_dod=0.05,
-            efficiency=self.ev_efficiency,
-        )
+
+        battery_car_2 = copy.deepcopy(battery_car_1)
+        battery_home_2 = copy.deepcopy(battery_home_1)
 
         # the used data_points list is formatted like this data_points = ['pv_power_value', 'time_value', 'soc_value', 'charge_value', 'grid_usage', 'power_usage_value']
         # where pv_power_value is in kWh
@@ -854,6 +884,8 @@ class App(customtkinter.CTk):
         data_points = get_ev_charge_values(data_points, self.ev_distance_year, self.ev_number_of_cars)
         
         data_points = process_prices_data(data_points, self.general_latitude, self.general_longitude, self.general_start_date, self.selected_provider, self.use_api)
+        
+        data_points = process_heat_pump_data(data_points, self.heat_area, self.heat_cop, self.heat_temp, self.heat_building)
         
         data_points_optimized = copy.deepcopy(data_points)  # Make a deep copy of the original data_points list
         

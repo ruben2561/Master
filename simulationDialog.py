@@ -284,6 +284,84 @@ class SimulationDialog(customtkinter.CTk):
         )
         self.entry_ev_efficiency.grid(row=6, column=5)
         
+        ###########################################################################
+        ###########################################################################
+        ###########################################################################
+
+        # Option Menu for Heat Pump
+        self.label_heat_pump = customtkinter.CTkLabel(
+            self.frame_3, text="Heat Pump", font=customtkinter.CTkFont(size=20, weight="bold")
+        )
+        self.label_heat_pump.grid(row=1, column=6, columnspan=2)
+        self.optionmenu_heat_pump = customtkinter.CTkOptionMenu(
+            self.frame_3,
+            dynamic_resizing=False,
+            command=self.update_heat_options,
+        )
+        self.optionmenu_heat_pump.grid(row=2, column=6, columnspan=2, pady=(0,15))
+        
+        #########################
+        
+        self.switch_heat = customtkinter.CTkSwitch(
+            self.frame_3, command=self.switch_heat_event, text="Heat Pump?"
+        )
+        self.switch_heat.grid(row=0, column=6, columnspan=2, pady=(25,0))
+        
+        #########################
+        
+        self.label_heat_building = customtkinter.CTkLabel(
+            self.frame_3,
+            text="Building Age",
+            font=customtkinter.CTkFont(size=15),
+        )
+        self.label_heat_building.grid(row=3, column=6, padx=30, sticky='w')
+        self.optionmenu_building = customtkinter.CTkOptionMenu(
+            self.frame_3,
+            dynamic_resizing=False,
+            width=100,
+            values=["New", "+-2010", "+-2000", "-1995"],
+        )
+        self.optionmenu_building.grid(row=3, column=7)
+        
+        ########################
+        
+        self.label_heat_area = customtkinter.CTkLabel(
+            self.frame_3,
+            text="Area House (m²)",
+            font=customtkinter.CTkFont(size=15),
+        )
+        self.label_heat_area.grid(row=4, column=6, padx=30, sticky='w')
+        self.entry_heat_area = customtkinter.CTkEntry(
+            self.frame_3, width=50,
+        )
+        self.entry_heat_area.grid(row=4, column=7)
+        
+        #########################
+        
+        self.label_heat_cop = customtkinter.CTkLabel(
+            self.frame_3,
+            text="COP",
+            font=customtkinter.CTkFont(size=15),
+        )
+        self.label_heat_cop.grid(row=5, column=6, padx=30, sticky='w')
+        self.entry_heat_cop = customtkinter.CTkEntry(
+            self.frame_3, width=50,
+        )
+        self.entry_heat_cop.grid(row=5, column=7)
+        
+        
+        #########################
+        
+        self.label_heat_temp = customtkinter.CTkLabel(
+            self.frame_3,
+            text="Desired °C inside",
+            font=customtkinter.CTkFont(size=15),
+        )
+        self.label_heat_temp.grid(row=6, column=6, padx=30, sticky='w')
+        self.entry_heat_temp = customtkinter.CTkEntry(
+            self.frame_3, width=50,
+        )
+        self.entry_heat_temp.grid(row=6, column=7)
         
         
         ###########################################################################
@@ -302,7 +380,7 @@ class SimulationDialog(customtkinter.CTk):
         self.label_general = customtkinter.CTkLabel(
             self.frame_3, text="General", font=customtkinter.CTkFont(size=20, weight="bold")
         )
-        self.label_general.grid(row=1, column=6, columnspan=2, pady=(0,0))
+        self.label_general.grid(row=1, column=8, columnspan=2, pady=(0,0))
         
         ########################
         
@@ -311,14 +389,14 @@ class SimulationDialog(customtkinter.CTk):
             text="Consumer Profile",
             font=customtkinter.CTkFont(size=15),
         )
-        self.label_consumer_profile.grid(row=3, column=6, padx=30, sticky='w')
+        self.label_consumer_profile.grid(row=3, column=8, padx=30, sticky='w')
         self.optionmenu_consumer_profile = customtkinter.CTkOptionMenu(
             self.frame_3,
             dynamic_resizing=False,
             width=100,
         )
         self.optionmenu_consumer_profile.grid(
-            row=3, column=7, padx=(0,25)
+            row=3, column=9, padx=(0,25)
         )
         
         ########################
@@ -328,7 +406,7 @@ class SimulationDialog(customtkinter.CTk):
             text="Provider",
             font=customtkinter.CTkFont(size=15),
         )
-        self.label_provider.grid(row=4, column=6, padx=30, sticky='w')
+        self.label_provider.grid(row=4, column=8, padx=30, sticky='w')
         self.optionmenu_provider = customtkinter.CTkOptionMenu(
             self.frame_3,
             dynamic_resizing=False,
@@ -336,7 +414,7 @@ class SimulationDialog(customtkinter.CTk):
             values=["Ecopower", "Engie Dynamic", "Octa+Dynamic"],
         )
         self.optionmenu_provider.grid(
-            row=4, column=7, padx=(0,25)
+            row=4, column=9, padx=(0,25)
         )
 
         ########################
@@ -346,11 +424,11 @@ class SimulationDialog(customtkinter.CTk):
             text="Latitude",
             font=customtkinter.CTkFont(size=15),
         )
-        self.label_general_latitude.grid(row=5, column=6, padx=30, sticky='w')
+        self.label_general_latitude.grid(row=5, column=8, padx=30, sticky='w')
         self.entry_general_latitude = customtkinter.CTkEntry(
             self.frame_3, width=50,
         )
-        self.entry_general_latitude.grid(row=5, column=7, padx=(0,25))
+        self.entry_general_latitude.grid(row=5, column=9, padx=(0,25))
         
         ########################
         
@@ -359,11 +437,11 @@ class SimulationDialog(customtkinter.CTk):
             text="Longitude",
             font=customtkinter.CTkFont(size=15),
         )
-        self.label_general_longitude.grid(row=6, column=6, padx=30, sticky='w')
+        self.label_general_longitude.grid(row=6, column=8, padx=30, sticky='w')
         self.entry_general_longitude = customtkinter.CTkEntry(
             self.frame_3, width=50,
         )
-        self.entry_general_longitude.grid(row=6, column=7, padx=(0,25))
+        self.entry_general_longitude.grid(row=6, column=9, padx=(0,25))
         
         ########################
         
@@ -372,42 +450,44 @@ class SimulationDialog(customtkinter.CTk):
             text="Start Date",
             font=customtkinter.CTkFont(size=15),
         )
-        self.label_general_start_date.grid(row=7, column=6, padx=30, sticky='w')
+        self.label_general_start_date.grid(row=7, column=8, padx=30, sticky='w')
         self.entry_general_start_date = customtkinter.CTkEntry(
             self.frame_3, width=100,
         )
-        self.entry_general_start_date.grid(row=7, column=7, padx=(0,25))
+        self.entry_general_start_date.grid(row=7, column=9, padx=(0,25))
         
         ###########################################################################
         ###########################################################################
         ###########################################################################
         
         self.checkbox_testing = customtkinter.CTkCheckBox(self.frame_3, text="Use Testing Data", onvalue="on", offvalue="off")
-        self.checkbox_testing.grid(row=11, column=6, columnspan=2, pady=(20,15))
+        self.checkbox_testing.grid(row=11, column=8, columnspan=2, pady=(20,15))
         
         self.button_confirm = customtkinter.CTkButton(
             self.frame_3,
             text="Confirm",
             command=self.confirm_parameters,
         )
-        self.button_confirm.grid(row=12, column=6, columnspan=2)
+        self.button_confirm.grid(row=12, column=8, columnspan=2)
         
         self.button_confirm_save = customtkinter.CTkButton(
             self.frame_3,
             text="Confirm And Save",
             command=self.confirm_save_parameters,
         )
-        self.button_confirm_save.grid(row=13, column=6, columnspan=2, pady=(0,25))
+        self.button_confirm_save.grid(row=13, column=8, columnspan=2, pady=(0,25))
 
         self.checkbox_testing.select()
         self.switch_battery.select()
         self.switch_solar.select()
         self.switch_ev.select()
+        self.switch_heat.select()
         self.populate_simulation_options()
         self.populate_battery_options()
         self.populate_solarpanel_options()
         self.populate_ev_options()
         self.populate_consumer_profile_options()
+        self.populate_heat_options()
         
         # Fetch simulation data from the database
         self.simulation_data = self.db_manager.fetch_simulation_data()
@@ -433,7 +513,7 @@ class SimulationDialog(customtkinter.CTk):
     #TODO aparte functie maken
     def switch_battery_event(self):
         if self.switch_battery.get() == 0:
-            self.optionmenu_battery.configure(fg_color="grey20", button_color="grey20", state = "disabled")
+            self.optionmenu_battery.configure(fg_color="grey17", button_color="grey17", text_color_disabled="grey17", state = "disabled")
             self.entry_battery_charge.configure(fg_color="grey17", border_color="grey17", text_color="grey17", state = "disabled")
             self.label_battery_charge.configure(text_color='grey17')
             self.entry_battery_discharge.configure(fg_color="grey17", border_color="grey17", text_color="grey17", state = "disabled")
@@ -460,7 +540,7 @@ class SimulationDialog(customtkinter.CTk):
     
     def switch_solar_event(self):
         if self.switch_solar.get() == 0:
-            self.optionmenu_solar_panel.configure(fg_color="grey20", button_color="grey20", state = "disabled")
+            self.optionmenu_solar_panel.configure(fg_color="grey17", button_color="grey17", text_color_disabled="grey17", state = "disabled")
             self.entry_solar_azimuth.configure(fg_color="grey17", border_color="grey17", text_color="grey17", state = "disabled")
             self.label_solar_azimuth.configure(text_color='grey17')
             self.entry_solar_tilt.configure(fg_color="grey17", border_color="grey17", text_color="grey17", state = "disabled")
@@ -496,7 +576,7 @@ class SimulationDialog(customtkinter.CTk):
     
     def switch_ev_event(self):
         if self.switch_ev.get() == 0:
-            self.optionmenu_ev_charger.configure(fg_color="grey20", button_color="grey20", state = "disabled")
+            self.optionmenu_ev_charger.configure(fg_color="grey17", button_color="grey17", text_color_disabled="grey17", state = "disabled")
             self.entry_ev_charge.configure(fg_color="grey17", border_color="grey17", text_color="grey17", state = "disabled")
             self.label_ev_charge.configure(text_color='grey17')
             self.entry_ev_number_of_cars.configure(fg_color="grey17", border_color="grey17", text_color="grey17", state = "disabled")
@@ -517,6 +597,32 @@ class SimulationDialog(customtkinter.CTk):
             self.entry_ev_distance_year.configure(state = "normal", fg_color="#343638", text_color="#DCE4EE", border_color="#565B5E")
             self.label_ev_efficiency.configure(text_color='#DCE4EE')
             self.entry_ev_efficiency.configure(state = "normal", fg_color="#343638", text_color="#DCE4EE", border_color="#565B5E")
+            
+    ############################
+    
+    def switch_heat_event(self):
+        if self.switch_heat.get() == 0:
+            self.optionmenu_heat_pump.configure(fg_color="grey17", button_color="grey17", text_color_disabled="grey17", state = "disabled")
+            self.optionmenu_building.configure(fg_color="grey17", button_color="grey17", text_color_disabled="grey17", state = "disabled")
+            self.label_heat_building.configure(text_color='grey17')
+            self.entry_heat_area.configure(fg_color="grey17", border_color="grey17", text_color="grey17", state = "disabled")
+            self.label_heat_area.configure(text_color='grey17')
+            self.entry_heat_cop.configure(fg_color="grey17", border_color="grey17", text_color="grey17", state = "disabled")
+            self.label_heat_cop.configure(text_color='grey17')
+            self.entry_heat_temp.configure(fg_color="grey17", border_color="grey17", text_color="grey17", state = "disabled")
+            self.label_heat_temp.configure(text_color='grey17')
+            
+            
+        if self.switch_heat.get() == 1:
+            self.optionmenu_heat_pump.configure(fg_color="#AEB74F", button_color="#9fa845", text_color="black", state = "normal")
+            self.label_heat_building.configure(text_color='#DCE4EE')
+            self.optionmenu_building.configure(state = "normal", fg_color="#AEB74F", button_color="#9fa845")
+            self.label_heat_area.configure(text_color='#DCE4EE')
+            self.entry_heat_area.configure(state = "normal", fg_color="#343638", text_color="#DCE4EE", border_color="#565B5E")
+            self.label_heat_cop.configure(text_color='#DCE4EE')
+            self.entry_heat_cop.configure(state = "normal", fg_color="#343638", text_color="#DCE4EE", border_color="#565B5E")
+            self.label_heat_temp.configure(text_color='#DCE4EE')
+            self.entry_heat_temp.configure(state = "normal", fg_color="#343638", text_color="#DCE4EE", border_color="#565B5E")
     
     
     
@@ -546,6 +652,9 @@ class SimulationDialog(customtkinter.CTk):
         self.entry_ev_number_of_cars.delete(0, tkinter.END)
         self.entry_ev_efficiency.delete(0, tkinter.END)
         self.entry_ev_distance_year.delete(0, tkinter.END)
+        self.entry_heat_area.delete(0, tkinter.END)
+        self.entry_heat_cop.delete(0, tkinter.END)
+        self.entry_heat_temp.delete(0, tkinter.END)
         self.entry_general_latitude.delete(0, tkinter.END)
         self.entry_general_longitude.delete(0, tkinter.END)
         self.entry_general_start_date.delete(0, tkinter.END)
@@ -564,11 +673,15 @@ class SimulationDialog(customtkinter.CTk):
         self.entry_ev_number_of_cars.insert(0, selected_simulation_data[16])
         self.entry_ev_efficiency.insert(0, selected_simulation_data[17])
         self.entry_ev_distance_year.insert(0, selected_simulation_data[18])
-        self.optionmenu_consumer_profile.set(selected_simulation_data[19])
-        self.optionmenu_provider.set(selected_simulation_data[20])
-        self.entry_general_latitude.insert(0, selected_simulation_data[21])
-        self.entry_general_longitude.insert(0, selected_simulation_data[22])
-        self.entry_general_start_date.insert(0, selected_simulation_data[23])
+        self.optionmenu_building.set(selected_simulation_data[20])
+        self.entry_heat_area.insert(0, selected_simulation_data[21])
+        self.entry_heat_cop.insert(0, selected_simulation_data[22])
+        self.entry_heat_temp.insert(0, selected_simulation_data[23])
+        self.optionmenu_consumer_profile.set(selected_simulation_data[24])
+        self.optionmenu_provider.set(selected_simulation_data[25])
+        self.entry_general_latitude.insert(0, selected_simulation_data[26])
+        self.entry_general_longitude.insert(0, selected_simulation_data[27])
+        self.entry_general_start_date.insert(0, selected_simulation_data[28])
         
         # Select the switch if selected_simulation_data value is 1
         if selected_simulation_data[2] == 1:
@@ -587,10 +700,16 @@ class SimulationDialog(customtkinter.CTk):
             self.switch_ev.select()
         else:
             self.switch_ev.deselect()
+            
+        if selected_simulation_data[19] == 1:
+            self.switch_heat.select()
+        else:
+            self.switch_heat.deselect()
         
         self.switch_battery_event()
         self.switch_solar_event()
         self.switch_ev_event()
+        self.switch_heat_event()
             
             
         #TODO fix this from database
@@ -645,6 +764,20 @@ class SimulationDialog(customtkinter.CTk):
         self.entry_ev_efficiency.insert(0, selected_ev_data[4])
         self.entry_ev_distance_year.insert(0, selected_ev_data[5])
         
+    def update_heat_options(self, selected_heat):
+        
+        selected_heat = self.optionmenu_heat_pump.get()
+        selected_heat_data = self.db_manager.fetch_ev_charger_by_name(selected_heat)
+        
+        self.entry_heat_area.delete(0, tkinter.END)
+        self.entry_heat_cop.delete(0, tkinter.END)
+        self.entry_heat_temp.delete(0, tkinter.END)
+        
+        self.optionmenu_building.set(selected_heat_data[2])
+        self.entry_heat_area.insert(0, selected_heat_data[3])
+        self.entry_heat_cop.insert(0, selected_heat_data[4])
+        self.entry_heat_temp.insert(0, selected_heat_data[5])
+        
     ###########################################################################
     ###########################################################################
     ###########################################################################
@@ -684,14 +817,24 @@ class SimulationDialog(customtkinter.CTk):
         self.optionmenu_solar_panel.set("Load Solar Panel")
         
     def populate_ev_options(self):
-        # Fetch battery data from the database
+        # Fetch ev data from the database
         ev_data = self.db_manager.fetch_ev_charger_data()
-        # Extract battery names
+        # Extract ev names
         ev_options = [ev[1] for ev in ev_data]
-        # Update option menu with battery names
+        # Update option menu with ev names
         self.optionmenu_ev_charger.option_clear
         self.optionmenu_ev_charger.configure(values=ev_options)
         self.optionmenu_ev_charger.set("Load Ev Charger")
+        
+    def populate_heat_options(self):
+        # Fetch heat data from the database
+        heat_data = self.db_manager.fetch_heat_pump_data()
+        # Extract heat names
+        heat_options = [heat[1] for heat in heat_data]
+        # Update option menu with heat names
+        self.optionmenu_heat_pump.option_clear
+        self.optionmenu_heat_pump.configure(values=heat_options)
+        self.optionmenu_heat_pump.set("Load Heat Pump")
         
     def populate_consumer_profile_options(self):
             current_directory = os.getcwd()
@@ -724,16 +867,20 @@ class SimulationDialog(customtkinter.CTk):
         self.entry_ev_number_of_cars.insert(0, previous_data[16])
         self.entry_ev_efficiency.insert(0, previous_data[17])
         self.entry_ev_distance_year.insert(0, previous_data[18])
-        self.optionmenu_consumer_profile.set(previous_data[19])
-        self.optionmenu_provider.set(previous_data[20])
-        self.entry_general_latitude.insert(0, previous_data[21])
-        self.entry_general_longitude.insert(0, previous_data[22])
-        self.entry_general_start_date.insert(0, previous_data[23])
+        self.optionmenu_building.set(previous_data[20])
+        self.entry_heat_area.insert(0, previous_data[21])
+        self.entry_heat_cop.insert(0, previous_data[22])
+        self.entry_heat_temp.insert(0, previous_data[23])
+        self.optionmenu_consumer_profile.set(previous_data[24])
+        self.optionmenu_provider.set(previous_data[25])
+        self.entry_general_latitude.insert(0, previous_data[26])
+        self.entry_general_longitude.insert(0, previous_data[27])
+        self.entry_general_start_date.insert(0, previous_data[28])
         
-        # Select the switch if selected_simulation_data value is 1
+        # Select the switch if previous_data value is 1
         if previous_data[2] == 1:
             self.switch_battery.select()
-        # Deselect the switch if selected_simulation_data value is 0
+        # Deselect the switch if previous_data value is 0
         else:
             self.switch_battery.deselect()
 
@@ -748,9 +895,15 @@ class SimulationDialog(customtkinter.CTk):
         else:
             self.switch_ev.deselect()
             
+        if previous_data[19] == 1:
+            self.switch_heat.select()
+        else:
+            self.switch_heat.deselect()
+            
         self.switch_battery_event()
         self.switch_solar_event()
         self.switch_ev_event()
+        self.switch_heat_event()
         
             
     ###########################################################################
@@ -791,6 +944,11 @@ class SimulationDialog(customtkinter.CTk):
             "EV Number of Cars": self.entry_ev_number_of_cars.get() if self.switch_ev.get() else "0",
             "EV Efficiency": self.entry_ev_efficiency.get() if self.switch_ev.get() else "0",
             "EV Distance Year": self.entry_ev_distance_year.get() if self.switch_ev.get() else "0",
+            "Heat": self.switch_heat.get(),
+            "Heat Building": self.optionmenu_building.get() if self.switch_heat.get() else "0",
+            "Heat Area": self.entry_heat_area.get() if self.switch_heat.get() else "0",
+            "Heat COP": self.entry_heat_cop.get() if self.switch_heat.get() else "0",
+            "Heat Temp": self.entry_heat_temp.get() if self.switch_heat.get() else "0",
             "Consumer Profile": self.optionmenu_consumer_profile.get().replace(', ', '_'),
             "Provider": self.optionmenu_provider.get(),
             "Latitude": self.entry_general_latitude.get(),
@@ -815,6 +973,9 @@ class SimulationDialog(customtkinter.CTk):
             "EV Number of Cars": (0, 10),
             "EV Efficiency": (0, 100),
             "EV Distance Year": (0, 25000),
+            "Heat Area": (0, 1000),
+            "Heat COP": (0, 10),
+            "Heat Temp": (0, 30),
             "Latitude": (-90, 90),
             "Longitude": (-180, 180)
         }
@@ -858,6 +1019,12 @@ class SimulationDialog(customtkinter.CTk):
         if self.switch_ev.get():
             if float(entries["EV Charge"]) <= 0 or float(entries["EV Number of Cars"]) <= 0 or float(entries["EV Efficiency"]) <= 0 or float(entries["EV Distance Year"]) <= 0:
                 warning_message = "EV fields cannot be zero when EV is selected."
+                CTkMessagebox(title="Warning", message=warning_message)
+                return  # Stop further processing
+            
+        if self.switch_heat.get():
+            if float(entries["Heat Area"]) <= 0 or float(entries["Heat COP"]) <= 0 or float(entries["Heat Temp"]) <= 0:
+                warning_message = "Heat Pump fields cannot be zero when Heat Pump is selected."
                 CTkMessagebox(title="Warning", message=warning_message)
                 return  # Stop further processing
 
@@ -901,6 +1068,11 @@ class SimulationDialog(customtkinter.CTk):
             "EV Number of Cars": self.entry_ev_number_of_cars.get() if self.switch_ev.get() else "0",
             "EV Efficiency": self.entry_ev_efficiency.get() if self.switch_ev.get() else "0",
             "EV Distance Year": self.entry_ev_distance_year.get() if self.switch_ev.get() else "0",
+            "Heat": self.switch_heat.get(),
+            "Heat Building": self.optionmenu_building.get() if self.switch_heat.get() else "0",
+            "Heat Area": self.entry_heat_area.get() if self.switch_heat.get() else "0",
+            "Heat COP": self.entry_heat_cop.get() if self.switch_heat.get() else "0",
+            "Heat Temp": self.entry_heat_temp.get() if self.switch_heat.get() else "0",
             "Consumer Profile": self.optionmenu_consumer_profile.get().replace(', ', '_'),
             "Provider": self.optionmenu_provider.get(),
             "Latitude": self.entry_general_latitude.get(),
@@ -924,7 +1096,10 @@ class SimulationDialog(customtkinter.CTk):
             "EV Charge": (0, 100),
             "EV Number of Cars": (0, 10),
             "EV Efficiency": (0, 100),
-            "EV Distance Year": (0, 25000),
+            "EV Distance Year": (0, 50000),
+            "Heat Area": (0, 2000),
+            "Heat COP": (0, 10),
+            "Heat Temp": (0, 35),
             "Latitude": (-90, 90),
             "Longitude": (-180, 180)
         }
@@ -970,6 +1145,13 @@ class SimulationDialog(customtkinter.CTk):
                 warning_message = "EV fields cannot be zero when EV is selected."
                 CTkMessagebox(title="Warning", message=warning_message)
                 return  # Stop further processing
+            
+        if self.switch_heat.get():
+            if float(entries["Heat Area"]) <= 0 or float(entries["Heat COP"]) <= 0 or float(entries["Heat Temp"]) <= 0:
+                warning_message = "Heat Pump fields cannot be zero when Heat Pump is selected."
+                CTkMessagebox(title="Warning", message=warning_message)
+                return  # Stop further processing
+
         
         #TODO fixen dat ook consumer en datum checkt
         if empty_fields:

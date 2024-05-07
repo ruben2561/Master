@@ -48,6 +48,7 @@ def calculate_pv_power(forecast_list, latitude, longitude, number_of_panels, are
     dnies = np.array([float(data_point["DNI"]) for data_point in forecast_list])
     ghies = np.array([float(data_point["GHI"]) for data_point in forecast_list])
     dhies = np.array([float(data_point["DHI"]) for data_point in forecast_list])
+    
     poa_globals = pvlib.irradiance.get_total_irradiance(
         surface_tilt=tilt,
         surface_azimuth=azimuth,
@@ -63,6 +64,7 @@ def calculate_pv_power(forecast_list, latitude, longitude, number_of_panels, are
     for i, data_point in enumerate(forecast_list):
         pv_list.append({
             "pv_power_value": pv_estimates[i],
+            "temperature_out": float(data_point["temp"]),
             "time_value": datetime.strptime(data_point["period_end"], "%Y-%m-%dT%H:%M"),
         })
 
@@ -102,7 +104,8 @@ def process_solar_data(latitude, longitude, start_date, number_of_panels, area, 
         #TODO fix /2
         data_points.append(
             {
-                "pv_power_value": data_point['pv_power_value']/2,
+                "pv_power_value": data_point['pv_power_value'],
+                "temperature_out": data_point["temperature_out"], 
                 "time_value": data_point['time_value'],
                 "soc_value": 0,
                 "charge_value": 0,
@@ -113,6 +116,7 @@ def process_solar_data(latitude, longitude, start_date, number_of_panels, area, 
                 "price_injection": 0,
                 "price_offtake": 0,
                 "ev_charge_value": 0,
+                "heat_pump_value": 0,
             }
         )
 

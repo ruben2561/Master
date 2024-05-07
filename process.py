@@ -12,7 +12,7 @@ import matplotlib.dates as mdates
 import datetime
 from datetime import datetime
 
-def process_point_optimized(time_difference_hours, time_value, pv_power_values, power_usage_values, offtake_price_values, injection_price_values, soc_value, battery, ev_battery):
+def process_point_optimized(time_difference_hours, time_value, pv_power_values, power_usage_values, offtake_price_values, injection_price_values, soc_value, battery, ev_battery, heat_pump_value):
     
     grid_injection = 0
     grid_offtake = 0
@@ -69,18 +69,20 @@ def process_point_optimized(time_difference_hours, time_value, pv_power_values, 
     ### Algoritm code below #######################################
     ###############################################################
     
-    algoritm_to_use = 1
+    algoritm_to_use = 2
     
     ##111111111####################################################
     if algoritm_to_use == 1:
         
         ev_charged = 0
-            
+        
+        #TODO aanpassen ev values and heat values also in list of 1 day ahead
+        
         if(time_value.hour > 17 or time_value.hour < 8):
             ev_charged, ev_residue = ev_battery.charge(ev_battery.get_max_charge(), time_difference_hours)
-            charge_discharge_battery = pv_power_values[0] - power_usage_values[0] - ev_charged
+            charge_discharge_battery = pv_power_values[0] - power_usage_values[0] - heat_pump_value - ev_charged
         else:
-            charge_discharge_battery = pv_power_values[0] - power_usage_values[0]
+            charge_discharge_battery = pv_power_values[0] - power_usage_values[0] - heat_pump_value
 
         if charge_discharge_battery > 0:
             charged, residue_to_much_energy = battery.charge(charge_discharge_battery, time_difference_hours)
@@ -95,7 +97,7 @@ def process_point_optimized(time_difference_hours, time_value, pv_power_values, 
             discharge_value = discharged
             ev_charge_value = ev_charged
             
-        if offtake_price_values[0] <= 50:
+        if offtake_price_values[0] <= 40:
             charged, residue_to_much_energy = battery.charge(battery.get_max_charge(), time_difference_hours)
             charge_value += charged
             grid_offtake += charged
@@ -108,9 +110,9 @@ def process_point_optimized(time_difference_hours, time_value, pv_power_values, 
             
         if(time_value.hour > 17 or time_value.hour < 8):
             ev_charged, ev_residue = ev_battery.charge(ev_battery.get_max_charge(), time_difference_hours)
-            charge_discharge_battery = pv_power_values[0] - power_usage_values[0] - ev_charged
+            charge_discharge_battery = pv_power_values[0] - power_usage_values[0] - heat_pump_value - ev_charged
         else:
-            charge_discharge_battery = pv_power_values[0] - power_usage_values[0]
+            charge_discharge_battery = pv_power_values[0] - power_usage_values[0] - heat_pump_value
 
         if charge_discharge_battery > 0:
             charged, residue_to_much_energy = battery.charge(charge_discharge_battery, time_difference_hours)
@@ -125,7 +127,7 @@ def process_point_optimized(time_difference_hours, time_value, pv_power_values, 
             discharge_value = discharged
             ev_charge_value = ev_charged
         
-        if offtake_price_values[0] <= 100 and sum(offtake_price_values[5:10])/len(offtake_price_values[5:10]) > 120 and sum(pv_power_values)/len(pv_power_values) < sum(power_usage_values)/len(power_usage_values):
+        if offtake_price_values[0] <= 120 and sum(offtake_price_values[5:10])/len(offtake_price_values[5:10]) > 120 and sum(pv_power_values)/len(pv_power_values) < sum(power_usage_values)/len(power_usage_values):
                 
             charged, residue_to_much_energy = battery.charge(battery.get_max_charge(), time_difference_hours)
             charge_value += charged
@@ -152,8 +154,8 @@ def process_data_optimized(data_points, battery, ev_battery, ev_total_distance):
         time_value = current_points[0].get("time_value")
         soc_value = battery.get_soc()
         next_time = current_points[1].get("time_value")
-        
         ev_charge_value = current_point.get("ev_charge_value")
+        heat_pump_value = current_point.get("heat_pump_value")
         
         
         #if time is 12:00 discharge the car an average amount to simulate car usage
@@ -164,7 +166,7 @@ def process_data_optimized(data_points, battery, ev_battery, ev_total_distance):
         if time_value and next_time:
             time_difference_hours = (next_time - time_value).total_seconds() / 3600
             
-            grid_injection, grid_offtake, charge_value, discharge_value, ev_charged = process_point_optimized(time_difference_hours, time_value, pv_power_values, power_usage_values, offtake_price_values, injection_price_values, soc_value, battery, ev_battery)
+            grid_injection, grid_offtake, charge_value, discharge_value, ev_charged = process_point_optimized(time_difference_hours, time_value, pv_power_values, power_usage_values, offtake_price_values, injection_price_values, soc_value, battery, ev_battery, heat_pump_value)
             
             current_point["soc_value"] = soc_value
             current_point["grid_injection"] = grid_injection
@@ -185,7 +187,7 @@ def process_data(data_points, battery, ev_battery, ev_total_distance):
         time_value = current_point.get("time_value")
         next_time = next_point.get("time_value")
         ev_charge_value = current_point.get("ev_charge_value")
-        
+        heat_pump_value = current_point.get("heat_pump_value")
 
         #if time is 12:00 discharge the car an average amount to simulate car usage
         if time_value.hour == 12 and time_value.minute == 0:
@@ -203,9 +205,9 @@ def process_data(data_points, battery, ev_battery, ev_total_distance):
             #check if car is home so it can charge
             if(time_value.hour > 17 or time_value.hour < 8):
                 ev_charged, ev_residue = ev_battery.charge(ev_battery.get_max_charge(), time_difference_hours)
-                charge_discharge_battery = pv_power_value - power_usage_value - ev_charged
+                charge_discharge_battery = pv_power_value - power_usage_value - heat_pump_value - ev_charged
             else:
-                charge_discharge_battery = pv_power_value - power_usage_value
+                charge_discharge_battery = pv_power_value - power_usage_value - heat_pump_value
 
             current_point["soc_value"] = battery.get_soc()
 
@@ -298,6 +300,8 @@ def calculate_values(data_points, specific_time, scale):
         prices_injection = [point["price_injection"] for point in data_points]
         prices_offtake = [point["price_offtake"] for point in data_points]
         ev_charge_sums = [-point["ev_charge_value"] for point in data_points]
+        heat_pump_sums = [-point["heat_pump_value"] for point in data_points]
+        
         line_width = 0.04
         title = "Not Optimized - Hourly Data For Date " + str(specific_time) + " In 2023"
 
@@ -352,6 +356,7 @@ def calculate_values(data_points, specific_time, scale):
         prices_injection = [point["price_injection"] for point in data_points]
         prices_offtake = [point["price_offtake"] for point in data_points]
         ev_charge_values = [-point["ev_charge_value"] for point in data_points]
+        heat_pump_values = [-point["heat_pump_value"] for point in data_points]
         
         # Calculate cost for grid injection and grid offtake
         grid_injection_costs = [x * y / 1000 for x, y in zip(grid_injection_values, prices_injection)]
@@ -368,8 +373,8 @@ def calculate_values(data_points, specific_time, scale):
         daily_sums = defaultdict(lambda: defaultdict(float))
 
         # Iterate over the data_points and accumulate sums for each day
-        for time_value, pv_power, power_usage, charge, discharge, grid_injection, grid_offtake, ev_charge in zip(
-            time_values, pv_power_values, power_usage_values, charge_values, discharge_values, grid_injection_values, grid_offtake_values, ev_charge_values
+        for time_value, pv_power, power_usage, charge, discharge, grid_injection, grid_offtake, ev_charge, heat_pump in zip(
+            time_values, pv_power_values, power_usage_values, charge_values, discharge_values, grid_injection_values, grid_offtake_values, ev_charge_values, heat_pump_values
         ):
             # Extract day from the datetime object
             day = time_value.date()
@@ -382,6 +387,7 @@ def calculate_values(data_points, specific_time, scale):
             daily_sums[day]['grid_injection'] += grid_injection
             daily_sums[day]['grid_offtake'] += grid_offtake
             daily_sums[day]['ev_charge'] += ev_charge
+            daily_sums[day]['heat_pump'] += heat_pump
 
         pv_power_sums = [sums['pv_power'] for sums in daily_sums.values()]
         power_usage_sums = [sums['power_usage'] for sums in daily_sums.values()]
@@ -390,6 +396,8 @@ def calculate_values(data_points, specific_time, scale):
         grid_injection_sums = [sums['grid_injection'] for sums in daily_sums.values()]
         grid_offtake_sums = [sums['grid_offtake'] for sums in daily_sums.values()]
         ev_charge_sums = [sums['ev_charge'] for sums in daily_sums.values()]
+        heat_pump_sums = [sums['heat_pump'] for sums in daily_sums.values()]
+        
         time_values = list(daily_sums.keys())
         line_width = 0.95
         title = "Not Optimized - Dayly Data For Week " + str(week_number) + " In 2023"
@@ -419,6 +427,7 @@ def calculate_values(data_points, specific_time, scale):
         prices_injection = [point["price_injection"] for point in data_points]
         prices_offtake = [point["price_offtake"] for point in data_points]
         ev_charge_values = [-point["ev_charge_value"] for point in data_points]
+        heat_pump_values = [-point["heat_pump_value"] for point in data_points]
         
         # Calculate cost for grid injection and grid offtake
         grid_injection_costs = [x * y / 1000 for x, y in zip(grid_injection_values, prices_injection)]
@@ -435,8 +444,8 @@ def calculate_values(data_points, specific_time, scale):
         daily_sums = defaultdict(lambda: defaultdict(float))
 
         # Iterate over the data_points and accumulate sums for each day
-        for time_value, pv_power, power_usage, charge, discharge, grid_injection, grid_offtake, ev_charge in zip(
-            time_values, pv_power_values, power_usage_values, charge_values, discharge_values, grid_injection_values, grid_offtake_values, ev_charge_values
+        for time_value, pv_power, power_usage, charge, discharge, grid_injection, grid_offtake, ev_charge, heat_pump in zip(
+            time_values, pv_power_values, power_usage_values, charge_values, discharge_values, grid_injection_values, grid_offtake_values, ev_charge_values, heat_pump_values
         ):
             # Extract day from the datetime object
             day = time_value.date()
@@ -449,6 +458,7 @@ def calculate_values(data_points, specific_time, scale):
             daily_sums[day]['grid_injection'] += grid_injection
             daily_sums[day]['grid_offtake'] += grid_offtake
             daily_sums[day]['ev_charge'] += ev_charge
+            daily_sums[day]['heat_pump'] += heat_pump
 
         pv_power_sums = [sums['pv_power'] for sums in daily_sums.values()]
         power_usage_sums = [sums['power_usage'] for sums in daily_sums.values()]
@@ -457,6 +467,7 @@ def calculate_values(data_points, specific_time, scale):
         grid_injection_sums = [sums['grid_injection'] for sums in daily_sums.values()]
         grid_offtake_sums = [sums['grid_offtake'] for sums in daily_sums.values()]
         ev_charge_sums = [sums['ev_charge'] for sums in daily_sums.values()]
+        heat_pump_sums = [sums['heat_pump'] for sums in daily_sums.values()]
         time_values = list(daily_sums.keys())
         line_width = 0.9
         title = "Not Optimized - Dayly Data For Month " + str(specific_time) + " In 2023"
@@ -477,6 +488,7 @@ def calculate_values(data_points, specific_time, scale):
         prices_injection = [point["price_injection"] for point in data_points]
         prices_offtake = [point["price_offtake"] for point in data_points]
         ev_charge_values = [-point["ev_charge_value"] for point in data_points]
+        heat_pump_values = [-point["heat_pump_value"] for point in data_points]
         
         # Calculate cost for grid injection and grid offtake
         grid_injection_costs = [x * y / 1000 for x, y in zip(grid_injection_values, prices_injection)]
@@ -493,8 +505,8 @@ def calculate_values(data_points, specific_time, scale):
         daily_sums = defaultdict(lambda: defaultdict(float))
 
         # Iterate over the data_points and accumulate sums for each day
-        for time_value, pv_power, power_usage, charge, discharge, soc, grid_injection, grid_offtake, ev_charge in zip(
-            time_values, pv_power_values, power_usage_values, charge_values, discharge_values, soc_values, grid_injection_values, grid_offtake_values, ev_charge_values
+        for time_value, pv_power, power_usage, charge, discharge, soc, grid_injection, grid_offtake, ev_charge, heat_pump in zip(
+            time_values, pv_power_values, power_usage_values, charge_values, discharge_values, soc_values, grid_injection_values, grid_offtake_values, ev_charge_values, heat_pump_values
         ):
         
             year_year = time_value.year
@@ -508,6 +520,7 @@ def calculate_values(data_points, specific_time, scale):
             daily_sums[year_year]['grid_injection'] += grid_injection
             daily_sums[year_year]['grid_offtake'] += grid_offtake
             daily_sums[year_year]['ev_charge'] += ev_charge
+            daily_sums[year_year]['heat_pump'] += heat_pump
 
         pv_power_sums = [sums['pv_power'] for sums in daily_sums.values()]
         power_usage_sums = [sums['power_usage'] for sums in daily_sums.values()]
@@ -517,6 +530,7 @@ def calculate_values(data_points, specific_time, scale):
         grid_injection_sums = [sums['grid_injection'] for sums in daily_sums.values()]
         grid_offtake_sums = [sums['grid_offtake'] for sums in daily_sums.values()]
         ev_charge_sums = [sums['ev_charge'] for sums in daily_sums.values()]
+        heat_pump_sums = [sums['heat_pump'] for sums in daily_sums.values()]
         time_values = list(daily_sums.keys())
         line_width = 2
         title = "Not Optimized - Yealy Data For 2023"
@@ -537,6 +551,7 @@ def calculate_values(data_points, specific_time, scale):
         prices_injection = [point["price_injection"] for point in data_points]
         prices_offtake = [point["price_offtake"] for point in data_points]
         ev_charge_values = [-point["ev_charge_value"] for point in data_points]
+        heat_pump_values = [-point["heat_pump_value"] for point in data_points]
         
         # Calculate cost for grid injection and grid offtake
         grid_injection_costs = [x * y / 1000 for x, y in zip(grid_injection_values, prices_injection)]
@@ -553,8 +568,8 @@ def calculate_values(data_points, specific_time, scale):
         daily_sums = defaultdict(lambda: defaultdict(float))
 
         # Iterate over the data_points and accumulate sums for each day
-        for time_value, pv_power, power_usage, charge, discharge, soc, grid_injection, grid_offtake, ev_charge in zip(
-            time_values, pv_power_values, power_usage_values, charge_values, discharge_values, soc_values, grid_injection_values, grid_offtake_values, ev_charge_values
+        for time_value, pv_power, power_usage, charge, discharge, soc, grid_injection, grid_offtake, ev_charge, heat_pump in zip(
+            time_values, pv_power_values, power_usage_values, charge_values, discharge_values, soc_values, grid_injection_values, grid_offtake_values, ev_charge_values, heat_pump_values
         ):
         
             year_month = time_value.month
@@ -568,6 +583,7 @@ def calculate_values(data_points, specific_time, scale):
             daily_sums[year_month]['grid_injection'] += grid_injection
             daily_sums[year_month]['grid_offtake'] += grid_offtake
             daily_sums[year_month]['ev_charge'] += ev_charge
+            daily_sums[year_month]['heat_pump'] += heat_pump
 
         pv_power_sums = [sums['pv_power'] for sums in daily_sums.values()]
         power_usage_sums = [sums['power_usage'] for sums in daily_sums.values()]
@@ -577,6 +593,7 @@ def calculate_values(data_points, specific_time, scale):
         grid_injection_sums = [sums['grid_injection'] for sums in daily_sums.values()]
         grid_offtake_sums = [sums['grid_offtake'] for sums in daily_sums.values()]
         ev_charge_sums = [sums['ev_charge'] for sums in daily_sums.values()]
+        heat_pump_sums = [sums['heat_pump'] for sums in daily_sums.values()]
         time_values = list(daily_sums.keys())
         line_width = 0.9
         title = "Not Optimized - Montly Data For 2023"
@@ -597,6 +614,7 @@ def calculate_values(data_points, specific_time, scale):
         prices_injection = [point["price_injection"] for point in data_points]
         prices_offtake = [point["price_offtake"] for point in data_points]
         ev_charge_values = [-point["ev_charge_value"] for point in data_points]
+        heat_pump_values = [-point["heat_pump_value"] for point in data_points]
         
         # Calculate cost for grid injection and grid offtake
         grid_injection_costs = [x * y / 1000 for x, y in zip(grid_injection_values, prices_injection)]
@@ -613,8 +631,8 @@ def calculate_values(data_points, specific_time, scale):
         daily_sums = defaultdict(lambda: defaultdict(float))
 
         # Iterate over the data_points and accumulate sums for each day
-        for time_value, pv_power, power_usage, charge, discharge, soc, grid_injection, grid_offtake, ev_charge in zip(
-            time_values, pv_power_values, power_usage_values, charge_values, discharge_values, soc_values, grid_injection_values, grid_offtake_values, ev_charge_values
+        for time_value, pv_power, power_usage, charge, discharge, soc, grid_injection, grid_offtake, ev_charge, heat_pump in zip(
+            time_values, pv_power_values, power_usage_values, charge_values, discharge_values, soc_values, grid_injection_values, grid_offtake_values, ev_charge_values, heat_pump_values
         ):
             
 
@@ -631,6 +649,7 @@ def calculate_values(data_points, specific_time, scale):
             daily_sums[year_week]['grid_injection'] += grid_injection
             daily_sums[year_week]['grid_offtake'] += grid_offtake
             daily_sums[year_week]['ev_charge'] += ev_charge
+            daily_sums[year_week]['heat_pump'] += heat_pump
 
         pv_power_sums = [sums['pv_power'] for sums in daily_sums.values()]
         power_usage_sums = [sums['power_usage'] for sums in daily_sums.values()]
@@ -640,6 +659,7 @@ def calculate_values(data_points, specific_time, scale):
         grid_injection_sums = [sums['grid_injection'] for sums in daily_sums.values()]
         grid_offtake_sums = [sums['grid_offtake'] for sums in daily_sums.values()]
         ev_charge_sums = [sums['ev_charge'] for sums in daily_sums.values()]
+        heat_pump_sums = [sums['heat_pump'] for sums in daily_sums.values()]
         time_values = list(daily_sums.keys())
         line_width = 0.7
         title = "Not Optimized - Weekly Data For 2023"
@@ -662,6 +682,7 @@ def calculate_values(data_points, specific_time, scale):
         "grid_injection_cost": round(grid_injection_costs_total, 4),
         "grid_offtake_cost": round(grid_offtake_costs_total, 4),
         "ev_charge_values": ev_charge_sums,
+        "heat_pump_values": heat_pump_sums,
         "line_width": line_width,
         "title": title
         }

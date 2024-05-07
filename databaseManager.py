@@ -111,6 +111,35 @@ class DatabaseManager:
         query = "DELETE FROM EVCharger WHERE name = ?"
         self.cursor.execute(query, (name,))
         self.connection.commit()
+        
+     ###########################################################################
+    ###########################################################################
+    ###########################################################################
+    
+    def fetch_heat_pump_data(self):
+        self.connect()
+        try:
+            self.cursor.execute("SELECT * FROM HeatPump")
+            heat_pump_data = self.cursor.fetchall()
+            return heat_pump_data
+        except sqlite3.Error as e:
+            print("Error fetching heat_pump data:", e)
+
+    def fetch_heat_pump_by_name(self, heat_pump_name):
+        query = "SELECT * FROM EVCharger WHERE name = ?"
+        self.cursor.execute(query, (heat_pump_name,))
+        heat_pump_data = self.cursor.fetchone()
+        return heat_pump_data
+    
+    def add_heat_pump(self, name, building, areaHouse, COP, desiredTemp):
+        query = "INSERT INTO HeatPump (name, building, areaHouse, COP, desiredTemp) VALUES (?,?,?,?,?)"
+        self.cursor.execute(query, (name, building, areaHouse, COP, desiredTemp))
+        self.connection.commit()
+
+    def delete_heat_pump_by_name(self, name):
+        query = "DELETE FROM HeatPump WHERE name = ?"
+        self.cursor.execute(query, (name,))
+        self.connection.commit()
     
     
     ###########################################################################
@@ -152,6 +181,11 @@ class DatabaseManager:
             ev_number_of_cars,
             ev_efficiency,
             ev_distance_year,
+            heat,
+            heat_building,
+            heat_area,
+            heat_cop,
+            heat_temp,
             consumer_profile,
             provider,
             general_latitude,
@@ -159,7 +193,7 @@ class DatabaseManager:
             general_start_date,
             use_api):
         
-        query = "INSERT INTO Simulation (name, battery, batteryCharge, batteryDischarge, batteryCapacity, batteryEfficiency, solar, solarAzimuth, solarTilt, solarNumberOfPanels, solarEfficiency, solarLength, solarWidth, ev, evCharge, evNumberOfCars, evEfficiency, evDistanceYear, consumerProfile, provider, generalLatitude, generalLongitude, generalStartDate, useApi) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+        query = "INSERT INTO Simulation (name, battery, batteryCharge, batteryDischarge, batteryCapacity, batteryEfficiency, solar, solarAzimuth, solarTilt, solarNumberOfPanels, solarEfficiency, solarLength, solarWidth, ev, evCharge, evNumberOfCars, evEfficiency, evDistanceYear, heat, heatBuilding, heatArea, heatCOP, heatTemp, consumerProfile, provider, generalLatitude, generalLongitude, generalStartDate, useApi) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
         
         self.cursor.execute(query, 
             (
@@ -181,6 +215,11 @@ class DatabaseManager:
             ev_number_of_cars,
             ev_efficiency,
             ev_distance_year,
+            heat,
+            heat_building,
+            heat_area,
+            heat_cop,
+            heat_temp,
             consumer_profile,
             provider,
             general_latitude,
