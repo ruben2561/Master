@@ -80,6 +80,9 @@ class Battery:
         Get the current state of charge (SoC) of the battery.
         """
         return self.soc
+    
+    def get_capacity(self):
+        return self.capacity
 
     def is_full(self):
         """

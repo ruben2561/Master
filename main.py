@@ -472,16 +472,16 @@ class App(customtkinter.CTk):
         print(df)
 
         # code to display in text field
-        self.label_offtake_result_1.configure(text=str(round(grid_offtake_sum, 3)) + " kWh")
-        self.label_injection_result_1.configure(text=str(abs(round(grid_injection_sum, 3))) + " kWh")
-        self.label_charge_result_1.configure(text=str(abs(round(sum(charge_values), 3))) + " kWh")
-        self.label_discharge_result_1.configure(text=str(abs(round(sum(discharge_values), 3))) + " kWh")
-        self.label_pv_production_result_1.configure(text=str(abs(round(sum(pv_power_values), 3))) + " kWh")
-        self.label_power_use_result_1.configure(text=str(abs(round(sum(power_usage_values), 3))) + " kWh")
-        self.label_heat_pump_usage_result_1.configure(text=str(abs(round(sum(heat_pump_values), 3))) + " kWh")
-        self.label_ev_charge_result_1.configure(text=str(abs(round(sum(ev_charge_values), 3))) + " kWh")
-        self.label_cost_result_1.configure(text=str(round(grid_offtake_cost, 3)) + " €")
-        self.label_earning_result_1.configure(text=str(abs(round(grid_injection_cost, 3))) + " €")
+        self.label_offtake_result_1.configure(text=str(round(grid_offtake_sum, 2)) + " kWh")
+        self.label_injection_result_1.configure(text=str(abs(round(grid_injection_sum, 2))) + " kWh")
+        self.label_charge_result_1.configure(text=str(abs(round(sum(charge_values), 2))) + " kWh")
+        self.label_discharge_result_1.configure(text=str(abs(round(sum(discharge_values), 2))) + " kWh")
+        self.label_pv_production_result_1.configure(text=str(abs(round(sum(pv_power_values), 2))) + " kWh")
+        self.label_power_use_result_1.configure(text=str(abs(round(sum(power_usage_values), 2))) + " kWh")
+        self.label_heat_pump_usage_result_1.configure(text=str(abs(round(sum(heat_pump_values), 2))) + " kWh")
+        self.label_ev_charge_result_1.configure(text=str(abs(round(sum(ev_charge_values), 2))) + " kWh")
+        self.label_cost_result_1.configure(text="€" + str(round(grid_offtake_cost, 2)))
+        self.label_earning_result_1.configure(text= "€" + str(abs(round(grid_injection_cost, 2))))
         
         # Calculate bottom values
         bottom_offtake = [x + y for x, y in zip(pv_power_values, discharge_values)]
@@ -591,12 +591,12 @@ class App(customtkinter.CTk):
         heat_pump_values_optimized = calculated_values_optimized["heat_pump_values"]
 
         # code to display in text field
-        self.label_offtake_result_2.configure(text=str(round(grid_offtake_sum_optimized, 3)) + " kWh")
-        self.label_injection_result_2.configure(text=str(abs(round(grid_injection_sum_optimized, 3))) + " kWh")
-        self.label_charge_result_2.configure(text=str(abs(round(sum(charge_values_optimized), 3))) + " kWh")
-        self.label_discharge_result_2.configure(text=str(abs(round(sum(discharge_values_optimized), 3))) + " kWh")
-        self.label_cost_result_2.configure(text=str(round(grid_offtake_cost_optimized, 3)) + " €")
-        self.label_earning_result_2.configure(text=str(abs(round(grid_injection_cost_optimized, 3))) + " €")
+        self.label_offtake_result_2.configure(text=str(round(grid_offtake_sum_optimized, 2)) + " kWh")
+        self.label_injection_result_2.configure(text=str(abs(round(grid_injection_sum_optimized, 2))) + " kWh")
+        self.label_charge_result_2.configure(text=str(abs(round(sum(charge_values_optimized), 2))) + " kWh")
+        self.label_discharge_result_2.configure(text=str(abs(round(sum(discharge_values_optimized), 2))) + " kWh")
+        self.label_cost_result_2.configure(text="€" + str(round(grid_offtake_cost_optimized, 2)))
+        self.label_earning_result_2.configure(text="€" + str(abs(round(grid_injection_cost_optimized, 2))))
 
         # Calculate bottom values
         bottom_offtake_optimized = [x + y for x, y in zip(pv_power_values_optimized, discharge_values_optimized)]
@@ -680,8 +680,9 @@ class App(customtkinter.CTk):
         ############################################################################
         ############################################################################
         ############################################################################
-        
-        self.label_saved_result_1.configure(text=str(abs(round(abs(grid_offtake_cost)-abs(grid_injection_cost)-abs(grid_offtake_cost_optimized)+abs(grid_injection_cost_optimized), 3))) + " €")
+        saving = round(abs(grid_offtake_cost)-abs(grid_injection_cost)-abs(grid_offtake_cost_optimized)+abs(grid_injection_cost_optimized), 2)
+        saving_percentage = round((abs(grid_offtake_cost_optimized)-abs(grid_injection_cost_optimized))/(abs(grid_offtake_cost)-abs(grid_injection_cost)), 2) * 100
+        self.label_saved_result_1.configure(text="€" + str(saving) + "\n  " + str(saving_percentage) + "%")
         
         new_soc_values = scale_list(soc_values, 400)
         new_soc_values_optimized = scale_list(soc_values_optimized, 400)
@@ -908,3 +909,15 @@ class App(customtkinter.CTk):
 if __name__ == "__main__":
     app = App()
     app.mainloop()
+
+
+
+
+
+
+
+
+
+
+
+
