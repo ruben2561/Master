@@ -230,12 +230,12 @@ class App(customtkinter.CTk):
             anchor="w",
             font=customtkinter.CTkFont(size=15),
         )
-        self.label_power_use.grid(row=3, column=0, padx=20, pady=(5, 0) , sticky="w")
+        self.label_power_use.grid(row=3, column=0, padx=20, pady=(0, 0) , sticky="w")
         
         self.label_power_use_result_1 = customtkinter.CTkLabel(
             self.sidebar_frame2, text="...", font=customtkinter.CTkFont(size=12)
         )
-        self.label_power_use_result_1.grid(row=3, column=1, columnspan=2, pady=(5, 0) , padx=(0,10))
+        self.label_power_use_result_1.grid(row=3, column=1, columnspan=2, pady=(0, 0) , padx=(0,10))
         
         ###########################################################
         
@@ -245,12 +245,12 @@ class App(customtkinter.CTk):
             anchor="w",
             font=customtkinter.CTkFont(size=15),
         )
-        self.label_heat_pump_usage.grid(row=4, column=0, padx=20, pady=(5, 0) , sticky="w")
+        self.label_heat_pump_usage.grid(row=4, column=0, padx=20, pady=(0, 0) , sticky="w")
         
         self.label_heat_pump_usage_result_1 = customtkinter.CTkLabel(
             self.sidebar_frame2, text="...", font=customtkinter.CTkFont(size=12)
         )
-        self.label_heat_pump_usage_result_1.grid(row=4, column=1, columnspan=2, pady=(5, 0) , padx=(0,10))
+        self.label_heat_pump_usage_result_1.grid(row=4, column=1, columnspan=2, pady=(0, 0) , padx=(0,10))
         
         ###########################################################
         
@@ -260,12 +260,12 @@ class App(customtkinter.CTk):
             anchor="w",
             font=customtkinter.CTkFont(size=15),
         )
-        self.label_ev_charge.grid(row=5, column=0, padx=20, pady=(5, 0) , sticky="w")
+        self.label_ev_charge.grid(row=5, column=0, padx=20, pady=(0, 0) , sticky="w")
         
         self.label_ev_charge_result_1 = customtkinter.CTkLabel(
             self.sidebar_frame2, text="...", font=customtkinter.CTkFont(size=12)
         )
-        self.label_ev_charge_result_1.grid(row=5, column=1, columnspan=2, pady=(5, 0) , padx=(0,10))
+        self.label_ev_charge_result_1.grid(row=5, column=1, columnspan=2, pady=(0, 0) , padx=(0,10))
         
          ###########################################################
         
@@ -275,17 +275,17 @@ class App(customtkinter.CTk):
             anchor="w",
             font=customtkinter.CTkFont(size=15),
         )
-        self.label_charge.grid(row=6, column=0, padx=20, pady=(5, 0) , sticky="w")
+        self.label_charge.grid(row=6, column=0, padx=20, pady=(15, 0) , sticky="w")
         
         self.label_charge_result_1 = customtkinter.CTkLabel(
             self.sidebar_frame2, text="...", font=customtkinter.CTkFont(size=12)
         )
-        self.label_charge_result_1.grid(row=6, column=1, pady=(5, 0) , padx=(0,10))
+        self.label_charge_result_1.grid(row=6, column=1, pady=(15, 0) , padx=(0,10))
         
         self.label_charge_result_2 = customtkinter.CTkLabel(
             self.sidebar_frame2, text="...", font=customtkinter.CTkFont(size=12)
         )
-        self.label_charge_result_2.grid(row=6, column=2, pady=(5, 0) )
+        self.label_charge_result_2.grid(row=6, column=2, pady=(15, 0) )
 
         ###########################################################
         
@@ -295,17 +295,17 @@ class App(customtkinter.CTk):
             anchor="w",
             font=customtkinter.CTkFont(size=15),
         )
-        self.label_discharge.grid(row=7, column=0, padx=20, pady=(5, 0) , sticky="w")
+        self.label_discharge.grid(row=7, column=0, padx=20, pady=(0, 0) , sticky="w")
         
         self.label_discharge_result_1 = customtkinter.CTkLabel(
             self.sidebar_frame2, text="...", font=customtkinter.CTkFont(size=12)
         )
-        self.label_discharge_result_1.grid(row=7, column=1, pady=(5, 0) , padx=(0,10))
+        self.label_discharge_result_1.grid(row=7, column=1, pady=(0, 0) , padx=(0,10))
         
         self.label_discharge_result_2 = customtkinter.CTkLabel(
             self.sidebar_frame2, text="...", font=customtkinter.CTkFont(size=12)
         )
-        self.label_discharge_result_2.grid(row=7, column=2, pady=(5, 0) )
+        self.label_discharge_result_2.grid(row=7, column=2, pady=(0, 0) )
 
         ############################################################
 
@@ -314,17 +314,17 @@ class App(customtkinter.CTk):
             text="Total Grid Offtake:",
             font=customtkinter.CTkFont(size=15),
         )
-        self.label_offtake.grid(row=8, column=0, padx=20, pady=(5, 0), sticky="w")
+        self.label_offtake.grid(row=8, column=0, padx=20, pady=(15, 0), sticky="w")
         
         self.label_offtake_result_1 = customtkinter.CTkLabel(
             self.sidebar_frame2, text="...", font=customtkinter.CTkFont(size=12)
         )
-        self.label_offtake_result_1.grid(row=8, column=1, pady=(5, 0) , padx=(0,10))
+        self.label_offtake_result_1.grid(row=8, column=1, pady=(15, 0) , padx=(0,10))
         
         self.label_offtake_result_2 = customtkinter.CTkLabel(
             self.sidebar_frame2, text="...", font=customtkinter.CTkFont(size=12)
         )
-        self.label_offtake_result_2.grid(row=8, column=2, pady=(5, 0) )
+        self.label_offtake_result_2.grid(row=8, column=2, pady=(15, 0) )
 
         ############################################################
 
@@ -333,57 +333,77 @@ class App(customtkinter.CTk):
             text="Total Grid Injection:",
             font=customtkinter.CTkFont(size=15),
         )
-        self.label_injection.grid(row=9, column=0, padx=20, pady=(5, 0) , sticky="w")
+        self.label_injection.grid(row=9, column=0, padx=20, pady=(0, 0) , sticky="w")
         
         self.label_injection_result_1 = customtkinter.CTkLabel(
             self.sidebar_frame2, text="...", font=customtkinter.CTkFont(size=12)
         )
-        self.label_injection_result_1.grid(row=9, column=1, pady=(5, 0) , padx=(0,10))
+        self.label_injection_result_1.grid(row=9, column=1, pady=(0, 0) , padx=(0,10))
         
         self.label_injection_result_2 = customtkinter.CTkLabel(
             self.sidebar_frame2, text="...", font=customtkinter.CTkFont(size=12)
         )
-        self.label_injection_result_2.grid(row=9, column=2, pady=(5, 0) )
+        self.label_injection_result_2.grid(row=9, column=2, pady=(0, 0) )
 
         ###########################################################
         
         self.label_earning = customtkinter.CTkLabel(
             self.sidebar_frame2,
-            text="Total Earning:",
+            text="Total Price Injection:",
             anchor="w",
             font=customtkinter.CTkFont(size=15),
         )
-        self.label_earning.grid(row=10, column=0, padx=20, pady=(5, 0) , sticky="w")
+        self.label_earning.grid(row=10, column=0, padx=20, pady=(15, 0) , sticky="w")
         
         self.label_earning_result_1 = customtkinter.CTkLabel(
             self.sidebar_frame2, text="...", font=customtkinter.CTkFont(size=12)
         )
-        self.label_earning_result_1.grid(row=10, column=1, pady=(5, 0) , padx=(0,10))
+        self.label_earning_result_1.grid(row=10, column=1, pady=(15, 0) , padx=(0,10))
         
         self.label_earning_result_2 = customtkinter.CTkLabel(
             self.sidebar_frame2, text="...", font=customtkinter.CTkFont(size=12)
         )
-        self.label_earning_result_2.grid(row=10, column=2, pady=(5, 0) )
+        self.label_earning_result_2.grid(row=10, column=2, pady=(15, 0) )
 
         ###########################################################
         
         self.label_cost = customtkinter.CTkLabel(
             self.sidebar_frame2,
-            text="Total Cost:",
+            text="Total Price Offtake:",
             anchor="w",
             font=customtkinter.CTkFont(size=15),
         )
-        self.label_cost.grid(row=11, column=0, padx=20, pady=(5, 0) , sticky="w")
+        self.label_cost.grid(row=11, column=0, padx=20, pady=(0, 0) , sticky="w")
         
         self.label_cost_result_1 = customtkinter.CTkLabel(
             self.sidebar_frame2, text="...", font=customtkinter.CTkFont(size=12)
         )
-        self.label_cost_result_1.grid(row=11, column=1, pady=(5, 0) , padx=(0,10))
+        self.label_cost_result_1.grid(row=11, column=1, pady=(0, 0) , padx=(0,10))
         
         self.label_cost_result_2 = customtkinter.CTkLabel(
             self.sidebar_frame2, text="...", font=customtkinter.CTkFont(size=12)
         )
-        self.label_cost_result_2.grid(row=11, column=2, pady=(5, 0) )
+        self.label_cost_result_2.grid(row=11, column=2, pady=(0, 0) )
+        
+        ###########################################################
+        
+        self.label_price = customtkinter.CTkLabel(
+            self.sidebar_frame2,
+            text="Net Price:",
+            anchor="w",
+            font=customtkinter.CTkFont(size=15),
+        )
+        self.label_price.grid(row=12, column=0, padx=20, pady=(15, 0) , sticky="w")
+        
+        self.label_price_result_1 = customtkinter.CTkLabel(
+            self.sidebar_frame2, text="...", font=customtkinter.CTkFont(size=12)
+        )
+        self.label_price_result_1.grid(row=12, column=1, pady=(15, 0) , padx=(0,10))
+        
+        self.label_price_result_2 = customtkinter.CTkLabel(
+            self.sidebar_frame2, text="...", font=customtkinter.CTkFont(size=12)
+        )
+        self.label_price_result_2.grid(row=12, column=2, pady=(15, 0) )
 
         ########################################################### 
         
@@ -393,12 +413,12 @@ class App(customtkinter.CTk):
             anchor="w",
             font=customtkinter.CTkFont(size=15, weight='bold'),
         )
-        self.label_saved.grid(row=12, column=0, padx=20, pady=(15, 0) , sticky="w")
+        self.label_saved.grid(row=13, column=0, padx=20, pady=(15, 0) , sticky="w")
         
         self.label_saved_result_1 = customtkinter.CTkLabel(
             self.sidebar_frame2, text="...", font=customtkinter.CTkFont(size=12, weight='bold')
         )
-        self.label_saved_result_1.grid(row=12, column=1, columnspan=2, pady=(15, 0) , padx=(0,10))
+        self.label_saved_result_1.grid(row=13, column=1, columnspan=2, pady=(15, 0) , padx=(0,10))
         
         ########################################################### 
         
@@ -482,6 +502,7 @@ class App(customtkinter.CTk):
         self.label_ev_charge_result_1.configure(text=str(abs(round(sum(ev_charge_values), 2))) + " kWh")
         self.label_cost_result_1.configure(text="€" + str(round(grid_offtake_cost, 2)))
         self.label_earning_result_1.configure(text= "€" + str(abs(round(grid_injection_cost, 2))))
+        self.label_price_result_1.configure(text="€" + str(round(abs(grid_offtake_cost)-abs(grid_injection_cost), 2)))
         
         # Calculate bottom values
         bottom_offtake = [x + y for x, y in zip(pv_power_values, discharge_values)]
@@ -597,6 +618,7 @@ class App(customtkinter.CTk):
         self.label_discharge_result_2.configure(text=str(abs(round(sum(discharge_values_optimized), 2))) + " kWh")
         self.label_cost_result_2.configure(text="€" + str(round(grid_offtake_cost_optimized, 2)))
         self.label_earning_result_2.configure(text="€" + str(abs(round(grid_injection_cost_optimized, 2))))
+        self.label_price_result_2.configure(text="€" + str(round(abs(grid_offtake_cost_optimized)-abs(grid_injection_cost_optimized), 2)))
 
         # Calculate bottom values
         bottom_offtake_optimized = [x + y for x, y in zip(pv_power_values_optimized, discharge_values_optimized)]
@@ -681,7 +703,7 @@ class App(customtkinter.CTk):
         ############################################################################
         ############################################################################
         saving = round(abs(grid_offtake_cost)-abs(grid_injection_cost)-abs(grid_offtake_cost_optimized)+abs(grid_injection_cost_optimized), 2)
-        saving_percentage = round((abs(grid_offtake_cost_optimized)-abs(grid_injection_cost_optimized))/(abs(grid_offtake_cost)-abs(grid_injection_cost)), 2) * 100
+        saving_percentage = round(saving/(abs(grid_offtake_cost)-abs(grid_injection_cost)), 2) * 100
         self.label_saved_result_1.configure(text="€" + str(saving) + "\n  " + str(saving_percentage) + "%")
         
         new_soc_values = scale_list(soc_values, 400)

@@ -4,7 +4,7 @@
     
 def calculate_needed_power(area, COP_base, temp_in_desired, temp_in, U, temp_out):
     
-    if(area == 0 or COP_base == 0 or temp_in == 0):
+    if(area == 0 or COP_base == 0 or temp_in_desired == 0):
         return 0
     
     k = 0.025
@@ -35,6 +35,11 @@ def calculate_indoor_temperature(temp_out, temp_in_initial, U, area, timestep=0.
     Returns:
         float: New indoor temperature in degrees Celsius after the specified time.
     """
+    
+    if(area == 0):
+        return 0
+    
+    
     # Constants
     rho_air = 1.225  # Density of air (kg/m³)
     c_p = 1005       # Specific heat capacity of air (J/(kg·K))

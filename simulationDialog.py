@@ -638,6 +638,29 @@ class SimulationDialog(customtkinter.CTk):
         selected_simulation = self.optionmenu_simulation.get()
         selected_simulation_data = self.db_manager.fetch_simulation_by_name(selected_simulation)
         
+        # Select the switch if selected_simulation_data value is 1
+        if selected_simulation_data[2] == 1:
+            self.switch_battery.select()
+        # Deselect the switch if selected_simulation_data value is 0
+        else:
+            self.switch_battery.deselect()
+
+        # Repeat the process for switch_solar and switch_ev
+        if selected_simulation_data[7] == 1:
+            self.switch_solar.select()
+        else:
+            self.switch_solar.deselect()
+
+        if selected_simulation_data[14] == 1:
+            self.switch_ev.select()
+        else:
+            self.switch_ev.deselect()
+            
+        if selected_simulation_data[19] == 1:
+            self.switch_heat.select()
+        else:
+            self.switch_heat.deselect()
+        
         self.entry_battery_charge.delete(0, tkinter.END)
         self.entry_battery_discharge.delete(0, tkinter.END)
         self.entry_battery_capacity.delete(0, tkinter.END)
@@ -682,29 +705,6 @@ class SimulationDialog(customtkinter.CTk):
         self.entry_general_latitude.insert(0, selected_simulation_data[26])
         self.entry_general_longitude.insert(0, selected_simulation_data[27])
         self.entry_general_start_date.insert(0, selected_simulation_data[28])
-        
-        # Select the switch if selected_simulation_data value is 1
-        if selected_simulation_data[2] == 1:
-            self.switch_battery.select()
-        # Deselect the switch if selected_simulation_data value is 0
-        else:
-            self.switch_battery.deselect()
-
-        # Repeat the process for switch_solar and switch_ev
-        if selected_simulation_data[7] == 1:
-            self.switch_solar.select()
-        else:
-            self.switch_solar.deselect()
-
-        if selected_simulation_data[14] == 1:
-            self.switch_ev.select()
-        else:
-            self.switch_ev.deselect()
-            
-        if selected_simulation_data[19] == 1:
-            self.switch_heat.select()
-        else:
-            self.switch_heat.deselect()
         
         self.switch_battery_event()
         self.switch_solar_event()
