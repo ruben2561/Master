@@ -13,7 +13,6 @@ def calculate_needed_power(area, COP_base, temp_in_desired, temp_in, U, temp_out
     Q_loss = U * area * abs(temp_out - temp_in)
     
     COP = COP_base - k * (temp_in - temp_out) if (temp_in - temp_out) <= 15 else max(COP_base / 2, 2)  # Ensuring COP doesn't go unrealistically low
-    print(str(COP))
     
     power_needed = ((Q + Q_loss) / COP)/1000 # * 3600 nodig?
     

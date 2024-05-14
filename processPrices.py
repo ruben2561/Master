@@ -1,10 +1,11 @@
 import csv
+from datetime import datetime
 
 import numpy as np
 from APIPrices import get_prices_data
 
 def calculate_injection_and_offtake_prices(pricing_data, provider):
-    prices_grid = [float(data_point["price"]) for data_point in pricing_data]
+    prices_grid = pricing_data
     
     prices_injection = []
     prices_offtake = []
@@ -25,13 +26,16 @@ def calculate_injection_and_offtake_prices(pricing_data, provider):
         "prices_offtake": prices_offtake,
     }
 
-def process_prices_data(data_points, latitude, longitude, start_date, provider, use_api):
+def process_prices_data(data_points, start_date, provider):
+    
     prices_data = get_prices_data(
-        latitude, longitude, start_date, "nordpool"
+        start_date, "entsoe"
     )
     
-    reader = csv.DictReader(prices_data.splitlines())
-    prices_list = list(reader)
+
+    prices_list = list(prices_data)
+    
+    #print(prices_list)
     
     prices = calculate_injection_and_offtake_prices(prices_list, provider)
     
