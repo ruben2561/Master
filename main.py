@@ -1,5 +1,7 @@
 import copy
+import itertools
 import math
+import threading
 import time
 import tkinter
 import tkinter.messagebox
@@ -347,43 +349,43 @@ class App(customtkinter.CTk):
 
         ###########################################################
         
-        self.label_earning = customtkinter.CTkLabel(
-            self.sidebar_frame2,
-            text="Total Price Injection:",
-            anchor="w",
-            font=customtkinter.CTkFont(size=15),
-        )
-        self.label_earning.grid(row=10, column=0, padx=20, pady=(15, 0) , sticky="w")
-        
-        self.label_earning_result_1 = customtkinter.CTkLabel(
-            self.sidebar_frame2, text="...", font=customtkinter.CTkFont(size=12)
-        )
-        self.label_earning_result_1.grid(row=10, column=1, pady=(15, 0) , padx=(0,10))
-        
-        self.label_earning_result_2 = customtkinter.CTkLabel(
-            self.sidebar_frame2, text="...", font=customtkinter.CTkFont(size=12)
-        )
-        self.label_earning_result_2.grid(row=10, column=2, pady=(15, 0) )
-
-        ###########################################################
-        
         self.label_cost = customtkinter.CTkLabel(
             self.sidebar_frame2,
             text="Total Price Offtake:",
             anchor="w",
             font=customtkinter.CTkFont(size=15),
         )
-        self.label_cost.grid(row=11, column=0, padx=20, pady=(0, 0) , sticky="w")
+        self.label_cost.grid(row=10, column=0, padx=20, pady=(15, 0) , sticky="w")
         
         self.label_cost_result_1 = customtkinter.CTkLabel(
             self.sidebar_frame2, text="...", font=customtkinter.CTkFont(size=12)
         )
-        self.label_cost_result_1.grid(row=11, column=1, pady=(0, 0) , padx=(0,10))
+        self.label_cost_result_1.grid(row=10, column=1, pady=(15, 0) , padx=(0,10))
         
         self.label_cost_result_2 = customtkinter.CTkLabel(
             self.sidebar_frame2, text="...", font=customtkinter.CTkFont(size=12)
         )
-        self.label_cost_result_2.grid(row=11, column=2, pady=(0, 0) )
+        self.label_cost_result_2.grid(row=10, column=2, pady=(15, 0) )
+                
+        ###########################################################
+        
+        self.label_earning = customtkinter.CTkLabel(
+            self.sidebar_frame2,
+            text="Total Price Injection:",
+            anchor="w",
+            font=customtkinter.CTkFont(size=15),
+        )
+        self.label_earning.grid(row=11, column=0, padx=20, pady=(0, 0) , sticky="w")
+        
+        self.label_earning_result_1 = customtkinter.CTkLabel(
+            self.sidebar_frame2, text="...", font=customtkinter.CTkFont(size=12)
+        )
+        self.label_earning_result_1.grid(row=11, column=1, pady=(0, 0) , padx=(0,10))
+        
+        self.label_earning_result_2 = customtkinter.CTkLabel(
+            self.sidebar_frame2, text="...", font=customtkinter.CTkFont(size=12)
+        )
+        self.label_earning_result_2.grid(row=11, column=2, pady=(0, 0) )
         
         ###########################################################
         
@@ -474,22 +476,22 @@ class App(customtkinter.CTk):
         ev_charge_values = calculated_values["ev_charge_values"]
         heat_pump_values = calculated_values["heat_pump_values"]
         
-        # Create a DataFrame from the calculated values
-        df = pd.DataFrame({
-            "Time": time_values,
-            "PV Power": pv_power_values,
-            "Power Usage": power_usage_values,
-            "Charge": charge_values,
-            "Discharge": discharge_values,
-            "SoC": scale_list(soc_values, len(power_usage_values)) if len(power_usage_values) > 1 else soc_values,
-            "Grid Injection": grid_injection_values,
-            "Grid Offtake": grid_offtake_values,
-            "Ev Charge Values": ev_charge_values,
-            "heat pump use": heat_pump_values,
-        })
+        # # Create a DataFrame from the calculated values
+        # df = pd.DataFrame({
+        #     "Time": time_values,
+        #     "PV Power": pv_power_values,
+        #     "Power Usage": power_usage_values,
+        #     "Charge": charge_values,
+        #     "Discharge": discharge_values,
+        #     "SoC": scale_list(soc_values, len(power_usage_values)) if len(power_usage_values) > 1 else soc_values,
+        #     "Grid Injection": grid_injection_values,
+        #     "Grid Offtake": grid_offtake_values,
+        #     "Ev Charge Values": ev_charge_values,
+        #     "heat pump use": heat_pump_values,
+        # })
 
-        # Print the DataFrame
-        print(df)
+        # # Print the DataFrame
+        # print(df)
 
         # code to display in text field
         self.label_offtake_result_1.configure(text=str(round(grid_offtake_sum, 2)) + " kWh")
@@ -906,7 +908,7 @@ class App(customtkinter.CTk):
         
         data_points = get_ev_charge_values(data_points, self.ev_distance_year, self.ev_number_of_cars)
         
-        data_points = process_prices_data(data_points, self.general_latitude, self.general_longitude, self.general_start_date, self.selected_provider, self.use_api)
+        data_points = process_prices_data(data_points, self.general_start_date, self.selected_provider)
         
         data_points = process_heat_pump_data(data_points, self.heat_area, self.heat_cop, self.heat_temp, self.heat_building)
         

@@ -99,18 +99,18 @@ def get_solar_data_solcast(latitude, longitude, start_date):
         #end_date = start_date + datetime.timedelta(days=365)
         
         # Convert to datetime object
-        start_date_object = datetime.strptime(start_date, "%d/%m/%Y")
+        start_date_object = datetime.datetime.strptime(start_date, "%Y-%m-%d")
 
         # Convert to desired format
         formatted_start_date = start_date_object.strftime("%Y-%m-%dT%H:%M:%S.000Z")
 
         endpoint2 = "https://api.solcast.com.au/rooftop_sites/2232-a658-4143-f02f/estimated_actuals?format=csv&api_key=w58k5_UUO4JxNP3ykI-gsRn8w65hJQQQ"
-        endpoint = f"https://api.solcast.com.au/data/historic/rooftop_pv_power?latitude={latitude}&longitude={longitude}&period=PT30M&output_parameters=pv_power_rooftop&capacity=1&install_date=2020-12-30&format=json&start={start_date}&end={end_date}&api_key=w58k5_UUO4JxNP3ykI-gsRn8w65hJQQQ"
+        #endpoint = f"https://api.solcast.com.au/data/historic/rooftop_pv_power?latitude={latitude}&longitude={longitude}&period=PT30M&output_parameters=pv_power_rooftop&capacity=1&install_date=2020-12-30&format=json&start={start_date}&end={end_date}&api_key=w58k5_UUO4JxNP3ykI-gsRn8w65hJQQQ"
 
         payload={}
         headers = {}
 
-        response = requests.request("GET", endpoint, headers=headers, data=payload)
+        response = requests.request("GET", endpoint2, headers=headers, data=payload)
         #print(response.text)
         # Check if the request was successful (status code 200)
         if response.status_code == 200:
