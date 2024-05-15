@@ -7,7 +7,6 @@ from tkinter import ttk
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from battery import Battery
-from APIWeather import get_solar_data_solcast
 import csv
 import matplotlib.dates as mdates
 import datetime
@@ -17,7 +16,7 @@ from datetime import datetime
 def process_data_points(algorithm_name, data_points, battery, ev_battery, ev_total_distance):
     #algorithm_name = algorithm_name + ".py"
     algorithm_name = algorithm_name.replace(" ", "_")
-    print(str(algorithm_name))
+
     # Construct the module name based on the provided algorithm name
     module_name = f"algorithms.{algorithm_name}"
     

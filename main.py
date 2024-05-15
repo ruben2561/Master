@@ -101,12 +101,12 @@ class App(customtkinter.CTk):
         self.optionmenu_algo_1 = customtkinter.CTkOptionMenu(
             self.sidebar_frame,
         )
-        self.optionmenu_algo_1.grid(row=0, column=2, padx=(20, 0), pady=(10,5))
+        self.optionmenu_algo_1.grid(row=0, column=2, padx=(20, 20), pady=(10,5))
         
         self.optionmenu_algo_2 = customtkinter.CTkOptionMenu(
             self.sidebar_frame,
         )
-        self.optionmenu_algo_2.grid(row=1, column=2, padx=(20, 0), pady=(0,10))
+        self.optionmenu_algo_2.grid(row=1, column=2, padx=(20, 20), pady=(0,10))
         
         #######################################################
         
@@ -432,7 +432,7 @@ class App(customtkinter.CTk):
         
         self.label_saved = customtkinter.CTkLabel(
             self.sidebar_frame2,
-            text="Saved:",
+            text="Difference:",
             anchor="w",
             font=customtkinter.CTkFont(size=15, weight='bold'),
         )
@@ -535,7 +535,7 @@ class App(customtkinter.CTk):
         bottom_injection = [x + y + z + a for x, y, z, a in zip(power_usage_values, heat_pump_values, ev_charge_values, charge_values)]
 
         line_width = calculated_values["line_width"]
-        self.ax1.set_title(calculated_values["title"])
+        self.ax1.set_title(calculated_values["title"].replace("Not Optimized", self.optionmenu_algo_1.get()))
         self.ax1.set_xlabel("Time")   
         self.ax1.grid(axis='y', zorder=0) 
         self.ax1.set_axisbelow(True)        
@@ -651,7 +651,7 @@ class App(customtkinter.CTk):
         bottom_injection_algo_2 = [x + y + z + a for x, y, z, a in zip(power_usage_values_algo_2, heat_pump_values_algo_2, ev_charge_values_algo_2, charge_values_algo_2)]
 
         line_width_algo_2 = calculated_values_algo_2["line_width"]
-        self.ax2.set_title(calculated_values_algo_2["title"].replace('Not ', ''))
+        self.ax2.set_title(calculated_values["title"].replace("Not Optimized", self.optionmenu_algo_2.get()))
         self.ax2.set_xlabel("Time")       
         self.ax2.grid(axis='y', zorder=0) 
         self.ax2.set_axisbelow(True)
@@ -727,7 +727,7 @@ class App(customtkinter.CTk):
         ############################################################################
         ############################################################################
         saving = round(abs(grid_offtake_cost)-abs(grid_injection_cost)-abs(grid_offtake_cost_algo_2)+abs(grid_injection_cost_algo_2), 2)
-        saving_percentage = round(saving/(abs(grid_offtake_cost)-abs(grid_injection_cost)), 2) * 100
+        saving_percentage = round(saving/abs(abs(grid_offtake_cost)-abs(grid_injection_cost)), 2) * 100
         self.label_saved_result_1.configure(text="€" + str(saving) + "\n  " + str(round(saving_percentage, 2)) + "%")
         
         new_soc_values = scale_list(soc_values, 400)
@@ -934,7 +934,7 @@ class App(customtkinter.CTk):
         # grid_usage is in kWh and is positive when extracted and is negative when injected
         
         data_points = process_solar_data(self.general_latitude, self.general_longitude, self.general_start_date, self.solar_number_of_panels, self.solar_width*self.solar_length, self.solar_azimuth, self.solar_tilt, self.solar_efficiency, self.solar_efficiency, self.use_api)
-
+        
         data_points = get_power_usage_values(data_points, self.selected_consumer_profile)
         
         data_points = get_ev_charge_values(data_points, self.ev_distance_year, self.ev_number_of_cars)

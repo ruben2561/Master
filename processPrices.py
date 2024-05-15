@@ -31,10 +31,7 @@ def process_prices_data(data_points, start_date, provider):
     prices_data = get_prices_data(
         start_date, "entsoe"
     )
-
     prices_list = list(prices_data)
-    
-    #print(prices_list)
     
     prices = calculate_injection_and_offtake_prices(prices_list, provider)
     
