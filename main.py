@@ -692,7 +692,7 @@ class App(customtkinter.CTk):
             heat_pump_values_algo_2,
             bottom=power_usage_values_algo_2, 
             color="#FADCC3", 
-            label="Ev Charge",
+            label="Heat Pump usage",
             width=line_width
         )
         self.ax2.bar(
@@ -700,7 +700,7 @@ class App(customtkinter.CTk):
             ev_charge_values_algo_2,
             bottom=bottom_ev_algo_2, 
             color="#add8e6", 
-            label="Heat Pump usage",
+            label="Ev Charge",
             width=line_width
         )
         self.ax2.bar(
@@ -815,11 +815,11 @@ class App(customtkinter.CTk):
             if self.optionmenu_month.get() not in ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]: self.optionmenu_month.set("January")
         
         if self.data_available:
-            self.update_graphs_with_new_data(self.data_points_complete, self.data_points_complete_algo_2)
+            self.update_graphs_with_new_data(self.data_points_complete_algo_1, self.data_points_complete_algo_2)
             
     def option_menu_time_event(self, event):
         if self.data_available:
-            self.update_graphs_with_new_data(self.data_points_complete, self.data_points_complete_algo_2)
+            self.update_graphs_with_new_data(self.data_points_complete_algo_1, self.data_points_complete_algo_2)
             
     def option_menu_month_event(self, event):
         selected_month = self.optionmenu_month.get()
@@ -851,7 +851,7 @@ class App(customtkinter.CTk):
             self.optionmenu_day.set(len(day_values))
 
         if self.data_available:
-            self.update_graphs_with_new_data(self.data_points_complete, self.data_points_complete_algo_2)
+            self.update_graphs_with_new_data(self.data_points_complete_algo_1, self.data_points_complete_algo_2)
             
     def populate_algo_options(self):
         """List all files in the given directory."""
