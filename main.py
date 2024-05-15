@@ -24,8 +24,7 @@ from process import (
     calculate_values,
     get_ev_charge_values,
     get_power_usage_values,
-    process_data,
-    process_data_optimized,
+    process_data_points,
     scale_list,
 )
 from processPVPower import process_solar_data
@@ -42,7 +41,6 @@ customtkinter.set_appearance_mode("Dark")
 customtkinter.set_default_color_theme("MPTheme.json")
 
 
-
 class App(customtkinter.CTk):
     def __init__(self):
         super().__init__()
@@ -55,10 +53,10 @@ class App(customtkinter.CTk):
         # self.geometry(f"{1280}x{760}")
 
         # configure grid layout (2x3)
-        self.grid_columnconfigure(0, weight=0)
-        self.grid_columnconfigure(1, weight=1)
-        self.grid_rowconfigure(0, weight=1)
-        self.grid_rowconfigure(1, weight=0)
+        # self.grid_columnconfigure(0, weight=0)
+        # self.grid_columnconfigure(1, weight=1)
+        # self.grid_rowconfigure(0, weight=1)
+        # self.grid_rowconfigure(1, weight=0)
 
         self.data_available = False
 
@@ -74,65 +72,88 @@ class App(customtkinter.CTk):
         
         self.sidebar_button_1 = customtkinter.CTkButton(
             self.sidebar_frame,
+            width=150,
             text="Start Simulation",
-            command=self.verify_parameters
-            ,
+            command=self.verify_parameters,
         )
-        self.sidebar_button_1.grid(row=0, column=0, pady=(10,10), padx=(20,20))
+        self.sidebar_button_1.grid(row=0, column=0, pady=(10,5), padx=(20,20))
         
         ######################################################
         
         self.sidebar_button_2 = customtkinter.CTkButton(
             self.sidebar_frame,
+            width=150,
             text="Simulation Parameters",
             command=self.simulation_parameters,
         )
-        self.sidebar_button_2.grid(row=0, column=1, padx=(20,20))
+        self.sidebar_button_2.grid(row=1, column=0, pady=(0,10), padx=(20,20))
+        
+        ######################################################
+        
+        # Option Menu for algorithm
+        self.label_algo = customtkinter.CTkLabel(
+            self.sidebar_frame,
+            text="Algo:",
+            font=customtkinter.CTkFont(size=20, weight="bold"),
+        )
+        self.label_algo.grid(row=0, column=1, rowspan=2, padx=(40,0))
+        
+        self.optionmenu_algo_1 = customtkinter.CTkOptionMenu(
+            self.sidebar_frame,
+        )
+        self.optionmenu_algo_1.grid(row=0, column=2, padx=(20, 0), pady=(10,5))
+        
+        self.optionmenu_algo_2 = customtkinter.CTkOptionMenu(
+            self.sidebar_frame,
+        )
+        self.optionmenu_algo_2.grid(row=1, column=2, padx=(20, 0), pady=(0,10))
+        
+        #######################################################
         
         ######################################################
         
         # Option Menu for Simulation scale
         self.label_scale = customtkinter.CTkLabel(
             self.sidebar_frame,
-            text="Visualisation:",
+            text="Visual:",
             font=customtkinter.CTkFont(size=20, weight="bold"),
         )
-        self.label_scale.grid(row=0, column=2, padx=(40,0))
+        self.label_scale.grid(row=0, column=3, rowspan=2, padx=(40,0))
         
         self.optionmenu_scale = customtkinter.CTkOptionMenu(
             self.sidebar_frame,
             dynamic_resizing=False, values=["PER YEAR", "PER MONTH", "PER WEEK", "SPECIFIC MONTH", "SPECIFIC WEEK", "SPECIFIC DAY"],
             command=self.update_date_options
         )
-        self.optionmenu_scale.grid(row=0, column=3, padx=(20,0))
+        self.optionmenu_scale.grid(row=0, column=4, columnspan=2, pady=(10,5), padx=(20,0))
         
         self.optionmenu_day = customtkinter.CTkOptionMenu(
             self.sidebar_frame,
             width=60,
             command=self.option_menu_time_event
         )
-        self.optionmenu_day.grid(row=0, column=4, padx=(20, 0))
+        self.optionmenu_day.grid(row=1, column=4, padx=(20, 0), pady=(0,10))
         
         self.optionmenu_month = customtkinter.CTkOptionMenu(
             self.sidebar_frame,
             width=80,
             command=self.option_menu_month_event
         )
-        self.optionmenu_month.grid(row=0, column=5, padx=(5, 20))
+        self.optionmenu_month.grid(row=1, column=5, padx=(5, 0), pady=(0,10))
         
         #######################################################
         
-        self.image_uhasselt = customtkinter.CTkImage(dark_image=Image.open(os.path.join("images/uhasselt.png")), size=(80 * 1.5, 19 * 1.5))
+        self.image_uhasselt = customtkinter.CTkImage(dark_image=Image.open(os.path.join("images/uhasselt.png")), size=(120 * 1.2, 28.5 * 1.2))
         label_uhasselt = customtkinter.CTkLabel(self.sidebar_frame, image=self.image_uhasselt, text='')
-        label_uhasselt.grid(row=0, column=6, padx=(160,0), sticky="e")
+        label_uhasselt.grid(row=0, column=6, rowspan=2, padx=(200,0), sticky="e")
         
-        self.image_uhasselt = customtkinter.CTkImage(dark_image=Image.open(os.path.join("images/kuleuven.png")), size=(12.80 * 6.2, 4.62 * 6.2))
+        self.image_uhasselt = customtkinter.CTkImage(dark_image=Image.open(os.path.join("images/kuleuven.png")), size=(79.36 * 1.2, 28.644 * 1.))
         label_uhasselt = customtkinter.CTkLabel(self.sidebar_frame, image=self.image_uhasselt, text='')
-        label_uhasselt.grid(row=0, column=7, padx=(20,0), sticky="e")
+        label_uhasselt.grid(row=0, column=7, rowspan=2, padx=(20,0), sticky="e")
         
-        self.image_ilumen = customtkinter.CTkImage(dark_image=Image.open(os.path.join("images/ilumen.png")), size=(72.4 * 1.4 , 29.2 * 1.4))
+        self.image_ilumen = customtkinter.CTkImage(dark_image=Image.open(os.path.join("images/ilumen.png")), size=(101.36 * 1.2, 40.88 * 1.2))
         label_ilumen = customtkinter.CTkLabel(self.sidebar_frame, image=self.image_ilumen, text='')
-        label_ilumen.grid(row=0, column=8, padx=(15,0), sticky="e")
+        label_ilumen.grid(row=0, column=8, rowspan=2, padx=(15,0), sticky="e")
 
         #######################################################
 
@@ -197,14 +218,14 @@ class App(customtkinter.CTk):
         
         self.logo_label2 = customtkinter.CTkLabel(
             self.sidebar_frame2,
-            text="Default",
+            text="Algo 1",
             font=customtkinter.CTkFont(size=15),
         )
         self.logo_label2.grid(row=1, column=1, padx=(0,10))
         
         self.logo_label3 = customtkinter.CTkLabel(
             self.sidebar_frame2,
-            text="Optimized",
+            text="Algo 2",
             font=customtkinter.CTkFont(size=15),
         )
         self.logo_label3.grid(row=1, column=2, padx=(0,20))
@@ -287,7 +308,7 @@ class App(customtkinter.CTk):
         self.label_charge_result_2 = customtkinter.CTkLabel(
             self.sidebar_frame2, text="...", font=customtkinter.CTkFont(size=12)
         )
-        self.label_charge_result_2.grid(row=6, column=2, pady=(15, 0) )
+        self.label_charge_result_2.grid(row=6, column=2, pady=(15, 0), padx=(0, 20))
 
         ###########################################################
         
@@ -307,7 +328,7 @@ class App(customtkinter.CTk):
         self.label_discharge_result_2 = customtkinter.CTkLabel(
             self.sidebar_frame2, text="...", font=customtkinter.CTkFont(size=12)
         )
-        self.label_discharge_result_2.grid(row=7, column=2, pady=(0, 0) )
+        self.label_discharge_result_2.grid(row=7, column=2, pady=(0, 0), padx=(0, 20) )
 
         ############################################################
 
@@ -326,7 +347,7 @@ class App(customtkinter.CTk):
         self.label_offtake_result_2 = customtkinter.CTkLabel(
             self.sidebar_frame2, text="...", font=customtkinter.CTkFont(size=12)
         )
-        self.label_offtake_result_2.grid(row=8, column=2, pady=(15, 0) )
+        self.label_offtake_result_2.grid(row=8, column=2, pady=(15, 0), padx=(0, 20) )
 
         ############################################################
 
@@ -345,7 +366,7 @@ class App(customtkinter.CTk):
         self.label_injection_result_2 = customtkinter.CTkLabel(
             self.sidebar_frame2, text="...", font=customtkinter.CTkFont(size=12)
         )
-        self.label_injection_result_2.grid(row=9, column=2, pady=(0, 0) )
+        self.label_injection_result_2.grid(row=9, column=2, pady=(0, 0), padx=(0, 20) )
 
         ###########################################################
         
@@ -365,7 +386,7 @@ class App(customtkinter.CTk):
         self.label_cost_result_2 = customtkinter.CTkLabel(
             self.sidebar_frame2, text="...", font=customtkinter.CTkFont(size=12)
         )
-        self.label_cost_result_2.grid(row=10, column=2, pady=(15, 0) )
+        self.label_cost_result_2.grid(row=10, column=2, pady=(15, 0), padx=(0, 20) )
                 
         ###########################################################
         
@@ -385,7 +406,7 @@ class App(customtkinter.CTk):
         self.label_earning_result_2 = customtkinter.CTkLabel(
             self.sidebar_frame2, text="...", font=customtkinter.CTkFont(size=12)
         )
-        self.label_earning_result_2.grid(row=11, column=2, pady=(0, 0) )
+        self.label_earning_result_2.grid(row=11, column=2, pady=(0, 0), padx=(0, 20) )
         
         ###########################################################
         
@@ -405,7 +426,7 @@ class App(customtkinter.CTk):
         self.label_price_result_2 = customtkinter.CTkLabel(
             self.sidebar_frame2, text="...", font=customtkinter.CTkFont(size=12)
         )
-        self.label_price_result_2.grid(row=12, column=2, pady=(15, 0) )
+        self.label_price_result_2.grid(row=12, column=2, pady=(15, 0), padx=(0, 20) )
 
         ########################################################### 
         
@@ -429,6 +450,7 @@ class App(customtkinter.CTk):
         self.optionmenu_day.configure(fg_color="grey20", button_color="grey20", state = "disabled")
         self.optionmenu_month.configure(fg_color="grey20", button_color="grey20", state = "disabled")
         self.optionmenu_scale.set("PER MONTH")
+        self.populate_algo_options()
         
         self.protocol("WM_DELETE_WINDOW", self.on_close)
         
@@ -441,7 +463,7 @@ class App(customtkinter.CTk):
     #############################################################################
     #############################################################################
     
-    def update_graphs_with_new_data(self, data_points, data_points_optimized):
+    def update_graphs_with_new_data(self, data_points, data_points_algo_2):
         
         # Clear existing plots
         self.ax1.clear()
@@ -589,113 +611,113 @@ class App(customtkinter.CTk):
         ############################################################################
         ############################################################################
         
-        calculated_values_optimized = calculate_values(data_points_optimized, str(self.optionmenu_day.get()) + "-" + str(self.optionmenu_month.get()), self.optionmenu_scale.get())
+        calculated_values_algo_2 = calculate_values(data_points_algo_2, str(self.optionmenu_day.get()) + "-" + str(self.optionmenu_month.get()), self.optionmenu_scale.get())
 
         # Perform some calculations to get new data
-        time_values_optimized = calculated_values_optimized["time_values"]
-        pv_power_values_optimized = calculated_values_optimized["pv_power_values"]
-        power_usage_values_optimized = calculated_values_optimized["power_usage_values"]
-        charge_values_optimized = calculated_values_optimized["charge_values"]
-        discharge_values_optimized = calculated_values_optimized["discharge_values"]
-        soc_values_optimized = calculated_values_optimized["soc_values"]
-        grid_injection_values_optimized = calculated_values_optimized["injection_values"]
-        grid_offtake_values_optimized = calculated_values_optimized["offtake_values"]
+        time_values_algo_2 = calculated_values_algo_2["time_values"]
+        pv_power_values_algo_2 = calculated_values_algo_2["pv_power_values"]
+        power_usage_values_algo_2 = calculated_values_algo_2["power_usage_values"]
+        charge_values_algo_2 = calculated_values_algo_2["charge_values"]
+        discharge_values_algo_2 = calculated_values_algo_2["discharge_values"]
+        soc_values_algo_2 = calculated_values_algo_2["soc_values"]
+        grid_injection_values_algo_2 = calculated_values_algo_2["injection_values"]
+        grid_offtake_values_algo_2 = calculated_values_algo_2["offtake_values"]
         
-        grid_injection_prices_optimized = calculated_values_optimized["grid_injection_prices"]
-        grid_offtake_prices_optimized = calculated_values_optimized["grid_offtake_prices"]
+        grid_injection_prices_algo_2 = calculated_values_algo_2["grid_injection_prices"]
+        grid_offtake_prices_algo_2 = calculated_values_algo_2["grid_offtake_prices"]
 
-        grid_injection_sum_optimized = calculated_values_optimized["grid_injection_sum"]
-        grid_offtake_sum_optimized = calculated_values_optimized["grid_offtake_sum"]
+        grid_injection_sum_algo_2 = calculated_values_algo_2["grid_injection_sum"]
+        grid_offtake_sum_algo_2 = calculated_values_algo_2["grid_offtake_sum"]
 
-        grid_injection_cost_optimized = calculated_values_optimized["grid_injection_cost"]
-        grid_offtake_cost_optimized = calculated_values_optimized["grid_offtake_cost"]
+        grid_injection_cost_algo_2 = calculated_values_algo_2["grid_injection_cost"]
+        grid_offtake_cost_algo_2 = calculated_values_algo_2["grid_offtake_cost"]
         
-        ev_charge_values_optimized = calculated_values_optimized["ev_charge_values"]
-        heat_pump_values_optimized = calculated_values_optimized["heat_pump_values"]
+        ev_charge_values_algo_2 = calculated_values_algo_2["ev_charge_values"]
+        heat_pump_values_algo_2 = calculated_values_algo_2["heat_pump_values"]
 
         # code to display in text field
-        self.label_offtake_result_2.configure(text=str(round(grid_offtake_sum_optimized, 2)) + " kWh")
-        self.label_injection_result_2.configure(text=str(abs(round(grid_injection_sum_optimized, 2))) + " kWh")
-        self.label_charge_result_2.configure(text=str(abs(round(sum(charge_values_optimized), 2))) + " kWh")
-        self.label_discharge_result_2.configure(text=str(abs(round(sum(discharge_values_optimized), 2))) + " kWh")
-        self.label_cost_result_2.configure(text="€" + str(round(grid_offtake_cost_optimized, 2)))
-        self.label_earning_result_2.configure(text="€" + str(abs(round(grid_injection_cost_optimized, 2))))
-        self.label_price_result_2.configure(text="€" + str(round(abs(grid_offtake_cost_optimized)-abs(grid_injection_cost_optimized), 2)))
+        self.label_offtake_result_2.configure(text=str(round(grid_offtake_sum_algo_2, 2)) + " kWh")
+        self.label_injection_result_2.configure(text=str(abs(round(grid_injection_sum_algo_2, 2))) + " kWh")
+        self.label_charge_result_2.configure(text=str(abs(round(sum(charge_values_algo_2), 2))) + " kWh")
+        self.label_discharge_result_2.configure(text=str(abs(round(sum(discharge_values_algo_2), 2))) + " kWh")
+        self.label_cost_result_2.configure(text="€" + str(round(grid_offtake_cost_algo_2, 2)))
+        self.label_earning_result_2.configure(text="€" + str(abs(round(grid_injection_cost_algo_2, 2))))
+        self.label_price_result_2.configure(text="€" + str(round(abs(grid_offtake_cost_algo_2)-abs(grid_injection_cost_algo_2), 2)))
 
         # Calculate bottom values
-        bottom_offtake_optimized = [x + y for x, y in zip(pv_power_values_optimized, discharge_values_optimized)]
-        bottom_ev_optimized = [x + y for x, y in zip(power_usage_values_optimized, heat_pump_values_optimized)]
-        bottom_charge_optimized = [x + y + z for x, y, z in zip(power_usage_values_optimized, heat_pump_values_optimized, ev_charge_values_optimized)]
-        bottom_injection_optimized = [x + y + z + a for x, y, z, a in zip(power_usage_values_optimized, heat_pump_values_optimized, ev_charge_values_optimized, charge_values_optimized)]
+        bottom_offtake_algo_2 = [x + y for x, y in zip(pv_power_values_algo_2, discharge_values_algo_2)]
+        bottom_ev_algo_2 = [x + y for x, y in zip(power_usage_values_algo_2, heat_pump_values_algo_2)]
+        bottom_charge_algo_2 = [x + y + z for x, y, z in zip(power_usage_values_algo_2, heat_pump_values_algo_2, ev_charge_values_algo_2)]
+        bottom_injection_algo_2 = [x + y + z + a for x, y, z, a in zip(power_usage_values_algo_2, heat_pump_values_algo_2, ev_charge_values_algo_2, charge_values_algo_2)]
 
-        line_width_optimized = calculated_values_optimized["line_width"]
-        self.ax2.set_title(calculated_values_optimized["title"].replace('Not ', ''))
+        line_width_algo_2 = calculated_values_algo_2["line_width"]
+        self.ax2.set_title(calculated_values_algo_2["title"].replace('Not ', ''))
         self.ax2.set_xlabel("Time")       
         self.ax2.grid(axis='y', zorder=0) 
         self.ax2.set_axisbelow(True)
 
         self.ax2.bar(
-            time_values_optimized, 
-            pv_power_values_optimized, 
+            time_values_algo_2, 
+            pv_power_values_algo_2, 
             color="#FFA500", 
             label="PV Power",
-            width=line_width_optimized
+            width=line_width_algo_2
         )
         self.ax2.bar(
-            time_values_optimized,
-            discharge_values_optimized,
-            bottom=pv_power_values_optimized,
+            time_values_algo_2,
+            discharge_values_algo_2,
+            bottom=pv_power_values_algo_2,
             color="#FF0000",
             label="Discharge",
-            width=line_width_optimized,
+            width=line_width_algo_2,
         )
         self.ax2.bar(
-            time_values_optimized,
-            grid_offtake_values_optimized,
-            bottom=bottom_offtake_optimized,
+            time_values_algo_2,
+            grid_offtake_values_algo_2,
+            bottom=bottom_offtake_algo_2,
             color="b",
             label="Grid Offtake",
-            width=line_width_optimized,
+            width=line_width_algo_2,
         )
 
         self.ax2.bar(
-            time_values_optimized, 
-            power_usage_values_optimized, 
+            time_values_algo_2, 
+            power_usage_values_algo_2, 
             color="#808080", 
             label="Power Usage",
-            width=line_width_optimized
+            width=line_width_algo_2
         )
         self.ax2.bar(
-            time_values_optimized, 
-            heat_pump_values_optimized,
-            bottom=power_usage_values_optimized, 
+            time_values_algo_2, 
+            heat_pump_values_algo_2,
+            bottom=power_usage_values_algo_2, 
             color="#FADCC3", 
             label="Ev Charge",
             width=line_width
         )
         self.ax2.bar(
-            time_values_optimized, 
-            ev_charge_values_optimized,
-            bottom=bottom_ev_optimized, 
+            time_values_algo_2, 
+            ev_charge_values_algo_2,
+            bottom=bottom_ev_algo_2, 
             color="#add8e6", 
             label="Heat Pump usage",
             width=line_width
         )
         self.ax2.bar(
-            time_values_optimized,
-            charge_values_optimized,
-            bottom=bottom_charge_optimized,
+            time_values_algo_2,
+            charge_values_algo_2,
+            bottom=bottom_charge_algo_2,
             color="#009600",
             label="Bat. Charge",
             width=line_width,
         )
         self.ax2.bar(
-            time_values_optimized,
-            grid_injection_values_optimized,
-            bottom=bottom_injection_optimized,
+            time_values_algo_2,
+            grid_injection_values_algo_2,
+            bottom=bottom_injection_algo_2,
             color="#4C00A4",
             label="Grid Injection",
-            width=line_width_optimized,
+            width=line_width_algo_2,
         )
         
         self.ax2.axhline(y=0, color="k", linestyle="-", linewidth=0.1)
@@ -704,12 +726,12 @@ class App(customtkinter.CTk):
         ############################################################################
         ############################################################################
         ############################################################################
-        saving = round(abs(grid_offtake_cost)-abs(grid_injection_cost)-abs(grid_offtake_cost_optimized)+abs(grid_injection_cost_optimized), 2)
+        saving = round(abs(grid_offtake_cost)-abs(grid_injection_cost)-abs(grid_offtake_cost_algo_2)+abs(grid_injection_cost_algo_2), 2)
         saving_percentage = round(saving/(abs(grid_offtake_cost)-abs(grid_injection_cost)), 2) * 100
-        self.label_saved_result_1.configure(text="€" + str(saving) + "\n  " + str(saving_percentage) + "%")
+        self.label_saved_result_1.configure(text="€" + str(saving) + "\n  " + str(round(saving_percentage, 2)) + "%")
         
         new_soc_values = scale_list(soc_values, 400)
-        new_soc_values_optimized = scale_list(soc_values_optimized, 400)
+        new_soc_values_algo_2 = scale_list(soc_values_algo_2, 400)
         
         grid_injection_prices_scaled = scale_list(grid_injection_prices, 400)
         grid_offtake_prices_scaled = scale_list(grid_offtake_prices, 400)
@@ -735,7 +757,7 @@ class App(customtkinter.CTk):
         ax4.set_ylabel('SOC', color="g", labelpad=15) 
         ax4.yaxis.set_label_coords(1.055, 0.5)  # Adjust the position of the label
         ax4.plot(new_soc_values, color="g", linestyle=":", label="Soc", linewidth=0.8)
-        ax4.plot(new_soc_values_optimized, color="g", linestyle="-.", label="Soc Optimized", linewidth=0.8)
+        ax4.plot(new_soc_values_algo_2, color="g", linestyle="-.", label="Soc algo_2", linewidth=0.8)
         ax4.tick_params(axis='y', labelcolor="g")
         ax4.legend(loc='center left', bbox_to_anchor=(1.06, 0.3))
         
@@ -793,11 +815,11 @@ class App(customtkinter.CTk):
             if self.optionmenu_month.get() not in ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]: self.optionmenu_month.set("January")
         
         if self.data_available:
-            self.update_graphs_with_new_data(self.data_points_complete, self.data_points_complete_optimized)
+            self.update_graphs_with_new_data(self.data_points_complete, self.data_points_complete_algo_2)
             
     def option_menu_time_event(self, event):
         if self.data_available:
-            self.update_graphs_with_new_data(self.data_points_complete, self.data_points_complete_optimized)
+            self.update_graphs_with_new_data(self.data_points_complete, self.data_points_complete_algo_2)
             
     def option_menu_month_event(self, event):
         selected_month = self.optionmenu_month.get()
@@ -829,8 +851,17 @@ class App(customtkinter.CTk):
             self.optionmenu_day.set(len(day_values))
 
         if self.data_available:
-            self.update_graphs_with_new_data(self.data_points_complete, self.data_points_complete_optimized)
+            self.update_graphs_with_new_data(self.data_points_complete, self.data_points_complete_algo_2)
             
+    def populate_algo_options(self):
+        """List all files in the given directory."""
+        filenames = [f for f in os.listdir("algorithms") if os.path.isfile(os.path.join("algorithms", f))]
+        filenames = [filename.replace("_", " ") for filename in filenames]
+        filenames = [filename.replace(".py", "") for filename in filenames]
+        self.optionmenu_algo_1.configure(values=filenames)
+        self.optionmenu_algo_2.configure(values=filenames)
+        self.optionmenu_algo_1.set("algorithm default")
+        self.optionmenu_algo_2.set(filenames[0])
         
     def verify_parameters(self):
         try:
@@ -912,13 +943,13 @@ class App(customtkinter.CTk):
         
         data_points = process_heat_pump_data(data_points, self.heat_area, self.heat_cop, self.heat_temp, self.heat_building)
         
-        data_points_optimized = copy.deepcopy(data_points)  # Make a deep copy of the original data_points list
+        data_points_algo_2 = copy.deepcopy(data_points)  # Make a deep copy of the original data_points list
         
-        self.data_points_complete_optimized = process_data_optimized(data_points_optimized, battery_home_2, battery_car_2, self.ev_distance_year * self.ev_number_of_cars)
+        self.data_points_complete_algo_1 = process_data_points(self.optionmenu_algo_1.get(), data_points, battery_home_1, battery_car_1, self.ev_distance_year * self.ev_number_of_cars)
         
-        self.data_points_complete = process_data(data_points, battery_home_1, battery_car_1, self.ev_distance_year * self.ev_number_of_cars)
+        self.data_points_complete_algo_2 = process_data_points(self.optionmenu_algo_2.get(), data_points_algo_2, battery_home_2, battery_car_2, self.ev_distance_year * self.ev_number_of_cars)
 
-        self.update_graphs_with_new_data(self.data_points_complete, self.data_points_complete_optimized)
+        self.update_graphs_with_new_data(self.data_points_complete_algo_1, self.data_points_complete_algo_2)
         
         self.data_available = True
         

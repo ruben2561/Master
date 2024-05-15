@@ -62,7 +62,7 @@ def calculate_indoor_temperature(temp_out, temp_in_initial, U, area, timestep=0.
         dT_dt = Q_loss / (mass_air * c_p)
         
         # Update the indoor temperature
-        temp_in -= dT_dt * timestep_seconds
+        temp_in += dT_dt * timestep_seconds
         
     return temp_in
 
@@ -83,7 +83,8 @@ def process_heat_pump_data(data_points, area, cop, temp_desired, building):
         
     temp_in_current = temp_desired
     for i in range(len(data_points) - 1):
-        if data_points[i]["time_value"].hour >= 7 and data_points[i]["time_value"].hour <= 22:
+        if temp_in_current < 100000: print(str(data_points[i]["temperature_out"]) + "     " + str(temp_in_current))
+        if data_points[i]["time_value"].hour >= 7 and data_points[i]["time_value"].hour <= 22 and temp_in_current <= temp_desired:
             heat_pump_value = calculate_needed_power(area, cop, temp_desired, temp_in_current, U, data_points[i]["temperature_out"])
             temp_in_current = temp_desired
             data_points[i]["heat_pump_value"] = float(heat_pump_value)
