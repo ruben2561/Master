@@ -18,18 +18,16 @@ def calculate_needed_power(area, COP_base, temp_in_desired, temp_in, U, temp_out
     
     return power_needed
 
-def calculate_indoor_temperature(temp_out, temp_in_initial, U, area, timestep=0.1):
+def calculate_indoor_temperature(temp_out, temp_in, U, area, timestep=0.1):
     """
     Calculates the indoor temperature over a given time period without heating.
     
     Parameters:
         temp_out (float): Outdoor temperature in degrees Celsius.
-        temp_in_initial (float): Initial indoor temperature in degrees Celsius.
+        temp_in (float): Initial indoor temperature in degrees Celsius.
         U (float): Overall heat transfer coefficient in W/(m²K).
         area (float): Surface area through which heat is being lost (in m²).
         volume (float): Volume of the indoor space (in m³).
-        time_hours (float): Total time over which to calculate the temperature change (in hours).
-        timestep (float): Time step for the Euler method (in hours).
     
     Returns:
         float: New indoor temperature in degrees Celsius after the specified time.
@@ -46,25 +44,13 @@ def calculate_indoor_temperature(temp_out, temp_in_initial, U, area, timestep=0.
     # Calculate the mass of air in the room
     mass_air = rho_air * area * 2.4
     
-    # Initial indoor temperature
-    temp_in = temp_in_initial
+     # Calculate heat loss rate (W)
+    Q_loss = U * area * (temp_out - temp_in) *3600
     
-    # Convert time to seconds for the calculations
-    total_seconds = 3600
-    timestep_seconds = timestep * 3600
-    
-    # Simulation loop
-    for t in range(0, int(total_seconds), int(timestep_seconds)):
-        # Calculate heat loss rate (W)
-        Q_loss = U * area * (temp_out - temp_in)
+    # Update the indoor temperature
+    temp_in_new = temp_in + (Q_loss / (mass_air * c_p))
         
-        # Calculate the rate of temperature change (dT/dt)
-        dT_dt = Q_loss / (mass_air * c_p)
-        
-        # Update the indoor temperature
-        temp_in -= dT_dt * timestep_seconds
-        
-    return temp_in
+    return temp_in_new
 
 def process_heat_pump_data(data_points, area, cop, temp_desired, building):
     building_U_values = {
@@ -83,7 +69,8 @@ def process_heat_pump_data(data_points, area, cop, temp_desired, building):
         
     temp_in_current = temp_desired
     for i in range(len(data_points) - 1):
-        if data_points[i]["time_value"].hour >= 7 and data_points[i]["time_value"].hour <= 22:
+        #if temp_in_current < 100000: print(str(data_points[i]["temperature_out"]) + "     " + str(temp_in_current))
+        if data_points[i]["time_value"].hour >= 7 and data_points[i]["time_value"].hour <= 22 and temp_in_current <= temp_desired:
             heat_pump_value = calculate_needed_power(area, cop, temp_desired, temp_in_current, U, data_points[i]["temperature_out"])
             temp_in_current = temp_desired
             data_points[i]["heat_pump_value"] = float(heat_pump_value)

@@ -10,7 +10,7 @@ import pvlib
 from datetime import datetime
 
 
-from APIWeather import get_solar_data_solcast
+from APIWeather import get_solar_data_openmeteo
 
 def get_sample_data_pv():
     try:
@@ -27,11 +27,66 @@ def get_sample_data_pv():
                     "pv_power_value": float(point["pv_power_value"]),
                     "time_value": period_end,
                 })
-                
             return pv_list
     except Exception as e:
         print(f"Error reading sample data: {e}")
         return None
+    
+def calculate_pv_power2(forecast_list, latitude, longitude, number_of_panels, area, azimuth, tilt, efficiency_panels, efficiency_invertor):
+    temperature_coefficient = -0.004  # per degree Celsius
+    
+    temps = np.array([float(data_point["temp"]) for data_point in forecast_list])
+    dnies = np.array([float(data_point["DNI"]) for data_point in forecast_list])
+    ghies = np.array([float(data_point["GHI"]) for data_point in forecast_list])
+    dhies = np.array([float(data_point["DHI"]) for data_point in forecast_list])
+
+    # Calculate solar position
+    solar_positions = pvlib.solarposition.get_solarposition(
+        pd.to_datetime([data_point["period_end"] for data_point in forecast_list]),
+        latitude, longitude
+    )
+    
+    #############
+    # Ensure angles are in radians for numpy trig functions
+    tilt_rad = np.radians(tilt)
+    azimuth_rad = np.radians(azimuth)
+    solar_zenith_rad = np.radians(solar_positions['zenith'].values)
+    solar_azimuth_rad = np.radians(solar_positions['azimuth'].values)
+
+    # Calculate angle of incidence
+    angle_of_incidences = (
+        np.cos(solar_zenith_rad) * np.cos(tilt_rad) +
+        np.sin(solar_zenith_rad) * np.sin(tilt_rad) * np.cos(solar_azimuth_rad - azimuth_rad)
+    )
+
+    # Ensure angle_of_incidences is not negative
+    angle_of_incidences = np.clip(angle_of_incidences, 0, 1)
+
+    # Calculate incident solar radiation on the panels
+    incident_solar_radiations = dnies * angle_of_incidences + dhies
+
+    # Adjust panel efficiency for temperature
+    adjusted_efficiency = efficiency_panels * (1 + temperature_coefficient * (temps - 25))
+
+    # Calculate power output per panel
+    power_outputs = area * incident_solar_radiations * adjusted_efficiency * efficiency_invertor
+
+    # Calculate total power output for all panels
+    pv_estimates = power_outputs * number_of_panels
+    
+    
+    #############
+
+    pv_list = []
+
+    for i, data_point in enumerate(forecast_list):
+        pv_list.append({
+            "pv_power_value": pv_estimates[i],
+            "temperature_out": float(data_point["temp"]),
+            "time_value": datetime.strptime(data_point["period_end"], "%Y-%m-%dT%H:%M"),
+        })
+
+    return pv_list
 
 def calculate_pv_power(forecast_list, latitude, longitude, number_of_panels, area, azimuth, tilt, efficiency_panels, efficiency_invertor):
     pv_list = []
@@ -86,7 +141,7 @@ def process_solar_data(latitude, longitude, start_date, number_of_panels, area, 
     # Calculate end date one year further
     #end_date = start_date + pd.DateOffset(days=365)
     #TODO fix end date
-    forecast_data = get_solar_data_solcast(
+    forecast_data = get_solar_data_openmeteo(
         latitude, longitude, start_date
     )
     
@@ -94,7 +149,6 @@ def process_solar_data(latitude, longitude, start_date, number_of_panels, area, 
     forecast_list = list(reader)
     
     pv_list = calculate_pv_power(forecast_list, latitude, longitude, number_of_panels, area, azimuth, tilt, efficiency_panels, efficiency_invertor)
-    #pv_list = get_sample_data_pv()
 
     # Initialize list to store data for plotting as tuples of (pv_power_value, time_value)
     data_points = []

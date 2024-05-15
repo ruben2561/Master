@@ -1,118 +1,31 @@
 from collections import defaultdict
 import copy
+import importlib
 import random
 import tkinter as tk
 from tkinter import ttk
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
-from algoritms import process_point_optimized
 from battery import Battery
-from APIWeather import get_solar_data_solcast
 import csv
 import matplotlib.dates as mdates
 import datetime
 from datetime import datetime
 
 
-def process_data_optimized(data_points, battery, ev_battery, ev_total_distance):
-    for i in range(len(data_points) - 1):
-        current_point = data_points[i]
-        data_points_copy = data_points + data_points[0:24]
-        current_points = data_points_copy[i:i+24]
+def process_data_points(algorithm_name, data_points, battery, ev_battery, ev_total_distance):
+    #algorithm_name = algorithm_name + ".py"
+    algorithm_name = algorithm_name.replace(" ", "_")
 
-        pv_power_values = [point.get("pv_power_value", 0) for point in current_points]
-        power_usage_values = [point.get("power_usage_value", 0) for point in current_points]
-        offtake_price_values = [point.get("price_offtake", 0) for point in current_points]
-        injection_price_values = [point.get("price_injection", 0) for point in current_points]
-        time_value = current_points[0].get("time_value")
-        soc_value = battery.get_soc()
-        next_time = current_points[1].get("time_value")
-        ev_charge_value = current_point.get("ev_charge_value")
-        heat_pump_value = current_point.get("heat_pump_value")
-        
-        
-        #if time is 12:00 discharge the car an average amount to simulate car usage
-        if time_value.hour == 12 and time_value.minute == 0:
-            ev_battery.discharge(ev_charge_value, 1)
-            current_point["ev_charge_value"] = 0
-
-        if time_value and next_time:
-            time_difference_hours = (next_time - time_value).total_seconds() / 3600
-            
-            grid_injection, grid_offtake, charge_value, discharge_value, ev_charged = process_point_optimized(time_difference_hours, time_value, pv_power_values, power_usage_values, offtake_price_values, injection_price_values, soc_value, battery, ev_battery, heat_pump_value)
-            
-            current_point["soc_value"] = soc_value
-            current_point["grid_injection"] = grid_injection
-            current_point["grid_offtake"] = grid_offtake
-            current_point["charge_value"] = charge_value
-            current_point["discharge_value"] = discharge_value
-            current_point["ev_charge_value"] = ev_charged 
-
-    return data_points
-
-def process_data(data_points, battery, ev_battery, ev_total_distance):
-    for i in range(len(data_points) - 1):
-        current_point = data_points[i]
-        next_point = data_points[i + 1]
-
-        pv_power_value = current_point.get("pv_power_value", 0)
-        power_usage_value = current_point.get("power_usage_value")
-        time_value = current_point.get("time_value")
-        next_time = next_point.get("time_value")
-        ev_charge_value = current_point.get("ev_charge_value")
-        heat_pump_value = current_point.get("heat_pump_value")
-
-        #if time is 12:00 discharge the car an average amount to simulate car usage
-        if time_value.hour == 12 and time_value.minute == 0:
-            ev_battery.discharge(ev_charge_value, 1)
-            current_point["ev_charge_value"] = 0
-
-        if time_value and next_time:
-            # Calculate time difference in hours
-
-            time_difference_hours = (next_time - time_value).total_seconds() / 3600
-            # Charge the battery based on the time difference
-            
-            ev_charged = 0
-            
-            #check if car is home so it can charge
-            if(time_value.hour > 17 or time_value.hour < 8):
-                ev_charged, ev_residue = ev_battery.charge(ev_battery.get_max_charge(), time_difference_hours)
-                charge_discharge_battery = pv_power_value - power_usage_value - heat_pump_value - ev_charged
-            else:
-                charge_discharge_battery = pv_power_value - power_usage_value - heat_pump_value
-
-            current_point["soc_value"] = battery.get_soc()
-
-            if charge_discharge_battery > 0:
-                charged, residue_to_much_energy = battery.charge(
-                    charge_discharge_battery, time_difference_hours
-                )
-                current_point["grid_injection"] = residue_to_much_energy
-                current_point["grid_offtake"] = 0
-                current_point["charge_value"] = charged
-                current_point["discharge_value"] = 0
-                current_point["ev_charge_value"] = ev_charged
-
-            elif charge_discharge_battery < 0:
-                discharged, residue_to_little_energy = battery.discharge(
-                    abs(charge_discharge_battery), time_difference_hours
-                )
-                current_point["grid_injection"] = 0
-                current_point["grid_offtake"] = residue_to_little_energy
-                current_point["charge_value"] = 0
-                current_point["discharge_value"] = discharged
-                current_point["ev_charge_value"] = ev_charged
-
-            else:
-                current_point["grid_injection"] = 0
-                current_point["grid_offtake"] = 0
-                current_point["charge_value"] = 0
-                current_point["discharge_value"] = 0
-                current_point["ev_charge_value"] = ev_charged
-
-    return data_points
-
+    # Construct the module name based on the provided algorithm name
+    module_name = f"algorithms.{algorithm_name}"
+    
+    # Dynamically import the module
+    module = importlib.import_module(module_name)
+    
+    # Run the process function from the imported module
+    return module.process_data(data_points, battery, ev_battery, ev_total_distance)
+    
 
 def get_power_usage_values(data_points, selected_user_profile):
     profile = "consumptionProfile/profile_" + selected_user_profile + ".csv"
