@@ -131,9 +131,9 @@ class DatabaseManager:
         heat_pump_data = self.cursor.fetchone()
         return heat_pump_data
     
-    def add_heat_pump(self, name, building, areaHouse, COP, desiredTemp):
-        query = "INSERT INTO HeatPump (name, building, areaHouse, COP, desiredTemp) VALUES (?,?,?,?,?)"
-        self.cursor.execute(query, (name, building, areaHouse, COP, desiredTemp))
+    def add_heat_pump(self, name, certificate, areaHouse, COP, desiredTemp):
+        query = "INSERT INTO HeatPump (name, certificate, areaHouse, COP, desiredTemp) VALUES (?,?,?,?,?)"
+        self.cursor.execute(query, (name, certificate, areaHouse, COP, desiredTemp))
         self.connection.commit()
 
     def delete_heat_pump_by_name(self, name):
@@ -182,7 +182,7 @@ class DatabaseManager:
             ev_efficiency,
             ev_distance_year,
             heat,
-            heat_building,
+            heat_certificate,
             heat_area,
             heat_cop,
             heat_temp,
@@ -193,7 +193,7 @@ class DatabaseManager:
             general_start_date,
             use_api):
         
-        query = "INSERT INTO Simulation (name, battery, batteryCharge, batteryDischarge, batteryCapacity, batteryEfficiency, solar, solarAzimuth, solarTilt, solarNumberOfPanels, solarEfficiency, solarLength, solarWidth, ev, evCharge, evNumberOfCars, evEfficiency, evDistanceYear, heat, heatBuilding, heatArea, heatCOP, heatTemp, consumerProfile, provider, generalLatitude, generalLongitude, generalStartDate, useApi) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+        query = "INSERT INTO Simulation (name, battery, batteryCharge, batteryDischarge, batteryCapacity, batteryEfficiency, solar, solarAzimuth, solarTilt, solarNumberOfPanels, solarEfficiency, solarLength, solarWidth, ev, evCharge, evNumberOfCars, evEfficiency, evDistanceYear, heat, heatCertificate, heatArea, heatCOP, heatTemp, consumerProfile, provider, generalLatitude, generalLongitude, generalStartDate, useApi) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
         
         self.cursor.execute(query, 
             (
@@ -216,7 +216,7 @@ class DatabaseManager:
             ev_efficiency,
             ev_distance_year,
             heat,
-            heat_building,
+            heat_certificate,
             heat_area,
             heat_cop,
             heat_temp,

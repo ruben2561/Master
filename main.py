@@ -882,7 +882,7 @@ class App(customtkinter.CTk):
                 self.ev_number_of_cars = self.simulation_data[16]
                 self.ev_efficiency = self.simulation_data[17]
                 self.ev_distance_year = self.simulation_data[18]               
-                self.heat_building = self.simulation_data[20]
+                self.heat_certificate = self.simulation_data[20]
                 self.heat_area = self.simulation_data[21]
                 self.heat_cop = self.simulation_data[22]
                 self.heat_temp = self.simulation_data[23]
@@ -941,7 +941,7 @@ class App(customtkinter.CTk):
         
         data_points = process_prices_data(data_points, self.general_start_date, self.selected_provider)
         
-        data_points = process_heat_pump_data(data_points, self.heat_area, self.heat_cop, self.heat_temp, self.heat_building)
+        data_points = process_heat_pump_data(data_points, self.heat_area, self.heat_cop, self.heat_temp, self.heat_certificate)
         
         data_points_algo_2 = copy.deepcopy(data_points)  # Make a deep copy of the original data_points list
         

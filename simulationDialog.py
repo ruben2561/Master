@@ -309,19 +309,19 @@ class SimulationDialog(customtkinter.CTk):
         
         #########################
         
-        self.label_heat_building = customtkinter.CTkLabel(
+        self.label_heat_certificate = customtkinter.CTkLabel(
             self.frame_3,
-            text="Building Age",
+            text="Energy Eff Certificate",
             font=customtkinter.CTkFont(size=15),
         )
-        self.label_heat_building.grid(row=3, column=6, padx=30, sticky='w')
-        self.optionmenu_building = customtkinter.CTkOptionMenu(
+        self.label_heat_certificate.grid(row=3, column=6, padx=30, sticky='w')
+        self.optionmenu_certificate = customtkinter.CTkOptionMenu(
             self.frame_3,
             dynamic_resizing=False,
             width=100,
-            values=["New", "+-2010", "+-2000", "-1995"],
+            values=["A+", "A", "B", "C", "D", "E", "F"],
         )
-        self.optionmenu_building.grid(row=3, column=7)
+        self.optionmenu_certificate.grid(row=3, column=7)
         
         ########################
         
@@ -603,8 +603,8 @@ class SimulationDialog(customtkinter.CTk):
     def switch_heat_event(self):
         if self.switch_heat.get() == 0:
             self.optionmenu_heat_pump.configure(fg_color="grey17", button_color="grey17", text_color_disabled="grey17", state = "disabled")
-            self.optionmenu_building.configure(fg_color="grey17", button_color="grey17", text_color_disabled="grey17", state = "disabled")
-            self.label_heat_building.configure(text_color='grey17')
+            self.optionmenu_certificate.configure(fg_color="grey17", button_color="grey17", text_color_disabled="grey17", state = "disabled")
+            self.label_heat_certificate.configure(text_color='grey17')
             self.entry_heat_area.configure(fg_color="grey17", border_color="grey17", text_color="grey17", state = "disabled")
             self.label_heat_area.configure(text_color='grey17')
             self.entry_heat_cop.configure(fg_color="grey17", border_color="grey17", text_color="grey17", state = "disabled")
@@ -615,8 +615,8 @@ class SimulationDialog(customtkinter.CTk):
             
         if self.switch_heat.get() == 1:
             self.optionmenu_heat_pump.configure(fg_color="#AEB74F", button_color="#9fa845", text_color="black", state = "normal")
-            self.label_heat_building.configure(text_color='#DCE4EE')
-            self.optionmenu_building.configure(state = "normal", fg_color="#AEB74F", button_color="#9fa845")
+            self.label_heat_certificate.configure(text_color='#DCE4EE')
+            self.optionmenu_certificate.configure(state = "normal", fg_color="#AEB74F", button_color="#9fa845")
             self.label_heat_area.configure(text_color='#DCE4EE')
             self.entry_heat_area.configure(state = "normal", fg_color="#343638", text_color="#DCE4EE", border_color="#565B5E")
             self.label_heat_cop.configure(text_color='#DCE4EE')
@@ -696,7 +696,7 @@ class SimulationDialog(customtkinter.CTk):
         self.entry_ev_number_of_cars.insert(0, selected_simulation_data[16])
         self.entry_ev_efficiency.insert(0, selected_simulation_data[17])
         self.entry_ev_distance_year.insert(0, selected_simulation_data[18])
-        self.optionmenu_building.set(selected_simulation_data[20])
+        self.optionmenu_certificate.set(selected_simulation_data[20])
         self.entry_heat_area.insert(0, selected_simulation_data[21])
         self.entry_heat_cop.insert(0, selected_simulation_data[22])
         self.entry_heat_temp.insert(0, selected_simulation_data[23])
@@ -773,7 +773,7 @@ class SimulationDialog(customtkinter.CTk):
         self.entry_heat_cop.delete(0, tkinter.END)
         self.entry_heat_temp.delete(0, tkinter.END)
         
-        self.optionmenu_building.set(selected_heat_data[2])
+        self.optionmenu_certificate.set(selected_heat_data[2])
         self.entry_heat_area.insert(0, selected_heat_data[3])
         self.entry_heat_cop.insert(0, selected_heat_data[4])
         self.entry_heat_temp.insert(0, selected_heat_data[5])
@@ -867,7 +867,7 @@ class SimulationDialog(customtkinter.CTk):
         self.entry_ev_number_of_cars.insert(0, previous_data[16])
         self.entry_ev_efficiency.insert(0, previous_data[17])
         self.entry_ev_distance_year.insert(0, previous_data[18])
-        self.optionmenu_building.set(previous_data[20])
+        self.optionmenu_certificate.set(previous_data[20])
         self.entry_heat_area.insert(0, previous_data[21])
         self.entry_heat_cop.insert(0, previous_data[22])
         self.entry_heat_temp.insert(0, previous_data[23])
@@ -945,7 +945,7 @@ class SimulationDialog(customtkinter.CTk):
             "EV Efficiency": self.entry_ev_efficiency.get() if self.switch_ev.get() else "0",
             "EV Distance Year": self.entry_ev_distance_year.get() if self.switch_ev.get() else "0",
             "Heat": self.switch_heat.get(),
-            "Heat Building": self.optionmenu_building.get() if self.switch_heat.get() else "0",
+            "Heat certificate": self.optionmenu_certificate.get() if self.switch_heat.get() else "0",
             "Heat Area": self.entry_heat_area.get() if self.switch_heat.get() else "0",
             "Heat COP": self.entry_heat_cop.get() if self.switch_heat.get() else "0",
             "Heat Temp": self.entry_heat_temp.get() if self.switch_heat.get() else "0",
@@ -1069,7 +1069,7 @@ class SimulationDialog(customtkinter.CTk):
             "EV Efficiency": self.entry_ev_efficiency.get() if self.switch_ev.get() else "0",
             "EV Distance Year": self.entry_ev_distance_year.get() if self.switch_ev.get() else "0",
             "Heat": self.switch_heat.get(),
-            "Heat Building": self.optionmenu_building.get() if self.switch_heat.get() else "0",
+            "Heat certificate": self.optionmenu_certificate.get() if self.switch_heat.get() else "0",
             "Heat Area": self.entry_heat_area.get() if self.switch_heat.get() else "0",
             "Heat COP": self.entry_heat_cop.get() if self.switch_heat.get() else "0",
             "Heat Temp": self.entry_heat_temp.get() if self.switch_heat.get() else "0",
