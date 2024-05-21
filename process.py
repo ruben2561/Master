@@ -62,49 +62,13 @@ def get_ev_charge_values(data_points, ev_distance_year, ev_number_of_cars):
             
     return data_points
 
-
 def calculate_values(data_points, specific_time, scale):
 
     if scale == "SPECIFIC DAY":
-        # Filter data points for the first day
-        day_data_points = [
-            point
-            for point in data_points
-            if point["time_value"].day == int(specific_time.split("-")[0]) and point["time_value"].strftime("%B") == specific_time.split("-")[1]
-        ]  # Modify the date accordingly
-        data_points = day_data_points
-
-        # Perform some calculations to get new data
-        time_values = [point["time_value"] for point in data_points]
-        pv_power_sums = [point["pv_power_value"] for point in data_points]
-        power_usage_sums = [-point["power_usage_value"] for point in data_points]
-        charge_sums = [-point["charge_value"] for point in data_points]
-        discharge_sums = [point["discharge_value"] for point in data_points]
-        soc_sums = [point["soc_value"] for point in data_points]
-        grid_injection_sums = [-point["grid_injection"] for point in data_points]
-        grid_offtake_sums = [point["grid_offtake"] for point in data_points]
-        prices_injection = [point["price_injection"] for point in data_points]
-        prices_offtake = [point["price_offtake"] for point in data_points]
-        ev_charge_sums = [-point["ev_charge_value"] for point in data_points]
-        heat_pump_sums = [-point["heat_pump_value"] for point in data_points]
-        
-        line_width = 0.04
-        title = "Not Optimized - Hourly Data For Date " + str(specific_time) + " In 2023"
-
-        
-        # Calculate cost for grid injection and grid offtake
-        grid_injection_costs = [x * y / 1000 for x, y in zip(grid_injection_sums, prices_injection)]
-        grid_offtake_costs = [x * y / 1000 for x, y in zip(grid_offtake_sums, prices_offtake)]
-
-        # Calculate sum of costs
-        grid_injection_costs_total = sum(grid_injection_costs)
-        grid_offtake_costs_total = sum(grid_offtake_costs)
-        
-        grid_injection_sum = sum(grid_injection_sums)
-        grid_offtake_sum = sum(grid_offtake_sums)
-        
-
-    if scale == "SPECIFIC WEEK":
+        day, month = specific_time.split("-")
+        data_points = [point for point in data_points if point["time_value"].day == int(day) and point["time_value"].strftime("%B") == month]
+    
+    elif scale == "SPECIFIC WEEK":
         
         # Dictionary mapping month names to numerical values
         month_to_num = {
@@ -128,330 +92,118 @@ def calculate_values(data_points, specific_time, scale):
             or (point["time_value"].month, point["time_value"].day) != (1, 1) and point["time_value"].isocalendar()[1] == int(week_number)
         ]  # Modify the date accordingly
         data_points = month_data_points
-        
-        # Assuming time_values contains datetime objects
-        # If time_values contains strings, convert them to datetime objects first
-        time_values = [point["time_value"] for point in data_points]
-        pv_power_values = [point["pv_power_value"] for point in data_points]
-        power_usage_values = [-point["power_usage_value"] for point in data_points]
-        charge_values = [-point["charge_value"] for point in data_points]
-        discharge_values = [point["discharge_value"] for point in data_points]
-        soc_values = [point["soc_value"] for point in data_points]
-        grid_injection_values = [-point["grid_injection"] for point in data_points]
-        grid_offtake_values = [point["grid_offtake"] for point in data_points]
-        prices_injection = [point["price_injection"] for point in data_points]
-        prices_offtake = [point["price_offtake"] for point in data_points]
-        ev_charge_values = [-point["ev_charge_value"] for point in data_points]
-        heat_pump_values = [-point["heat_pump_value"] for point in data_points]
-        
-        # Calculate cost for grid injection and grid offtake
-        grid_injection_costs = [x * y / 1000 for x, y in zip(grid_injection_values, prices_injection)]
-        grid_offtake_costs = [x * y / 1000 for x, y in zip(grid_offtake_values, prices_offtake)]
-
-        # Calculate sum of costs
-        grid_injection_costs_total = sum(grid_injection_costs)
-        grid_offtake_costs_total = sum(grid_offtake_costs)
-        
-        grid_injection_sum = sum(grid_injection_values)
-        grid_offtake_sum = sum(grid_offtake_values)
-
-        # Create a defaultdict to store sums for each day
-        daily_sums = defaultdict(lambda: defaultdict(float))
-
-        # Iterate over the data_points and accumulate sums for each day
-        for time_value, pv_power, power_usage, charge, discharge, grid_injection, grid_offtake, ev_charge, heat_pump in zip(
-            time_values, pv_power_values, power_usage_values, charge_values, discharge_values, grid_injection_values, grid_offtake_values, ev_charge_values, heat_pump_values
-        ):
-            # Extract day from the datetime object
-            day = time_value.date()
-            
-            # Accumulate sums for each column for the corresponding day
-            daily_sums[day]['pv_power'] += pv_power
-            daily_sums[day]['power_usage'] += power_usage
-            daily_sums[day]['charge'] += charge
-            daily_sums[day]['discharge'] += discharge
-            daily_sums[day]['grid_injection'] += grid_injection
-            daily_sums[day]['grid_offtake'] += grid_offtake
-            daily_sums[day]['ev_charge'] += ev_charge
-            daily_sums[day]['heat_pump'] += heat_pump
-
-        pv_power_sums = [sums['pv_power'] for sums in daily_sums.values()]
-        power_usage_sums = [sums['power_usage'] for sums in daily_sums.values()]
-        charge_sums = [sums['charge'] for sums in daily_sums.values()]
-        discharge_sums = [sums['discharge'] for sums in daily_sums.values()]
-        grid_injection_sums = [sums['grid_injection'] for sums in daily_sums.values()]
-        grid_offtake_sums = [sums['grid_offtake'] for sums in daily_sums.values()]
-        ev_charge_sums = [sums['ev_charge'] for sums in daily_sums.values()]
-        heat_pump_sums = [sums['heat_pump'] for sums in daily_sums.values()]
-        
-        time_values = list(daily_sums.keys())
-        line_width = 0.95
-        title = "Not Optimized - Dayly Data For Week " + str(week_number) + " In 2023"
-        
-        soc_sums = soc_values
     
-    
-    if scale == "SPECIFIC MONTH":
-         # Filter data points for the first month
+    elif scale == "SPECIFIC MONTH":
         month_data_points = [
             point
             for point in data_points
             if point["time_value"].strftime("%B") == specific_time.split("-")[1]
         ]  # Modify the date accordingly
         data_points = month_data_points
-        
-        # Assuming time_values contains datetime objects
-        # If time_values contains strings, convert them to datetime objects first
-        time_values = [point["time_value"] for point in data_points]
-        pv_power_values = [point["pv_power_value"] for point in data_points]
-        power_usage_values = [-point["power_usage_value"] for point in data_points]
-        charge_values = [-point["charge_value"] for point in data_points]
-        discharge_values = [point["discharge_value"] for point in data_points]
-        soc_values = [point["soc_value"] for point in data_points]
-        grid_injection_values = [-point["grid_injection"] for point in data_points]
-        grid_offtake_values = [point["grid_offtake"] for point in data_points]
-        prices_injection = [point["price_injection"] for point in data_points]
-        prices_offtake = [point["price_offtake"] for point in data_points]
-        ev_charge_values = [-point["ev_charge_value"] for point in data_points]
-        heat_pump_values = [-point["heat_pump_value"] for point in data_points]
-        
-        # Calculate cost for grid injection and grid offtake
-        grid_injection_costs = [x * y / 1000 for x, y in zip(grid_injection_values, prices_injection)]
-        grid_offtake_costs = [x * y / 1000 for x, y in zip(grid_offtake_values, prices_offtake)]
 
-        # Calculate sum of costs
-        grid_injection_costs_total = sum(grid_injection_costs)
-        grid_offtake_costs_total = sum(grid_offtake_costs)
-        
-        grid_injection_sum = sum(grid_injection_values)
-        grid_offtake_sum = sum(grid_offtake_values)
-
-        # Create a defaultdict to store sums for each day
-        daily_sums = defaultdict(lambda: defaultdict(float))
-
-        # Iterate over the data_points and accumulate sums for each day
-        for time_value, pv_power, power_usage, charge, discharge, grid_injection, grid_offtake, ev_charge, heat_pump in zip(
-            time_values, pv_power_values, power_usage_values, charge_values, discharge_values, grid_injection_values, grid_offtake_values, ev_charge_values, heat_pump_values
-        ):
-            # Extract day from the datetime object
-            day = time_value.date()
-            
-            # Accumulate sums for each column for the corresponding day
-            daily_sums[day]['pv_power'] += pv_power
-            daily_sums[day]['power_usage'] += power_usage
-            daily_sums[day]['charge'] += charge
-            daily_sums[day]['discharge'] += discharge
-            daily_sums[day]['grid_injection'] += grid_injection
-            daily_sums[day]['grid_offtake'] += grid_offtake
-            daily_sums[day]['ev_charge'] += ev_charge
-            daily_sums[day]['heat_pump'] += heat_pump
-
-        pv_power_sums = [sums['pv_power'] for sums in daily_sums.values()]
-        power_usage_sums = [sums['power_usage'] for sums in daily_sums.values()]
-        charge_sums = [sums['charge'] for sums in daily_sums.values()]
-        discharge_sums = [sums['discharge'] for sums in daily_sums.values()]
-        grid_injection_sums = [sums['grid_injection'] for sums in daily_sums.values()]
-        grid_offtake_sums = [sums['grid_offtake'] for sums in daily_sums.values()]
-        ev_charge_sums = [sums['ev_charge'] for sums in daily_sums.values()]
-        heat_pump_sums = [sums['heat_pump'] for sums in daily_sums.values()]
-        time_values = list(daily_sums.keys())
-        line_width = 0.9
-        title = "Not Optimized - Dayly Data For Month " + str(specific_time) + " In 2023"
-        
-        soc_sums = soc_values
+    elif scale == "PER YEAR":
+        data_points = data_points
     
-    if scale == "PER YEAR":
-        # Assuming time_values contains datetime objects
-        # If time_values contains strings, convert them to datetime objects first
-        time_values = [point["time_value"] for point in data_points]
-        pv_power_values = [point["pv_power_value"] for point in data_points]
-        power_usage_values = [-point["power_usage_value"] for point in data_points]
-        charge_values = [-point["charge_value"] for point in data_points]
-        discharge_values = [point["discharge_value"] for point in data_points]
-        soc_values = [point["soc_value"] for point in data_points]
-        grid_injection_values = [-point["grid_injection"] for point in data_points]
-        grid_offtake_values = [point["grid_offtake"] for point in data_points]
-        prices_injection = [point["price_injection"] for point in data_points]
-        prices_offtake = [point["price_offtake"] for point in data_points]
-        ev_charge_values = [-point["ev_charge_value"] for point in data_points]
-        heat_pump_values = [-point["heat_pump_value"] for point in data_points]
-        
-        # Calculate cost for grid injection and grid offtake
-        grid_injection_costs = [x * y / 1000 for x, y in zip(grid_injection_values, prices_injection)]
-        grid_offtake_costs = [x * y / 1000 for x, y in zip(grid_offtake_values, prices_offtake)]
+    elif scale == "PER MONTH":
+        data_points = data_points
 
-        # Calculate sum of costs
-        grid_injection_costs_total = sum(grid_injection_costs)
-        grid_offtake_costs_total = sum(grid_offtake_costs)
-        
-        grid_injection_sum = sum(grid_injection_values)
-        grid_offtake_sum = sum(grid_offtake_values)
-        
-        # Create a defaultdict to store sums for each day
-        daily_sums = defaultdict(lambda: defaultdict(float))
+    elif scale == "PER WEEK":
+        data_points = data_points
+    
+    # Extract and process the data
+    time_values = [point["time_value"] for point in data_points]
+    pv_power_values = [point["pv_power_value"] for point in data_points]
+    power_usage_values = [-point["power_usage_value"] for point in data_points]
+    charge_values = [-point["charge_value"] for point in data_points]
+    discharge_values = [point["discharge_value"] for point in data_points]
+    soc_values = [point["soc_value"] for point in data_points]
+    grid_injection_values = [-point["grid_injection"] for point in data_points]
+    grid_offtake_values = [point["grid_offtake"] for point in data_points]
+    prices_injection = [point["price_injection"] for point in data_points]
+    prices_offtake = [point["price_offtake"] for point in data_points]
+    ev_charge_values = [-point["ev_charge_value"] for point in data_points]
+    heat_pump_values = [-point["heat_pump_value"] for point in data_points]
 
-        # Iterate over the data_points and accumulate sums for each day
+    # Calculate costs
+    grid_injection_costs = [x * y / 1000 for x, y in zip(grid_injection_values, prices_injection)]
+    grid_offtake_costs = [x * y / 1000 for x, y in zip(grid_offtake_values, prices_offtake)]
+    grid_injection_costs_total = sum(grid_injection_costs)
+    grid_offtake_costs_total = sum(grid_offtake_costs)
+    grid_injection_sum = sum(grid_injection_values)
+    grid_offtake_sum = sum(grid_offtake_values)
+
+    # Create a defaultdict to store sums based on the time scale
+    sums = defaultdict(lambda: defaultdict(float))
+
+    if scale == "SPECIFIC WEEK" or scale == "PER WEEK" or scale == "SPECIFIC MONTH" or scale == "PER MONTH" or scale == "PER YEAR":
         for time_value, pv_power, power_usage, charge, discharge, soc, grid_injection, grid_offtake, ev_charge, heat_pump in zip(
             time_values, pv_power_values, power_usage_values, charge_values, discharge_values, soc_values, grid_injection_values, grid_offtake_values, ev_charge_values, heat_pump_values
         ):
+            if scale == "SPECIFIC WEEK" or scale ==  "SPECIFIC MONTH":
+                key = time_value.date()
+            elif scale == "PER YEAR":
+                key = time_value.year
+            elif scale == "PER WEEK":
+                key = time_value.isocalendar()[1]
+                if time_value.month == 1 and time_value.day == 1:
+                    key = 1
+            elif scale == "PER MONTH":
+                key = time_value.month
+
+            sums[key]['pv_power'] += pv_power
+            sums[key]['power_usage'] += power_usage
+            sums[key]['charge'] += charge
+            sums[key]['discharge'] += discharge
+            sums[key]['soc'] += soc
+            sums[key]['grid_injection'] += grid_injection
+            sums[key]['grid_offtake'] += grid_offtake
+            sums[key]['ev_charge'] += ev_charge
+            sums[key]['heat_pump'] += heat_pump
+
+            pv_power_sums = [sums[key]['pv_power'] for key in sorted(sums.keys())]
+            power_usage_sums = [sums[key]['power_usage'] for key in sorted(sums.keys())]
+            charge_sums = [sums[key]['charge'] for key in sorted(sums.keys())]
+            discharge_sums = [sums[key]['discharge'] for key in sorted(sums.keys())]
+            soc_sums = [sums[key]['soc'] for key in sorted(sums.keys())]
+            grid_injection_sums = [sums[key]['grid_injection'] for key in sorted(sums.keys())]
+            grid_offtake_sums = [sums[key]['grid_offtake'] for key in sorted(sums.keys())]
+            ev_charge_sums = [sums[key]['ev_charge'] for key in sorted(sums.keys())]
+            heat_pump_sums = [sums[key]['heat_pump'] for key in sorted(sums.keys())]
+            time_values = sorted(sums.keys())
         
-            year_year = time_value.year
+    else:
+        pv_power_sums = pv_power_values
+        power_usage_sums = power_usage_values
+        charge_sums = charge_values
+        discharge_sums = discharge_values
+        soc_sums = soc_values
+        grid_injection_sums = grid_injection_values
+        grid_offtake_sums = grid_offtake_values
+        ev_charge_sums = ev_charge_values
+        heat_pump_sums = heat_pump_values
+        time_values = time_values
             
-            # Accumulate sums for each column for the corresponding day
-            daily_sums[year_year]['pv_power'] += pv_power
-            daily_sums[year_year]['power_usage'] += power_usage
-            daily_sums[year_year]['charge'] += charge
-            daily_sums[year_year]['discharge'] += discharge
-            daily_sums[year_year]['soc'] += soc
-            daily_sums[year_year]['grid_injection'] += grid_injection
-            daily_sums[year_year]['grid_offtake'] += grid_offtake
-            daily_sums[year_year]['ev_charge'] += ev_charge
-            daily_sums[year_year]['heat_pump'] += heat_pump
 
-        pv_power_sums = [sums['pv_power'] for sums in daily_sums.values()]
-        power_usage_sums = [sums['power_usage'] for sums in daily_sums.values()]
-        charge_sums = [sums['charge'] for sums in daily_sums.values()]
-        discharge_sums = [sums['discharge'] for sums in daily_sums.values()]
-        soc_sums = [sums['soc'] for sums in daily_sums.values()]
-        grid_injection_sums = [sums['grid_injection'] for sums in daily_sums.values()]
-        grid_offtake_sums = [sums['grid_offtake'] for sums in daily_sums.values()]
-        ev_charge_sums = [sums['ev_charge'] for sums in daily_sums.values()]
-        heat_pump_sums = [sums['heat_pump'] for sums in daily_sums.values()]
-        time_values = list(daily_sums.keys())
-        line_width = 2
-        title = "Not Optimized - Yealy Data For 2023"
-        
-        soc_sums = [x /(365*24) for x in soc_sums]
-        
-    if scale == "PER MONTH":
-        # Assuming time_values contains datetime objects
-        # If time_values contains strings, convert them to datetime objects first
-        time_values = [point["time_value"] for point in data_points]
-        pv_power_values = [point["pv_power_value"] for point in data_points]
-        power_usage_values = [-point["power_usage_value"] for point in data_points]
-        charge_values = [-point["charge_value"] for point in data_points]
-        discharge_values = [point["discharge_value"] for point in data_points]
-        soc_values = [point["soc_value"] for point in data_points]
-        grid_injection_values = [-point["grid_injection"] for point in data_points]
-        grid_offtake_values = [point["grid_offtake"] for point in data_points]
-        prices_injection = [point["price_injection"] for point in data_points]
-        prices_offtake = [point["price_offtake"] for point in data_points]
-        ev_charge_values = [-point["ev_charge_value"] for point in data_points]
-        heat_pump_values = [-point["heat_pump_value"] for point in data_points]
-        
-        # Calculate cost for grid injection and grid offtake
-        grid_injection_costs = [x * y / 1000 for x, y in zip(grid_injection_values, prices_injection)]
-        grid_offtake_costs = [x * y / 1000 for x, y in zip(grid_offtake_values, prices_offtake)]
-
-        # Calculate sum of costs
-        grid_injection_costs_total = sum(grid_injection_costs)
-        grid_offtake_costs_total = sum(grid_offtake_costs)
-        
-        grid_injection_sum = sum(grid_injection_values)
-        grid_offtake_sum = sum(grid_offtake_values)
-
-        # Create a defaultdict to store sums for each day
-        daily_sums = defaultdict(lambda: defaultdict(float))
-
-        # Iterate over the data_points and accumulate sums for each day
-        for time_value, pv_power, power_usage, charge, discharge, soc, grid_injection, grid_offtake, ev_charge, heat_pump in zip(
-            time_values, pv_power_values, power_usage_values, charge_values, discharge_values, soc_values, grid_injection_values, grid_offtake_values, ev_charge_values, heat_pump_values
-        ):
-        
-            year_month = time_value.month
-            
-            # Accumulate sums for each column for the corresponding day
-            daily_sums[year_month]['pv_power'] += pv_power
-            daily_sums[year_month]['power_usage'] += power_usage
-            daily_sums[year_month]['charge'] += charge
-            daily_sums[year_month]['discharge'] += discharge
-            daily_sums[year_month]['soc'] += soc
-            daily_sums[year_month]['grid_injection'] += grid_injection
-            daily_sums[year_month]['grid_offtake'] += grid_offtake
-            daily_sums[year_month]['ev_charge'] += ev_charge
-            daily_sums[year_month]['heat_pump'] += heat_pump
-
-        pv_power_sums = [sums['pv_power'] for sums in daily_sums.values()]
-        power_usage_sums = [sums['power_usage'] for sums in daily_sums.values()]
-        charge_sums = [sums['charge'] for sums in daily_sums.values()]
-        discharge_sums = [sums['discharge'] for sums in daily_sums.values()]
-        soc_sums = [sums['soc'] for sums in daily_sums.values()]
-        grid_injection_sums = [sums['grid_injection'] for sums in daily_sums.values()]
-        grid_offtake_sums = [sums['grid_offtake'] for sums in daily_sums.values()]
-        ev_charge_sums = [sums['ev_charge'] for sums in daily_sums.values()]
-        heat_pump_sums = [sums['heat_pump'] for sums in daily_sums.values()]
-        time_values = list(daily_sums.keys())
+    # Adjust titles and line widths based on the scale
+    if scale == "SPECIFIC DAY":
+        line_width = 0.04
+        title = f"Not Optimized - Hourly Data For Date {specific_time} In 2023"
+    elif scale == "SPECIFIC WEEK":
+        line_width = 0.95
+        title = f"Not Optimized - Daily Data For Week {specific_time.split('-')[0]} In 2023"
+    elif scale == "SPECIFIC MONTH":
         line_width = 0.9
-        title = "Not Optimized - Montly Data For 2023"
-        
-        soc_sums = [x /(30.5*24) for x in soc_sums]
-        
-    if scale == "PER WEEK":
-        # Assuming time_values contains datetime objects
-        # If time_values contains strings, convert them to datetime objects first
-        time_values = [point["time_value"] for point in data_points]
-        pv_power_values = [point["pv_power_value"] for point in data_points]
-        power_usage_values = [-point["power_usage_value"] for point in data_points]
-        charge_values = [-point["charge_value"] for point in data_points]
-        discharge_values = [point["discharge_value"] for point in data_points]
-        soc_values = [point["soc_value"] for point in data_points]
-        grid_injection_values = [-point["grid_injection"] for point in data_points]
-        grid_offtake_values = [point["grid_offtake"] for point in data_points]
-        prices_injection = [point["price_injection"] for point in data_points]
-        prices_offtake = [point["price_offtake"] for point in data_points]
-        ev_charge_values = [-point["ev_charge_value"] for point in data_points]
-        heat_pump_values = [-point["heat_pump_value"] for point in data_points]
-        
-        # Calculate cost for grid injection and grid offtake
-        grid_injection_costs = [x * y / 1000 for x, y in zip(grid_injection_values, prices_injection)]
-        grid_offtake_costs = [x * y / 1000 for x, y in zip(grid_offtake_values, prices_offtake)]
-
-        # Calculate sum of costs
-        grid_injection_costs_total = sum(grid_injection_costs)
-        grid_offtake_costs_total = sum(grid_offtake_costs)
-        
-        grid_injection_sum = sum(grid_injection_values)
-        grid_offtake_sum = sum(grid_offtake_values)
-
-        # Create a defaultdict to store sums for each day
-        daily_sums = defaultdict(lambda: defaultdict(float))
-
-        # Iterate over the data_points and accumulate sums for each day
-        for time_value, pv_power, power_usage, charge, discharge, soc, grid_injection, grid_offtake, ev_charge, heat_pump in zip(
-            time_values, pv_power_values, power_usage_values, charge_values, discharge_values, soc_values, grid_injection_values, grid_offtake_values, ev_charge_values, heat_pump_values
-        ):
-            
-
-            year_week = time_value.isocalendar()[1]
-            if time_value.month == 1 and time_value.day == 1:
-                year_week = 1
-            
-            # Accumulate sums for each column for the corresponding day
-            daily_sums[year_week]['pv_power'] += pv_power
-            daily_sums[year_week]['power_usage'] += power_usage
-            daily_sums[year_week]['charge'] += charge
-            daily_sums[year_week]['discharge'] += discharge
-            daily_sums[year_week]['soc'] += soc
-            daily_sums[year_week]['grid_injection'] += grid_injection
-            daily_sums[year_week]['grid_offtake'] += grid_offtake
-            daily_sums[year_week]['ev_charge'] += ev_charge
-            daily_sums[year_week]['heat_pump'] += heat_pump
-
-        pv_power_sums = [sums['pv_power'] for sums in daily_sums.values()]
-        power_usage_sums = [sums['power_usage'] for sums in daily_sums.values()]
-        charge_sums = [sums['charge'] for sums in daily_sums.values()]
-        discharge_sums = [sums['discharge'] for sums in daily_sums.values()]
-        soc_sums = [sums['soc'] for sums in daily_sums.values()]
-        grid_injection_sums = [sums['grid_injection'] for sums in daily_sums.values()]
-        grid_offtake_sums = [sums['grid_offtake'] for sums in daily_sums.values()]
-        ev_charge_sums = [sums['ev_charge'] for sums in daily_sums.values()]
-        heat_pump_sums = [sums['heat_pump'] for sums in daily_sums.values()]
-        time_values = list(daily_sums.keys())
+        title = f"Not Optimized - Daily Data For Month {specific_time} In 2023"
+    elif scale == "PER YEAR":
+        line_width = 2
+        title = "Not Optimized - Yearly Data For 2023"
+    elif scale == "PER MONTH":
+        line_width = 0.9
+        title = "Not Optimized - Monthly Data For 2023"
+    elif scale == "PER WEEK":
         line_width = 0.7
         title = "Not Optimized - Weekly Data For 2023"
-        
-        soc_sums = [x /(7*24) for x in soc_sums]
-        
+
     return {
         "time_values": time_values,
         "pv_power_values": pv_power_sums,
@@ -471,7 +223,7 @@ def calculate_values(data_points, specific_time, scale):
         "heat_pump_values": heat_pump_sums,
         "line_width": line_width,
         "title": title
-        }
+    }
 
 
 def scale_list(original_list, new_length):
