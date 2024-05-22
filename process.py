@@ -13,7 +13,7 @@ import datetime
 from datetime import datetime
 
 
-def process_data_points(algorithm_name, data_points, battery, ev_battery, ev_total_distance):
+def process_data_points(algorithm_name, data_points, battery, ev_battery, ev_total_distance, OPEX):
     #algorithm_name = algorithm_name + ".py"
     algorithm_name = algorithm_name.replace(" ", "_")
 
@@ -24,7 +24,7 @@ def process_data_points(algorithm_name, data_points, battery, ev_battery, ev_tot
     module = importlib.import_module(module_name)
     
     # Run the process function from the imported module
-    return module.process_data(data_points, battery, ev_battery, ev_total_distance)
+    return module.process_data(data_points, battery, ev_battery, ev_total_distance, OPEX)
     
 
 def get_power_usage_values(data_points, selected_user_profile):
@@ -123,6 +123,7 @@ def calculate_values(data_points, specific_time, scale):
     prices_offtake = [point["price_offtake"] for point in data_points]
     ev_charge_values = [-point["ev_charge_value"] for point in data_points]
     heat_pump_values = [-point["heat_pump_value"] for point in data_points]
+    price_battery_use = [point["price_battery_use"] for point in data_points]
 
     # Calculate costs
     grid_injection_costs = [x * y / 1000 for x, y in zip(grid_injection_values, prices_injection)]
@@ -131,6 +132,7 @@ def calculate_values(data_points, specific_time, scale):
     grid_offtake_costs_total = sum(grid_offtake_costs)
     grid_injection_sum = sum(grid_injection_values)
     grid_offtake_sum = sum(grid_offtake_values)
+    battery_use_cost_total = sum(price_battery_use)
 
     # Create a defaultdict to store sums based on the time scale
     sums = defaultdict(lambda: defaultdict(float))
@@ -219,6 +221,7 @@ def calculate_values(data_points, specific_time, scale):
         "grid_offtake_sum": round(grid_offtake_sum, 4),
         "grid_injection_cost": round(grid_injection_costs_total, 4),
         "grid_offtake_cost": round(grid_offtake_costs_total, 4),
+        "battery_use_cost": round(battery_use_cost_total, 4),
         "ev_charge_values": ev_charge_sums,
         "heat_pump_values": heat_pump_sums,
         "line_width": line_width,

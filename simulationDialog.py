@@ -110,16 +110,29 @@ class SimulationDialog(customtkinter.CTk):
         
         #########################
         
-        self.label_battery_opex = customtkinter.CTkLabel(
+        self.label_battery_cycle_life = customtkinter.CTkLabel(
             self.frame_3,
-            text="OPEX",
+            text="Cycle Life",
             font=customtkinter.CTkFont(size=15),
         )
-        self.label_battery_opex.grid(row=7, column=0, padx=25, sticky='w')
-        self.entry_battery_opex = customtkinter.CTkEntry(
+        self.label_battery_cycle_life.grid(row=7, column=0, padx=25, sticky='w')
+        self.entry_battery_cycle_life = customtkinter.CTkEntry(
             self.frame_3, width=50,
         )
-        self.entry_battery_opex.grid(row=7, column=1)
+        self.entry_battery_cycle_life.grid(row=7, column=1)
+        
+        #########################
+        
+        self.label_battery_price = customtkinter.CTkLabel(
+            self.frame_3,
+            text="Battery Price (€)",
+            font=customtkinter.CTkFont(size=15),
+        )
+        self.label_battery_price.grid(row=8, column=0, padx=25, sticky='w')
+        self.entry_battery_price = customtkinter.CTkEntry(
+            self.frame_3, width=50,
+        )
+        self.entry_battery_price.grid(row=8, column=1)
         
         ###########################################################################
         ###########################################################################
@@ -535,8 +548,10 @@ class SimulationDialog(customtkinter.CTk):
             self.label_battery_capacity.configure(text_color='grey17')
             self.entry_battery_efficiency.configure(fg_color="grey17", border_color="grey17", text_color="grey17", state = "disabled")
             self.label_battery_efficiency.configure(text_color='grey17')
-            self.entry_battery_opex.configure(fg_color="grey17", border_color="grey17", text_color="grey17", state = "disabled")
-            self.label_battery_opex.configure(text_color='grey17')
+            self.entry_battery_cycle_life.configure(fg_color="grey17", border_color="grey17", text_color="grey17", state = "disabled")
+            self.label_battery_cycle_life.configure(text_color='grey17')
+            self.entry_battery_price.configure(fg_color="grey17", border_color="grey17", text_color="grey17", state = "disabled")
+            self.label_battery_price.configure(text_color='grey17')
             
         if self.switch_battery.get() == 1:
             self.optionmenu_battery.configure(fg_color="#AEB74F", button_color="#9fa845", state = "normal")
@@ -548,8 +563,10 @@ class SimulationDialog(customtkinter.CTk):
             self.entry_battery_capacity.configure(state = "normal", fg_color="#343638", text_color="#DCE4EE", border_color="#565B5E")
             self.label_battery_efficiency.configure(text_color='#DCE4EE')
             self.entry_battery_efficiency.configure(state = "normal", fg_color="#343638", text_color="#DCE4EE", border_color="#565B5E")
-            self.label_battery_opex.configure(text_color='#DCE4EE')
-            self.entry_battery_opex.configure(state = "normal", fg_color="#343638", text_color="#DCE4EE", border_color="#565B5E")
+            self.label_battery_cycle_life.configure(text_color='#DCE4EE')
+            self.entry_battery_cycle_life.configure(state = "normal", fg_color="#343638", text_color="#DCE4EE", border_color="#565B5E")
+            self.label_battery_price.configure(text_color='#DCE4EE')
+            self.entry_battery_price.configure(state = "normal", fg_color="#343638", text_color="#DCE4EE", border_color="#565B5E")
             
             
     ##############################
@@ -682,7 +699,8 @@ class SimulationDialog(customtkinter.CTk):
         self.entry_battery_discharge.delete(0, tkinter.END)
         self.entry_battery_capacity.delete(0, tkinter.END)
         self.entry_battery_efficiency.delete(0, tkinter.END)
-        self.entry_battery_opex.delete(0, tkinter.END)
+        self.entry_battery_cycle_life.delete(0, tkinter.END)
+        self.entry_battery_price.delete(0, tkinter.END)
         self.entry_solar_azimuth.delete(0, tkinter.END)
         self.entry_solar_tilt.delete(0, tkinter.END)
         self.entry_solar_number_of_panels.delete(0, tkinter.END)
@@ -704,7 +722,8 @@ class SimulationDialog(customtkinter.CTk):
         self.entry_battery_discharge.insert(0, selected_simulation_data[4])
         self.entry_battery_capacity.insert(0, selected_simulation_data[5])
         self.entry_battery_efficiency.insert(0, selected_simulation_data[6])
-        self.entry_battery_opex.insert(0, selected_simulation_data[7])
+        self.entry_battery_cycle_life.insert(0, int(str(selected_simulation_data[7]).split("12345")[0]))
+        self.entry_battery_price.insert(0, int(str(selected_simulation_data[7]).split("12345")[1]))
         self.entry_solar_azimuth.insert(0, selected_simulation_data[9])
         self.entry_solar_tilt.insert(0, selected_simulation_data[10])
         self.entry_solar_number_of_panels.insert(0, selected_simulation_data[11])
@@ -743,13 +762,15 @@ class SimulationDialog(customtkinter.CTk):
         self.entry_battery_discharge.delete(0, tkinter.END)
         self.entry_battery_capacity.delete(0, tkinter.END)
         self.entry_battery_efficiency.delete(0, tkinter.END)
-        self.entry_battery_opex.delete(0, tkinter.END)
+        self.entry_battery_cycle_life.delete(0, tkinter.END)
+        self.entry_battery_price.delete(0, tkinter.END)
         
         self.entry_battery_charge.insert(0, selected_battery_data[3])
         self.entry_battery_discharge.insert(0, selected_battery_data[4])
         self.entry_battery_capacity.insert(0, selected_battery_data[2])
         self.entry_battery_efficiency.insert(0, selected_battery_data[7])
-        self.entry_battery_opex.insert(0, selected_battery_data[8])
+        self.entry_battery_cycle_life.insert(0, int(str(selected_battery_data[8]).split("12345")[0]))
+        self.entry_battery_price.insert(0, int(str(selected_battery_data[8]).split("12345")[1]))
         
     def update_solarpanel_options(self, selected_solarpanel):
         
@@ -878,7 +899,8 @@ class SimulationDialog(customtkinter.CTk):
         self.entry_battery_discharge.insert(0, previous_data[4])
         self.entry_battery_capacity.insert(0, previous_data[5])
         self.entry_battery_efficiency.insert(0, previous_data[6])
-        self.entry_battery_opex.insert(0, previous_data[7])
+        self.entry_battery_cycle_life.insert(0, int(str(previous_data[7]).split("12345")[0]))
+        self.entry_battery_price.insert(0, int(str(previous_data[7]).split("12345")[1]))
         self.entry_solar_azimuth.insert(0, previous_data[9])
         self.entry_solar_tilt.insert(0, previous_data[10])
         self.entry_solar_number_of_panels.insert(0, previous_data[11])
@@ -954,7 +976,7 @@ class SimulationDialog(customtkinter.CTk):
             "Battery Discharge": self.entry_battery_discharge.get() if self.switch_battery.get() else "0",
             "Battery Capacity": self.entry_battery_capacity.get() if self.switch_battery.get() else "0",
             "Battery Efficiency": self.entry_battery_efficiency.get() if self.switch_battery.get() else "0",
-            "Battery OPEX": self.entry_battery_opex.get() if self.switch_battery.get() else "0",
+            "Battery OPEX": int(str(self.entry_battery_cycle_life.get()) + "12345" + str(self.entry_battery_price.get())) if self.switch_battery.get() else "0",
             "Solar": self.switch_solar.get(),
             "Solar Azimuth": self.entry_solar_azimuth.get() if self.switch_solar.get() else "0",
             "Solar Tilt": self.entry_solar_tilt.get() if self.switch_solar.get() else "0",
@@ -981,13 +1003,13 @@ class SimulationDialog(customtkinter.CTk):
         }
         
         # Define ranges for various entries
-        #TODO correct opex values
+        #TODO correct cycle_life values
         ranges = {
             "Battery Charge": (0, 100),
             "Battery Discharge": (0, 100),
             "Battery Capacity": (0, 1000),
             "Battery Efficiency": (0, 100),
-            "Battery OPEX": (0, 1000),
+            "Battery OPEX": (0, 10000000000000000),
             "Solar Azimuth": (0, 360),
             "Solar Tilt": (0, 90),
             "Number of Solar Panels": (0, 200),

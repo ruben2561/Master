@@ -1,4 +1,4 @@
-def process_data(data_points, battery, ev_battery, ev_total_distance):
+def process_data(data_points, battery, ev_battery, ev_total_distance, OPEX):
     for i in range(len(data_points) - 1):
         current_point = data_points[i]
         next_point = data_points[i + 1]
@@ -41,6 +41,7 @@ def process_data(data_points, battery, ev_battery, ev_total_distance):
                 current_point["charge_value"] = charged
                 current_point["discharge_value"] = 0
                 current_point["ev_charge_value"] = ev_charged
+                price_battery_usage = (OPEX/2000) * charged
 
             elif charge_discharge_battery < 0:
                 discharged, residue_to_little_energy = battery.discharge(
@@ -51,6 +52,7 @@ def process_data(data_points, battery, ev_battery, ev_total_distance):
                 current_point["charge_value"] = 0
                 current_point["discharge_value"] = discharged
                 current_point["ev_charge_value"] = ev_charged
+                price_battery_usage = (OPEX/2000) * discharged
 
             else:
                 current_point["grid_injection"] = 0
@@ -58,5 +60,9 @@ def process_data(data_points, battery, ev_battery, ev_total_distance):
                 current_point["charge_value"] = 0
                 current_point["discharge_value"] = 0
                 current_point["ev_charge_value"] = ev_charged
+                
+            
+                
+            current_point["price_battery_use"] = price_battery_usage
 
     return data_points

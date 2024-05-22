@@ -410,23 +410,43 @@ class App(customtkinter.CTk):
         
         ###########################################################
         
+        self.label_battery_use = customtkinter.CTkLabel(
+            self.sidebar_frame2,
+            text="Total Price Batt. Use:",
+            anchor="w",
+            font=customtkinter.CTkFont(size=15),
+        )
+        self.label_battery_use.grid(row=12, column=0, padx=20, pady=(0, 0) , sticky="w")
+        
+        self.label_battery_use_result_1 = customtkinter.CTkLabel(
+            self.sidebar_frame2, text="...", font=customtkinter.CTkFont(size=12)
+        )
+        self.label_battery_use_result_1.grid(row=12, column=1, pady=(0, 0) , padx=(0,10))
+        
+        self.label_battery_use_result_2 = customtkinter.CTkLabel(
+            self.sidebar_frame2, text="...", font=customtkinter.CTkFont(size=12)
+        )
+        self.label_battery_use_result_2.grid(row=12, column=2, pady=(0, 0), padx=(0, 20) )
+        
+        ###########################################################
+        
         self.label_price = customtkinter.CTkLabel(
             self.sidebar_frame2,
             text="Net Price:",
             anchor="w",
             font=customtkinter.CTkFont(size=15),
         )
-        self.label_price.grid(row=12, column=0, padx=20, pady=(15, 0) , sticky="w")
+        self.label_price.grid(row=13, column=0, padx=20, pady=(15, 0) , sticky="w")
         
         self.label_price_result_1 = customtkinter.CTkLabel(
             self.sidebar_frame2, text="...", font=customtkinter.CTkFont(size=12)
         )
-        self.label_price_result_1.grid(row=12, column=1, pady=(15, 0) , padx=(0,10))
+        self.label_price_result_1.grid(row=13, column=1, pady=(15, 0) , padx=(0,10))
         
         self.label_price_result_2 = customtkinter.CTkLabel(
             self.sidebar_frame2, text="...", font=customtkinter.CTkFont(size=12)
         )
-        self.label_price_result_2.grid(row=12, column=2, pady=(15, 0), padx=(0, 20) )
+        self.label_price_result_2.grid(row=13, column=2, pady=(15, 0), padx=(0, 20) )
 
         ########################################################### 
         
@@ -436,12 +456,12 @@ class App(customtkinter.CTk):
             anchor="w",
             font=customtkinter.CTkFont(size=15, weight='bold'),
         )
-        self.label_saved.grid(row=13, column=0, padx=20, pady=(15, 0) , sticky="w")
+        self.label_saved.grid(row=14, column=0, padx=20, pady=(15, 0) , sticky="w")
         
         self.label_saved_result_1 = customtkinter.CTkLabel(
             self.sidebar_frame2, text="...", font=customtkinter.CTkFont(size=12, weight='bold')
         )
-        self.label_saved_result_1.grid(row=13, column=1, columnspan=2, pady=(15, 0) , padx=(0,10))
+        self.label_saved_result_1.grid(row=14, column=1, columnspan=2, pady=(15, 0) , padx=(0,10))
         
         ########################################################### 
         
@@ -495,6 +515,8 @@ class App(customtkinter.CTk):
         grid_injection_cost = calculated_values["grid_injection_cost"]
         grid_offtake_cost = calculated_values["grid_offtake_cost"]
         
+        battery_use_cost = calculated_values["battery_use_cost"]
+        
         ev_charge_values = calculated_values["ev_charge_values"]
         heat_pump_values = calculated_values["heat_pump_values"]
         
@@ -526,7 +548,8 @@ class App(customtkinter.CTk):
         self.label_ev_charge_result_1.configure(text=str(abs(round(sum(ev_charge_values), 2))) + " kWh")
         self.label_cost_result_1.configure(text="€" + str(round(grid_offtake_cost, 2)))
         self.label_earning_result_1.configure(text= "€" + str(abs(round(grid_injection_cost, 2))))
-        self.label_price_result_1.configure(text="€" + str(round(abs(grid_offtake_cost)-abs(grid_injection_cost), 2)))
+        self.label_battery_use_result_1.configure(text= "€" + str(abs(round(battery_use_cost, 2))))
+        self.label_price_result_1.configure(text="€" + str(round(abs(grid_offtake_cost)-abs(grid_injection_cost)+abs(battery_use_cost), 2)))
         
         # Calculate bottom values
         bottom_offtake = [x + y for x, y in zip(pv_power_values, discharge_values)]
@@ -632,6 +655,8 @@ class App(customtkinter.CTk):
         grid_injection_cost_algo_2 = calculated_values_algo_2["grid_injection_cost"]
         grid_offtake_cost_algo_2 = calculated_values_algo_2["grid_offtake_cost"]
         
+        battery_use_cost_algo_2 = calculated_values_algo_2["battery_use_cost"]
+        
         ev_charge_values_algo_2 = calculated_values_algo_2["ev_charge_values"]
         heat_pump_values_algo_2 = calculated_values_algo_2["heat_pump_values"]
 
@@ -642,7 +667,8 @@ class App(customtkinter.CTk):
         self.label_discharge_result_2.configure(text=str(abs(round(sum(discharge_values_algo_2), 2))) + " kWh")
         self.label_cost_result_2.configure(text="€" + str(round(grid_offtake_cost_algo_2, 2)))
         self.label_earning_result_2.configure(text="€" + str(abs(round(grid_injection_cost_algo_2, 2))))
-        self.label_price_result_2.configure(text="€" + str(round(abs(grid_offtake_cost_algo_2)-abs(grid_injection_cost_algo_2), 2)))
+        self.label_battery_use_result_2.configure(text= "€" + str(abs(round(battery_use_cost_algo_2, 2))))
+        self.label_price_result_2.configure(text="€" + str(round(abs(grid_offtake_cost_algo_2)-abs(grid_injection_cost_algo_2)+abs(battery_use_cost_algo_2), 2)))
 
         # Calculate bottom values
         bottom_offtake_algo_2 = [x + y for x, y in zip(pv_power_values_algo_2, discharge_values_algo_2)]
@@ -726,8 +752,8 @@ class App(customtkinter.CTk):
         ############################################################################
         ############################################################################
         ############################################################################
-        saving = round(abs(grid_offtake_cost)-abs(grid_injection_cost)-abs(grid_offtake_cost_algo_2)+abs(grid_injection_cost_algo_2), 2)
-        saving_percentage = round(saving/abs(abs(grid_offtake_cost)-abs(grid_injection_cost)), 2) * 100
+        saving = round((abs(grid_offtake_cost)-abs(grid_injection_cost)+abs(battery_use_cost))-(abs(grid_offtake_cost_algo_2)-abs(grid_injection_cost_algo_2)+abs(battery_use_cost_algo_2)), 2)
+        saving_percentage = round(saving/abs(abs(grid_offtake_cost)-abs(grid_injection_cost)+abs(battery_use_cost)), 2) * 100
         self.label_saved_result_1.configure(text="€" + str(saving) + "\n  " + str(round(saving_percentage, 2)) + "%")
         
         new_soc_values = scale_list(soc_values, 400)
@@ -872,7 +898,7 @@ class App(customtkinter.CTk):
                 self.battery_discharge = self.simulation_data[4]
                 self.battery_capacity = self.simulation_data[5]
                 self.battery_efficiency = self.simulation_data[6]
-                self.battery_opex = self.simulation_data[7]
+                self.battery_opex = int(str(self.simulation_data[7]).split("12345")[1])*1000/(int(str(self.simulation_data[7]).split("12345")[0]) * self.simulation_data[5])
                 self.solar_azimuth = self.simulation_data[9]
                 self.solar_tilt = self.simulation_data[10]
                 self.solar_number_of_panels = self.simulation_data[11]
@@ -946,9 +972,9 @@ class App(customtkinter.CTk):
         
         data_points_algo_2 = copy.deepcopy(data_points)  # Make a deep copy of the original data_points list
         
-        self.data_points_complete_algo_1 = process_data_points(self.optionmenu_algo_1.get(), data_points, battery_home_1, battery_car_1, self.ev_distance_year * self.ev_number_of_cars)
+        self.data_points_complete_algo_1 = process_data_points(self.optionmenu_algo_1.get(), data_points, battery_home_1, battery_car_1, self.ev_distance_year * self.ev_number_of_cars, self.battery_opex)
         
-        self.data_points_complete_algo_2 = process_data_points(self.optionmenu_algo_2.get(), data_points_algo_2, battery_home_2, battery_car_2, self.ev_distance_year * self.ev_number_of_cars)
+        self.data_points_complete_algo_2 = process_data_points(self.optionmenu_algo_2.get(), data_points_algo_2, battery_home_2, battery_car_2, self.ev_distance_year * self.ev_number_of_cars, self.battery_opex)
 
         self.update_graphs_with_new_data(self.data_points_complete_algo_1, self.data_points_complete_algo_2)
         
