@@ -598,7 +598,7 @@ class App(customtkinter.CTk):
             time_values, 
             heat_pump_values,
             bottom=power_usage_values, 
-            color="#FADCC3", 
+            color="#CCFF00", 
             label="Heat Pump Usage",
             width=line_width
         )
@@ -717,7 +717,7 @@ class App(customtkinter.CTk):
             time_values_algo_2, 
             heat_pump_values_algo_2,
             bottom=power_usage_values_algo_2, 
-            color="#FADCC3", 
+            color="#CCFF00", 
             label="Heat Pump usage",
             width=line_width
         )
@@ -898,27 +898,29 @@ class App(customtkinter.CTk):
                 self.battery_discharge = self.simulation_data[4]
                 self.battery_capacity = self.simulation_data[5]
                 self.battery_efficiency = self.simulation_data[6]
-                self.battery_opex = int(str(self.simulation_data[7]).split("12345")[1])*1000/(int(str(self.simulation_data[7]).split("12345")[0]) * self.simulation_data[5])
+                self.battery_opex = (int(str(self.simulation_data[7]).split("12345")[1]) * 1000 / (int(str(self.simulation_data[7]).split("12345")[0]) * self.simulation_data[5])) if self.simulation_data[5] != 0 else 1
                 self.solar_azimuth = self.simulation_data[9]
                 self.solar_tilt = self.simulation_data[10]
                 self.solar_number_of_panels = self.simulation_data[11]
                 self.solar_efficiency = self.simulation_data[12]
                 self.solar_length = self.simulation_data[13]
                 self.solar_width = self.simulation_data[14]
-                self.ev_charge = self.simulation_data[16]
-                self.ev_number_of_cars = self.simulation_data[17]
-                self.ev_efficiency = self.simulation_data[18]
-                self.ev_distance_year = self.simulation_data[19]               
-                self.heat_certificate = self.simulation_data[21]
-                self.heat_area = self.simulation_data[22]
-                self.heat_cop = self.simulation_data[23]
-                self.heat_temp = self.simulation_data[24]
-                self.selected_consumer_profile = self.simulation_data[25]
-                self.selected_provider = self.simulation_data[26]
-                self.general_latitude = self.simulation_data[27]
-                self.general_longitude = self.simulation_data[28]
-                self.general_start_date = self.simulation_data[29]
-                self.use_api = self.simulation_data[30]
+                self.solar_cap = self.simulation_data[15]
+                self.solar_inv_cap = self.simulation_data[16]
+                self.ev_charge = self.simulation_data[18]
+                self.ev_number_of_cars = self.simulation_data[19]
+                self.ev_efficiency = self.simulation_data[20]
+                self.ev_distance_year = self.simulation_data[21]               
+                self.heat_certificate = self.simulation_data[23]
+                self.heat_area = self.simulation_data[24]
+                self.heat_cop = self.simulation_data[25]
+                self.heat_temp = self.simulation_data[26]
+                self.selected_consumer_profile = self.simulation_data[27]
+                self.selected_provider = self.simulation_data[28]
+                self.general_latitude = self.simulation_data[29]
+                self.general_longitude = self.simulation_data[30]
+                self.general_start_date = self.simulation_data[31]
+                self.use_api = self.simulation_data[32]
         
         except:
             # Show some retry/cancel warnings
@@ -960,7 +962,7 @@ class App(customtkinter.CTk):
         # charge_value is in kWh and is positive when charged and negative when discharged
         # grid_usage is in kWh and is positive when extracted and is negative when injected
         
-        data_points = process_solar_data(self.general_latitude, self.general_longitude, self.general_start_date, self.solar_number_of_panels, self.solar_width*self.solar_length, self.solar_azimuth, self.solar_tilt, self.solar_efficiency, self.solar_efficiency, self.use_api)
+        data_points = process_solar_data(self.general_latitude, self.general_longitude, self.general_start_date, self.solar_number_of_panels, self.solar_width*self.solar_length, self.solar_azimuth, self.solar_tilt, self.solar_efficiency, self.solar_efficiency, self.solar_cap, self.solar_inv_cap, self.use_api)
         
         data_points = get_power_usage_values(data_points, self.selected_consumer_profile)
         

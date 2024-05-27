@@ -254,11 +254,8 @@ def read_pv_list_from_file(filename):
         print(f"Error reading PV list from file: {e}")
         return None
 
-def process_solar_data(latitude, longitude, start_date, number_of_panels, area, azimuth, tilt, efficiency_panels, efficiency_invertor, use_api):
+def process_solar_data(latitude, longitude, start_date, number_of_panels, area, azimuth, tilt, efficiency_panels, efficiency_invertor, cap, inv_cap, use_api):
 
-    # Calculate end date one year further
-    #end_date = start_date + pd.DateOffset(days=365)
-    #TODO fix end date
     forecast_data = get_solar_data_openmeteo(
         latitude, longitude, start_date
     )
@@ -274,7 +271,6 @@ def process_solar_data(latitude, longitude, start_date, number_of_panels, area, 
     # Iterate over the forecast data
     for data_point in pv_list:
         # Store data point as a dictionary
-        #TODO fix /2
         data_points.append(
             {
                 "pv_power_value": data_point['pv_power_value'],
