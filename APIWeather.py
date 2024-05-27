@@ -22,6 +22,7 @@ def get_sample_data_pv():
     try:
         with open("sampleData/solar_data_year.csv", "r") as file:
             sample_data = file.read()
+            print("sample weather data used")
             return sample_data
     except Exception as e:
         print(f"Error reading sample data: {e}")
@@ -58,7 +59,6 @@ def format_weather_data(data):
     
     return formatted_data.strip()  # Remove the last newline character
 
-# TODO change to automatic one year end date
 def get_solar_data_openmeteo(latitude, longitude, start_date):
     try:
         
@@ -75,6 +75,8 @@ def get_solar_data_openmeteo(latitude, longitude, start_date):
 
         # Format the data
         formatted_weather_data = format_weather_data(weather_data)
+        
+        print("openmeteo weather data used")
         
         return formatted_weather_data
     

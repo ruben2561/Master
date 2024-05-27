@@ -34,24 +34,15 @@ class DatabaseManager:
         battery_data = self.cursor.fetchone()
         return battery_data
     
-    def add_battery(self, name, capacity, charge_power, discharge_power, max_soc, min_dod, efficiency):
-        query = f"INSERT INTO Battery (name, capacityKWh, chargePowerKW, dischargePowerKW, maxSoc, minDod, efficiency) VALUES (?, ?, ?, ?, ?, ?, ?)"
+    def add_battery(self, name, capacity, charge_power, discharge_power, max_soc, min_dod, efficiency, OPEX):
+        query = f"INSERT INTO Battery (name, capacityKWh, chargePowerKW, dischargePowerKW, maxSoc, minDod, efficiency, opex) VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
         print(query)
-        self.cursor.execute(query, (name,capacity,charge_power,discharge_power,max_soc,min_dod,efficiency))
+        self.cursor.execute(query, (name,capacity,charge_power,discharge_power,max_soc,min_dod,efficiency,OPEX))
         self.connection.commit()
 
     def delete_battery_by_name(self, name):
         query = "DELETE FROM Battery WHERE name = ?"
         self.cursor.execute(query, (name,))
-        self.connection.commit()
-
-    def update_battery(self, old_name, new_name, capacity, charge_power, discharge_power, max_soc, min_dod, efficiency):
-        query = """
-                UPDATE Battery 
-                SET name=?, capacityKWh=?, chargePowerKW=?, dischargePowerKW=?, maxSoc=?, minDod=?, efficiency=?
-                WHERE name=?
-                """
-        self.cursor.execute(query, (new_name, capacity, charge_power, discharge_power, max_soc, min_dod, efficiency, old_name))
         self.connection.commit()
 
     ###########################################################################
@@ -131,9 +122,9 @@ class DatabaseManager:
         heat_pump_data = self.cursor.fetchone()
         return heat_pump_data
     
-    def add_heat_pump(self, name, building, areaHouse, COP, desiredTemp):
-        query = "INSERT INTO HeatPump (name, building, areaHouse, COP, desiredTemp) VALUES (?,?,?,?,?)"
-        self.cursor.execute(query, (name, building, areaHouse, COP, desiredTemp))
+    def add_heat_pump(self, name, certificate, areaHouse, COP, desiredTemp):
+        query = "INSERT INTO HeatPump (name, certificate, areaHouse, COP, desiredTemp) VALUES (?,?,?,?,?)"
+        self.cursor.execute(query, (name, certificate, areaHouse, COP, desiredTemp))
         self.connection.commit()
 
     def delete_heat_pump_by_name(self, name):
@@ -169,6 +160,7 @@ class DatabaseManager:
             battery_discharge,
             battery_capacity,
             battery_efficiency,
+            battery_opex,
             solar,
             solar_azimuth,
             solar_tilt,
@@ -182,7 +174,7 @@ class DatabaseManager:
             ev_efficiency,
             ev_distance_year,
             heat,
-            heat_building,
+            heat_certificate,
             heat_area,
             heat_cop,
             heat_temp,
@@ -193,7 +185,7 @@ class DatabaseManager:
             general_start_date,
             use_api):
         
-        query = "INSERT INTO Simulation (name, battery, batteryCharge, batteryDischarge, batteryCapacity, batteryEfficiency, solar, solarAzimuth, solarTilt, solarNumberOfPanels, solarEfficiency, solarLength, solarWidth, ev, evCharge, evNumberOfCars, evEfficiency, evDistanceYear, heat, heatBuilding, heatArea, heatCOP, heatTemp, consumerProfile, provider, generalLatitude, generalLongitude, generalStartDate, useApi) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+        query = "INSERT INTO Simulation (name, battery, batteryCharge, batteryDischarge, batteryCapacity, batteryEfficiency, batteryOpex, solar, solarAzimuth, solarTilt, solarNumberOfPanels, solarEfficiency, solarLength, solarWidth, ev, evCharge, evNumberOfCars, evEfficiency, evDistanceYear, heat, heatCertificate, heatArea, heatCOP, heatTemp, consumerProfile, provider, generalLatitude, generalLongitude, generalStartDate, useApi) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
         
         self.cursor.execute(query, 
             (
@@ -203,6 +195,7 @@ class DatabaseManager:
             battery_discharge,
             battery_capacity,
             battery_efficiency,
+            battery_opex,
             solar,
             solar_azimuth,
             solar_tilt,
@@ -216,7 +209,7 @@ class DatabaseManager:
             ev_efficiency,
             ev_distance_year,
             heat,
-            heat_building,
+            heat_certificate,
             heat_area,
             heat_cop,
             heat_temp,

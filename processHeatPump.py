@@ -52,7 +52,7 @@ def calculate_indoor_temperature(temp_out, temp_in, U, area, timestep=0.1):
         
     return temp_in_new
 
-def process_heat_pump_data(data_points, area, cop, temp_desired, building):
+def process_heat_pump_data(data_points, area, cop, temp_desired, certificate):
     building_U_values = {
         "new": 0.175,
         "+-2010": 0.25,
@@ -60,7 +60,19 @@ def process_heat_pump_data(data_points, area, cop, temp_desired, building):
         "-1995": 0.525
     }
     
-    U = building_U_values.get(building, 0.3)  # Default U value if building type not found
+    certificate_U_values = {
+        "A+": 0.15,
+        "A": 0.25,
+        "B": 0.35,
+        "C": 0.5,
+        "D": 0.7,
+        "E": 0.9,
+        "F": 1
+    }
+    
+    #U = building_U_values.get(building, 0.3)  # Default U value if building type not found
+    
+    U = certificate_U_values.get(certificate, 0.3)  # Default U value if building type not found
 
         
     #TODO toevoegen temp verlies snacht 

@@ -1,4 +1,4 @@
-def process_point_optimized(time_difference_hours, time_value, pv_power_values, power_usage_values, offtake_price_values, injection_price_values, soc_value, battery, ev_battery, heat_pump_value):
+def process_point_optimized(time_difference_hours, time_value, pv_power_values, power_usage_values, offtake_price_values, injection_price_values, soc_value, battery, ev_battery, heat_pump_value, OPEX):
     
     grid_injection = 0
     grid_offtake = 0
@@ -83,13 +83,15 @@ def process_point_optimized(time_difference_hours, time_value, pv_power_values, 
         charged, residue_to_much_energy = battery.charge(battery.get_max_charge(), time_difference_hours)
         charge_value += charged
         grid_offtake += charged
+        
+    price_battery_usage = ((OPEX/2000) * charge_value) + ((OPEX/2000) * discharge_value)
 
-    return grid_injection, grid_offtake, charge_value, discharge_value, ev_charged
+    return grid_injection, grid_offtake, charge_value, discharge_value, ev_charged, price_battery_usage
 
 
 
 
-def process_data(data_points, battery, ev_battery, ev_total_distance):
+def process_data(data_points, battery, ev_battery, ev_total_distance, OPEX):
     for i in range(len(data_points) - 1):
         current_point = data_points[i]
         data_points_copy = data_points + data_points[0:24]
@@ -114,13 +116,14 @@ def process_data(data_points, battery, ev_battery, ev_total_distance):
         if time_value and next_time:
             time_difference_hours = (next_time - time_value).total_seconds() / 3600
             
-            grid_injection, grid_offtake, charge_value, discharge_value, ev_charged = process_point_optimized(time_difference_hours, time_value, pv_power_values, power_usage_values, offtake_price_values, injection_price_values, soc_value, battery, ev_battery, heat_pump_value)
+            grid_injection, grid_offtake, charge_value, discharge_value, ev_charged, price_battery_usage = process_point_optimized(time_difference_hours, time_value, pv_power_values, power_usage_values, offtake_price_values, injection_price_values, soc_value, battery, ev_battery, heat_pump_value, OPEX)
             
             current_point["soc_value"] = soc_value
             current_point["grid_injection"] = grid_injection
             current_point["grid_offtake"] = grid_offtake
             current_point["charge_value"] = charge_value
             current_point["discharge_value"] = discharge_value
-            current_point["ev_charge_value"] = ev_charged 
+            current_point["ev_charge_value"] = ev_charged
+            current_point["price_battery_use"] = price_battery_usage 
 
     return data_points
