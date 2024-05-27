@@ -263,7 +263,7 @@ def process_solar_data(latitude, longitude, start_date, number_of_panels, area, 
     reader = csv.DictReader(forecast_data.splitlines())
     forecast_list = list(reader)
     
-    pv_list = calculate_pv_power(forecast_list, latitude, longitude, number_of_panels, area, azimuth, tilt, efficiency_panels, efficiency_invertor, 5, 5)
+    pv_list = calculate_pv_power(forecast_list, latitude, longitude, number_of_panels, area, azimuth, tilt, efficiency_panels, efficiency_invertor, cap, inv_cap)
 
     # Initialize list to store data for plotting as tuples of (pv_power_value, time_value)
     data_points = []

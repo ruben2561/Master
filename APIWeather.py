@@ -39,8 +39,6 @@ def fetch_weather_data(latitude, longitude, start_date, end_date):
     }
 
     response = requests.get(base_url, params=params)
-    
-    print(response)
 
     if response.status_code == 200:
         return response.json()
@@ -77,7 +75,7 @@ def get_solar_data_openmeteo(latitude, longitude, start_date):
 
         # Format the data
         formatted_weather_data = format_weather_data(weather_data)
-        
+            
         print("openmeteo weather data used")
         
         return formatted_weather_data

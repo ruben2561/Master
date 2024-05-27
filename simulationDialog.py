@@ -779,7 +779,7 @@ class SimulationDialog(customtkinter.CTk):
         self.optionmenu_consumer_profile.set(selected_simulation_data[27])
         self.optionmenu_provider.set(selected_simulation_data[28])
         self.entry_general_latitude.insert(0, selected_simulation_data[29])
-        self.entry_general_longitude.insert(0, selected_simulation_data[20])
+        self.entry_general_longitude.insert(0, selected_simulation_data[30])
         self.entry_general_start_date.insert(0, selected_simulation_data[31])
         
         self.switch_battery_event()
@@ -961,7 +961,7 @@ class SimulationDialog(customtkinter.CTk):
         self.optionmenu_consumer_profile.set(previous_data[27])
         self.optionmenu_provider.set(previous_data[28])
         self.entry_general_latitude.insert(0, previous_data[29])
-        self.entry_general_longitude.insert(0, previous_data[20])
+        self.entry_general_longitude.insert(0, previous_data[30])
         self.entry_general_start_date.insert(0, previous_data[31])
         
         # Select the switch if previous_data value is 1
