@@ -79,11 +79,12 @@ def process_point_optimized(time_difference_hours, time_value, pv_power_values, 
         discharge_value = discharged
         ev_charge_value = ev_charged
         
-    if offtake_price_values[0] <= 40:
-        charged, residue_to_much_energy = battery.charge(battery.get_max_charge(), time_difference_hours)
-        charge_value += charged
-        grid_offtake += charged
-        
+    if(time_value.hour > 17 or time_value.hour < 8):
+        if offtake_price_values[0] <= 40:
+            charged, residue_to_much_energy = battery.charge(battery.get_max_charge(), time_difference_hours)
+            charge_value += charged
+            grid_offtake += charged
+            
     price_battery_usage = ((OPEX/2000) * charge_value) + ((OPEX/2000) * discharge_value)
 
     return grid_injection, grid_offtake, charge_value, discharge_value, ev_charged, price_battery_usage

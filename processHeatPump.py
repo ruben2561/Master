@@ -73,11 +73,6 @@ def process_heat_pump_data(data_points, area, cop, temp_desired, certificate):
     #U = building_U_values.get(building, 0.3)  # Default U value if building type not found
     
     U = certificate_U_values.get(certificate, 0.3)  # Default U value if building type not found
-
-        
-    #TODO toevoegen temp verlies snacht 
-    # alleen doen if time = overdag
-    # anders globale variabele van temp in bijhouden 
         
     temp_in_current = temp_desired
     for i in range(len(data_points) - 1):

@@ -64,9 +64,9 @@ class DatabaseManager:
         solarpanel_data = self.cursor.fetchone()
         return solarpanel_data
     
-    def add_solarpanel(self, name, azimuth, tilt, numberOfPanels, length, width, efficiency):
-        query = "INSERT INTO SolarPanel (name, azimuth, tilt, numberOfPanels, length, width, efficiency) VALUES (?,?,?,?,?,?,?)"
-        self.cursor.execute(query, (name, azimuth, tilt, numberOfPanels, length, width, efficiency))
+    def add_solarpanel(self, name, azimuth, tilt, numberOfPanels, length, width, efficiency, panelCapacity, invertorCapacity):
+        query = "INSERT INTO SolarPanel (name, azimuth, tilt, numberOfPanels, length, width, efficiency, panelCapacity, invertorCapacity) VALUES (?,?,?,?,?,?,?,?,?)"
+        self.cursor.execute(query, (name, azimuth, tilt, numberOfPanels, length, width, efficiency, panelCapacity, invertorCapacity))
         self.connection.commit()
 
     def delete_solarpanel_by_name(self, name):
@@ -168,6 +168,8 @@ class DatabaseManager:
             solar_efficiency,
             solar_length,
             solar_width,
+            solar_cap,
+            solar_inv_cap,
             ev,
             ev_charge,
             ev_number_of_cars,
@@ -185,7 +187,7 @@ class DatabaseManager:
             general_start_date,
             use_api):
         
-        query = "INSERT INTO Simulation (name, battery, batteryCharge, batteryDischarge, batteryCapacity, batteryEfficiency, batteryOpex, solar, solarAzimuth, solarTilt, solarNumberOfPanels, solarEfficiency, solarLength, solarWidth, ev, evCharge, evNumberOfCars, evEfficiency, evDistanceYear, heat, heatCertificate, heatArea, heatCOP, heatTemp, consumerProfile, provider, generalLatitude, generalLongitude, generalStartDate, useApi) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+        query = "INSERT INTO Simulation (name, battery, batteryCharge, batteryDischarge, batteryCapacity, batteryEfficiency, batteryOpex, solar, solarAzimuth, solarTilt, solarNumberOfPanels, solarEfficiency, solarLength, solarWidth, solarPanelCapacity, solarInvertorCapacity, ev, evCharge, evNumberOfCars, evEfficiency, evDistanceYear, heat, heatCertificate, heatArea, heatCOP, heatTemp, consumerProfile, provider, generalLatitude, generalLongitude, generalStartDate, useApi) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
         
         self.cursor.execute(query, 
             (
@@ -203,6 +205,8 @@ class DatabaseManager:
             solar_efficiency,
             solar_length,
             solar_width,
+            solar_cap,
+            solar_inv_cap,
             ev,
             ev_charge,
             ev_number_of_cars,

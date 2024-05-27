@@ -235,6 +235,32 @@ class SimulationDialog(customtkinter.CTk):
         )
         self.entry_solar_width.grid(row=8, column=3)
         
+        #########################
+        
+        self.label_solar_cap = customtkinter.CTkLabel(
+            self.frame_3,
+            text="Panel Cap (kW)",
+            font=customtkinter.CTkFont(size=15),
+        )
+        self.label_solar_cap.grid(row=9, column=2, padx=30, sticky='w')
+        self.entry_solar_cap = customtkinter.CTkEntry(
+            self.frame_3, width=50,
+        )
+        self.entry_solar_cap.grid(row=9, column=3)
+        
+        #########################
+        
+        self.label_solar_inv_cap = customtkinter.CTkLabel(
+            self.frame_3,
+            text="Invertor cap (kW)",
+            font=customtkinter.CTkFont(size=15),
+        )
+        self.label_solar_inv_cap.grid(row=10, column=2, padx=30, sticky='w')
+        self.entry_solar_inv_cap = customtkinter.CTkEntry(
+            self.frame_3, width=50,
+        )
+        self.entry_solar_inv_cap.grid(row=10, column=3)
+        
         ###########################################################################
         ###########################################################################
         ###########################################################################
@@ -587,6 +613,10 @@ class SimulationDialog(customtkinter.CTk):
             self.label_solar_length.configure(text_color='grey17')
             self.entry_solar_width.configure(fg_color="grey17", border_color="grey17", text_color="grey17", state = "disabled")
             self.label_solar_width.configure(text_color='grey17')
+            self.entry_solar_cap.configure(fg_color="grey17", border_color="grey17", text_color="grey17", state = "disabled")
+            self.label_solar_cap.configure(text_color='grey17')
+            self.entry_solar_inv_cap.configure(fg_color="grey17", border_color="grey17", text_color="grey17", state = "disabled")
+            self.label_solar_inv_cap.configure(text_color='grey17')
             
             
         if self.switch_solar.get() == 1:
@@ -603,6 +633,10 @@ class SimulationDialog(customtkinter.CTk):
             self.entry_solar_length.configure(state = "normal", fg_color="#343638", text_color="#DCE4EE", border_color="#565B5E")
             self.label_solar_width.configure(text_color='#DCE4EE')
             self.entry_solar_width.configure(state = "normal", fg_color="#343638", text_color="#DCE4EE", border_color="#565B5E")
+            self.label_solar_cap.configure(text_color='#DCE4EE')
+            self.entry_solar_cap.configure(state = "normal", fg_color="#343638", text_color="#DCE4EE", border_color="#565B5E")
+            self.label_solar_inv_cap.configure(text_color='#DCE4EE')
+            self.entry_solar_inv_cap.configure(state = "normal", fg_color="#343638", text_color="#DCE4EE", border_color="#565B5E")
             
             
     #############################
@@ -685,12 +719,12 @@ class SimulationDialog(customtkinter.CTk):
         else:
             self.switch_solar.deselect()
 
-        if selected_simulation_data[15] == 1:
+        if selected_simulation_data[17] == 1:
             self.switch_ev.select()
         else:
             self.switch_ev.deselect()
             
-        if selected_simulation_data[20] == 1:
+        if selected_simulation_data[22] == 1:
             self.switch_heat.select()
         else:
             self.switch_heat.deselect()
@@ -707,6 +741,8 @@ class SimulationDialog(customtkinter.CTk):
         self.entry_solar_efficiency.delete(0, tkinter.END)
         self.entry_solar_length.delete(0, tkinter.END)
         self.entry_solar_width.delete(0, tkinter.END)
+        self.entry_solar_cap.delete(0, tkinter.END)
+        self.entry_solar_inv_cap.delete(0, tkinter.END)
         self.entry_ev_charge.delete(0, tkinter.END)
         self.entry_ev_number_of_cars.delete(0, tkinter.END)
         self.entry_ev_efficiency.delete(0, tkinter.END)
@@ -730,19 +766,21 @@ class SimulationDialog(customtkinter.CTk):
         self.entry_solar_efficiency.insert(0, selected_simulation_data[12])
         self.entry_solar_length.insert(0, selected_simulation_data[13])
         self.entry_solar_width.insert(0, selected_simulation_data[14])
-        self.entry_ev_charge.insert(0, selected_simulation_data[16])
-        self.entry_ev_number_of_cars.insert(0, selected_simulation_data[17])
-        self.entry_ev_efficiency.insert(0, selected_simulation_data[18])
-        self.entry_ev_distance_year.insert(0, selected_simulation_data[19])
-        self.optionmenu_certificate.set(selected_simulation_data[21])
-        self.entry_heat_area.insert(0, selected_simulation_data[22])
-        self.entry_heat_cop.insert(0, selected_simulation_data[23])
-        self.entry_heat_temp.insert(0, selected_simulation_data[24])
-        self.optionmenu_consumer_profile.set(selected_simulation_data[25])
-        self.optionmenu_provider.set(selected_simulation_data[26])
-        self.entry_general_latitude.insert(0, selected_simulation_data[27])
-        self.entry_general_longitude.insert(0, selected_simulation_data[28])
-        self.entry_general_start_date.insert(0, selected_simulation_data[29])
+        self.entry_solar_cap.insert(0, selected_simulation_data[15])
+        self.entry_solar_inv_cap.insert(0, selected_simulation_data[16])
+        self.entry_ev_charge.insert(0, selected_simulation_data[18])
+        self.entry_ev_number_of_cars.insert(0, selected_simulation_data[19])
+        self.entry_ev_efficiency.insert(0, selected_simulation_data[20])
+        self.entry_ev_distance_year.insert(0, selected_simulation_data[21])
+        self.optionmenu_certificate.set(selected_simulation_data[23])
+        self.entry_heat_area.insert(0, selected_simulation_data[24])
+        self.entry_heat_cop.insert(0, selected_simulation_data[25])
+        self.entry_heat_temp.insert(0, selected_simulation_data[26])
+        self.optionmenu_consumer_profile.set(selected_simulation_data[27])
+        self.optionmenu_provider.set(selected_simulation_data[28])
+        self.entry_general_latitude.insert(0, selected_simulation_data[29])
+        self.entry_general_longitude.insert(0, selected_simulation_data[20])
+        self.entry_general_start_date.insert(0, selected_simulation_data[31])
         
         self.switch_battery_event()
         self.switch_solar_event()
@@ -783,6 +821,8 @@ class SimulationDialog(customtkinter.CTk):
         self.entry_solar_number_of_panels.delete(0, tkinter.END)
         self.entry_solar_length.delete(0, tkinter.END)
         self.entry_solar_width.delete(0, tkinter.END)
+        self.entry_solar_cap.delete(0, tkinter.END)
+        self.entry_solar_inv_cap.delete(0, tkinter.END)
         
         self.entry_solar_azimuth.insert(0, selected_solarpanel_data[2])
         self.entry_solar_tilt.insert(0, selected_solarpanel_data[3])
@@ -790,6 +830,8 @@ class SimulationDialog(customtkinter.CTk):
         self.entry_solar_number_of_panels.insert(0, selected_solarpanel_data[4])
         self.entry_solar_length.insert(0, selected_solarpanel_data[5])
         self.entry_solar_width.insert(0, selected_solarpanel_data[6])
+        self.entry_solar_cap.insert(0, selected_solarpanel_data[7])
+        self.entry_solar_inv_cap.insert(0, selected_solarpanel_data[8])
         
     def update_ev_options(self, selected_ev):
         
@@ -837,7 +879,6 @@ class SimulationDialog(customtkinter.CTk):
         self.optionmenu_simulation.configure(values=simulation_options)
         self.optionmenu_simulation.set("Load Simulation")
 
-    # TODO this doesnt work yet
     def populate_battery_options(self):
         # Fetch battery data from the database
         battery_data = self.db_manager.fetch_battery_data()
@@ -907,19 +948,21 @@ class SimulationDialog(customtkinter.CTk):
         self.entry_solar_efficiency.insert(0, previous_data[12])
         self.entry_solar_length.insert(0, previous_data[13])
         self.entry_solar_width.insert(0, previous_data[14])
-        self.entry_ev_charge.insert(0, previous_data[16])
-        self.entry_ev_number_of_cars.insert(0, previous_data[17])
-        self.entry_ev_efficiency.insert(0, previous_data[18])
-        self.entry_ev_distance_year.insert(0, previous_data[19])
-        self.optionmenu_certificate.set(previous_data[21])
-        self.entry_heat_area.insert(0, previous_data[22])
-        self.entry_heat_cop.insert(0, previous_data[23])
-        self.entry_heat_temp.insert(0, previous_data[24])
-        self.optionmenu_consumer_profile.set(previous_data[25])
-        self.optionmenu_provider.set(previous_data[26])
-        self.entry_general_latitude.insert(0, previous_data[27])
-        self.entry_general_longitude.insert(0, previous_data[28])
-        self.entry_general_start_date.insert(0, previous_data[29])
+        self.entry_solar_cap.insert(0, previous_data[15])
+        self.entry_solar_inv_cap.insert(0, previous_data[16])
+        self.entry_ev_charge.insert(0, previous_data[18])
+        self.entry_ev_number_of_cars.insert(0, previous_data[19])
+        self.entry_ev_efficiency.insert(0, previous_data[20])
+        self.entry_ev_distance_year.insert(0, previous_data[21])
+        self.optionmenu_certificate.set(previous_data[23])
+        self.entry_heat_area.insert(0, previous_data[24])
+        self.entry_heat_cop.insert(0, previous_data[25])
+        self.entry_heat_temp.insert(0, previous_data[26])
+        self.optionmenu_consumer_profile.set(previous_data[27])
+        self.optionmenu_provider.set(previous_data[28])
+        self.entry_general_latitude.insert(0, previous_data[29])
+        self.entry_general_longitude.insert(0, previous_data[20])
+        self.entry_general_start_date.insert(0, previous_data[31])
         
         # Select the switch if previous_data value is 1
         if previous_data[2] == 1:
@@ -934,12 +977,12 @@ class SimulationDialog(customtkinter.CTk):
         else:
             self.switch_solar.deselect()
 
-        if previous_data[15] == 1:
+        if previous_data[17] == 1:
             self.switch_ev.select()
         else:
             self.switch_ev.deselect()
             
-        if previous_data[20] == 1:
+        if previous_data[22] == 1:
             self.switch_heat.select()
         else:
             self.switch_heat.deselect()
@@ -976,7 +1019,7 @@ class SimulationDialog(customtkinter.CTk):
             "Battery Discharge": self.entry_battery_discharge.get() if self.switch_battery.get() else "0",
             "Battery Capacity": self.entry_battery_capacity.get() if self.switch_battery.get() else "0",
             "Battery Efficiency": self.entry_battery_efficiency.get() if self.switch_battery.get() else "0",
-            "Battery OPEX": int(str(self.entry_battery_cycle_life.get()) + "12345" + str(self.entry_battery_price.get())) if self.switch_battery.get() else "0",
+            "Battery OPEX": int(str(self.entry_battery_cycle_life.get()) + "12345" + str(self.entry_battery_price.get())) if self.switch_battery.get() else "1123451",
             "Solar": self.switch_solar.get(),
             "Solar Azimuth": self.entry_solar_azimuth.get() if self.switch_solar.get() else "0",
             "Solar Tilt": self.entry_solar_tilt.get() if self.switch_solar.get() else "0",
@@ -984,6 +1027,8 @@ class SimulationDialog(customtkinter.CTk):
             "Solar Efficiency": self.entry_solar_efficiency.get() if self.switch_solar.get() else "0",
             "Solar Length": self.entry_solar_length.get() if self.switch_solar.get() else "0",
             "Solar Width": self.entry_solar_width.get() if self.switch_solar.get() else "0",
+            "Solar Cap": self.entry_solar_cap.get() if self.switch_solar.get() else "0",
+            "Solar Inv Cap": self.entry_solar_inv_cap.get() if self.switch_solar.get() else "0",
             "Ev": self.switch_ev.get(),
             "EV Charge": self.entry_ev_charge.get() if self.switch_ev.get() else "0",
             "EV Number of Cars": self.entry_ev_number_of_cars.get() if self.switch_ev.get() else "0",
@@ -1016,13 +1061,15 @@ class SimulationDialog(customtkinter.CTk):
             "Solar Efficiency": (0, 100),
             "Solar Length": (0, 20),
             "Solar Width": (0, 10),
+            "Solar Cap": (0, 100),
+            "Solar Inv Cap": (0, 100),
             "EV Charge": (0, 100),
-            "EV Number of Cars": (0, 10),
+            "EV Number of Cars": (0, 50),
             "EV Efficiency": (0, 100),
-            "EV Distance Year": (0, 25000),
+            "EV Distance Year": (0, 100000),
             "Heat Area": (0, 1000),
             "Heat COP": (0, 10),
-            "Heat Temp": (0, 30),
+            "Heat Temp": (0, 35),
             "Latitude": (-90, 90),
             "Longitude": (-180, 180)
         }
@@ -1058,7 +1105,7 @@ class SimulationDialog(customtkinter.CTk):
                 return  # Stop further processing
 
         if self.switch_solar.get():
-            if float(entries["Solar Azimuth"]) <= 0 or float(entries["Solar Tilt"]) <= 0 or float(entries["Number of Solar Panels"]) <= 0 or float(entries["Solar Efficiency"]) <= 0 or float(entries["Solar Length"]) <= 0 or float(entries["Solar Width"]) <= 0:
+            if float(entries["Solar Azimuth"]) <= 0 or float(entries["Solar Tilt"]) <= 0 or float(entries["Number of Solar Panels"]) <= 0 or float(entries["Solar Efficiency"]) <= 0 or float(entries["Solar Length"]) <= 0 or float(entries["Solar Width"]) <= 0 or float(entries["Solar Cap"]) <= 0 or float(entries["Solar Inv Cap"]) <= 0:
                 warning_message = "Solar fields cannot be zero when Solar is selected."
                 CTkMessagebox(title="Warning", message=warning_message)
                 return  # Stop further processing
