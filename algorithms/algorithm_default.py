@@ -60,6 +60,7 @@ def process_data(data_points, battery, ev_battery, ev_total_distance, OPEX):
                 current_point["charge_value"] = 0
                 current_point["discharge_value"] = 0
                 current_point["ev_charge_value"] = ev_charged
+                price_battery_usage = 0
                 
             
                 
