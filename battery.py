@@ -1,11 +1,3 @@
-# batterij gaat nooit 100% opladen of ontladen
-# aan de hand van de soc zal de oplading en ontlading anders worden
-# efficiency dus als we in theorie 100% geladen zijn gaat dit minder zijn
-# verschil ac en dc laden toevoegen
-# 
-# 
-# 
-
 class Battery:
     def __init__(self, capacity, soc, charge_power, discharge_power, max_soc, min_dod, efficiency):
         self.capacity = capacity  # in kWh
@@ -16,7 +8,7 @@ class Battery:
         self.efficiency = efficiency
         self.soc = soc if soc > self.capacity * self.min_dod else self.capacity * self.min_dod # in kWh, current charge level of the battery
 
-        if(self.efficiency > 1):
+        if self.efficiency > 1:
             self.efficiency = self.efficiency/100
 
     def charge(self, power, time):
@@ -25,7 +17,7 @@ class Battery:
         power: charging power in kW
         time: charging time in hours
         """
-        if(self.efficiency == 0):
+        if self.efficiency == 0:
             return 0, time * power
         
         new_power = power
@@ -35,11 +27,11 @@ class Battery:
         
         time_max = ((self.capacity*self.max_soc)-self.soc) / (new_power * efficiency) # max time battery can charge until full
         
-        if(time_max >= 1):
+        if time_max >= 1:
             self.soc += time * new_power * efficiency
             return time * new_power * efficiency, (power-new_power) * time
         
-        elif(time_max <= 1):
+        elif time_max <= 1:
             self.soc += time_max * new_power * efficiency
             return time_max * new_power * efficiency, (time-time_max) * power + (power-new_power) * time
 
@@ -49,7 +41,7 @@ class Battery:
         power: discharging power in kW
         time: discharging time in hours
         """
-        if(self.efficiency == 0):
+        if self.efficiency == 0:
             return 0, time * power
         
         new_power = power
@@ -60,11 +52,11 @@ class Battery:
         
         time_max = (self.soc - (self.capacity * self.min_dod)) / (new_power * efficiency) # max time battery can discharge until empty
         
-        if(time_max >= 1):
+        if time_max >= 1:
             self.soc -= time * new_power * efficiency
             return time * new_power * efficiency, (power-new_power) * time
         
-        elif(time_max < 1):
+        elif time_max < 1:
             self.soc -= time_max * new_power * efficiency
             return time_max * new_power * efficiency, (time-time_max) * power + (power-new_power) * time
         

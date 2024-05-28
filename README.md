@@ -21,11 +21,11 @@ To get started with this project, follow these steps:
 ```
 git clone https://github.com/ruben2561/Master
 ```
-3. **Navigate to the project directory**:
+2**Navigate to the project directory**:
 ```
 cd <project_directory>
 ```
-4. **Install requirements**:
+3**Install requirements**:
 ```
 pip install -r requirements.txt
 ```

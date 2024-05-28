@@ -2,6 +2,8 @@ import sqlite3
 
 class DatabaseManager:
     def __init__(self, db_file):
+        self.cursor = None
+        self.connection = None
         self.db_file = db_file
 
     def connect(self):

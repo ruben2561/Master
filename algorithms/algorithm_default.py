@@ -24,7 +24,7 @@ def process_data(data_points, battery, ev_battery, ev_total_distance, OPEX):
             ev_charged = 0
             
             #check if car is home so it can charge
-            if(time_value.hour > 17 or time_value.hour < 8):
+            if time_value.hour > 17 or time_value.hour < 8:
                 ev_charged, ev_residue = ev_battery.charge(ev_battery.get_max_charge(), time_difference_hours)
                 charge_discharge_battery = pv_power_value - power_usage_value - heat_pump_value - ev_charged
             else:

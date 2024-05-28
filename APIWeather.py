@@ -1,21 +1,11 @@
-import requests
 import csv
 import datetime
-from datetime import datetime, timedelta
 import openmeteo_requests
-
-import requests_cache
 import pandas as pd
+import requests
+import requests_cache
+from datetime import datetime, timedelta
 from retry_requests import retry
-
-# Set your Solcast API key
-api_key = "w58k5_UUO4JxNP3ykI-gsRn8w65hJQQQ"
-
-# Specify the location (latitude and longitude)
-latitude = 50.9254992
-longitude = 5.3932811
-
-
 
 
 def get_sample_data_pv():
@@ -27,16 +17,12 @@ def get_sample_data_pv():
     except Exception as e:
         print(f"Error reading sample data: {e}")
         return None
-    
+
+
 def fetch_weather_data(latitude, longitude, start_date, end_date):
     base_url = "https://archive-api.open-meteo.com/v1/archive"
-    params = {
-        'latitude': latitude,
-        'longitude': longitude,
-        'start_date': start_date,
-        'end_date': end_date,
-        'hourly': 'temperature_2m,shortwave_radiation,diffuse_radiation,direct_normal_irradiance'
-    }
+    params = {'latitude': latitude, 'longitude': longitude, 'start_date': start_date, 'end_date': end_date,
+        'hourly': 'temperature_2m,shortwave_radiation,diffuse_radiation,direct_normal_irradiance'}
 
     response = requests.get(base_url, params=params)
 
@@ -45,6 +31,7 @@ def fetch_weather_data(latitude, longitude, start_date, end_date):
     else:
         response.raise_for_status()
 
+
 def format_weather_data(data):
     hourly_data = data.get('hourly', {})
     periods = hourly_data.get('time', [])
@@ -52,34 +39,35 @@ def format_weather_data(data):
     GHIs = hourly_data.get('shortwave_radiation', [])
     DHIs = hourly_data.get('diffuse_radiation', [])
     DNIs = hourly_data.get('direct_normal_irradiance', [])
-    
+
     formatted_data = "period_end,temp,GHI,DHI,DNI\n"
     for period, temp, ghi, dhi, dni in zip(periods, temperatures, GHIs, DHIs, DNIs):
         formatted_data += f"{period},{temp},{ghi},{dhi},{dni}\n"
-    
+
     return formatted_data.strip()  # Remove the last newline character
+
 
 def get_solar_data_openmeteo(latitude, longitude, start_date):
     try:
-        
+
         date_obj = datetime.strptime(start_date, "%Y-%m-%d")
-        
+
         # Add the specified number of days
         new_date_obj = date_obj + timedelta(days=364)
-        
+
         # Convert the datetime object back to a string
         end_date = new_date_obj.strftime("%Y-%m-%d")
 
-       # Fetch weather data
+        # Fetch weather data
         weather_data = fetch_weather_data(latitude, longitude, start_date, end_date)
 
         # Format the data
         formatted_weather_data = format_weather_data(weather_data)
-            
+
         print("openmeteo weather data used")
-        
+
         return formatted_weather_data
-    
+
     except Exception as e:
         print(f"Error: {e}")
         return get_sample_data_pv()
