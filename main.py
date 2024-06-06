@@ -754,12 +754,12 @@ class App(customtkinter.CTk):
         self.data_points_complete_algo_1 = process_data_points(self.optionmenu_algo_1.get(), data_points,
                                                                battery_home_1, battery_car_1,
                                                                self.ev_distance_year * self.ev_number_of_cars,
-                                                               self.battery_opex)
+                                                               self.battery_opex, self.heat_temp)
 
         self.data_points_complete_algo_2 = process_data_points(self.optionmenu_algo_2.get(), data_points_algo_2,
                                                                battery_home_2, battery_car_2,
                                                                self.ev_distance_year * self.ev_number_of_cars,
-                                                               self.battery_opex)
+                                                               self.battery_opex, self.heat_temp)
 
         self.update_graphs_with_new_data(self.data_points_complete_algo_1, self.data_points_complete_algo_2)
 

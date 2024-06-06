@@ -1,6 +1,6 @@
 def process_point_optimized(time_difference_hours, time_value, pv_power_values, power_usage_values,
-                            offtake_price_values, injection_price_values, heat_pump_values, temp_out_values, soc_value, battery,
-                            ev_battery, OPEX, temp_desired):
+                            offtake_price_values, injection_price_values, soc_value, battery, ev_battery,
+                            heat_pump_value, OPEX, temp_desired, temp_out):
     grid_injection = 0
     grid_offtake = 0
     charge_value = 0
@@ -67,28 +67,24 @@ def process_point_optimized(time_difference_hours, time_value, pv_power_values, 
     ### Algoritm code begins here #################################
     ###############################################################
 
-    if time_value.hour > 17 or time_value.hour < 8:
-        ev_charged, ev_residue = ev_battery.charge(ev_battery.get_max_charge(), time_difference_hours)
-        charge_discharge_battery = pv_power_values[0] - power_usage_values[0] - heat_pump_values[0] - ev_charged
-    else:
-        charge_discharge_battery = pv_power_values[0] - power_usage_values[0] - heat_pump_values[0]
+    
+        
+        
+        
+        
+        
+        
+        
+        
+        
 
-    if charge_discharge_battery > 0:
-        charged, residue_to_much_energy = battery.charge(charge_discharge_battery, time_difference_hours)
-        grid_injection = residue_to_much_energy
-        charge_value = charged
-
-    elif charge_discharge_battery < 0:
-        discharged, residue_to_little_energy = battery.discharge(abs(charge_discharge_battery), time_difference_hours)
-        grid_offtake = residue_to_little_energy
-        discharge_value = discharged
-        ev_charge_value = ev_charged
-
-    if offtake_price_values[0] <= 120 < sum(offtake_price_values[5:10]) / len(offtake_price_values[5:10]) and sum(
-            pv_power_values) / len(pv_power_values) < sum(power_usage_values) / len(power_usage_values):
-        charged, residue_to_much_energy = battery.charge(battery.get_max_charge(), time_difference_hours)
-        charge_value += charged
-        grid_offtake += charged
+    
+    
+    grid_injection =        # enter the total kWh grid injection this hour 
+    grid_offtake =          # enter the total kWh grid offtake this hour
+    charge_value =          # enter the total kWh charged on the battery this hour
+    discharge_value =       # enter the total kWh discharged on the battery this hour
+    ev_charged =            # enter the total kWh charged on the ev this hour
     
     ###############################################################
     ### Algoritm code ends here ###################################

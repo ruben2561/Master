@@ -14,7 +14,7 @@ from tkinter import ttk
 from battery import Battery
 
 
-def process_data_points(algorithm_name, data_points, battery, ev_battery, ev_total_distance, OPEX):
+def process_data_points(algorithm_name, data_points, battery, ev_battery, ev_total_distance, OPEX, temp_desired):
     # algorithm_name = algorithm_name + ".py"
     algorithm_name = algorithm_name.replace(" ", "_")
 
@@ -25,7 +25,7 @@ def process_data_points(algorithm_name, data_points, battery, ev_battery, ev_tot
     module = importlib.import_module(module_name)
 
     # Run the process function from the imported module
-    return module.process_data(data_points, battery, ev_battery, ev_total_distance, OPEX)
+    return module.process_data(data_points, battery, ev_battery, ev_total_distance, OPEX, temp_desired)
 
 
 def get_power_usage_values(data_points, selected_user_profile):
@@ -40,13 +40,14 @@ def get_power_usage_values(data_points, selected_user_profile):
                 samples_list = list(reader)
 
             for i in range(len(data_points) - 1):
-                number = random.choice([1, 1, 1, 1, 1, 1, 2, 2, 3])
+                number = random.choice([1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 3, 3])
                 if number == 1: data_points[i]["power_usage_value"] = float(samples_list[i]["Power"]) + float(
                     samples_list[i]["Power"]) * random.uniform(-0.1, 0.1)
                 if number == 2: data_points[i]["power_usage_value"] = float(samples_list[i]["Power"]) + float(
                     samples_list[i]["Power"]) * random.uniform(-0.3, 0.3)
                 if number == 3: data_points[i]["power_usage_value"] = float(samples_list[i]["Power"]) + float(
-                    samples_list[i]["Power"]) * random.uniform(-0.7, 0.7)
+                    samples_list[i]["Power"]) * random.uniform(-0.5, 0.5)
+                else: data_points[i]["power_usage_value"] = float(samples_list[i]["Power"])
 
         return data_points
 

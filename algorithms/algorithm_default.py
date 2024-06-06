@@ -1,4 +1,4 @@
-def process_data(data_points, battery, ev_battery, ev_total_distance, OPEX):
+def process_data(data_points, battery, ev_battery, ev_total_distance, OPEX, temp_desired):
     for i in range(len(data_points) - 1):
         current_point = data_points[i]
         next_point = data_points[i + 1]
