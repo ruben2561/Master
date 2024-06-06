@@ -1,6 +1,5 @@
 import customtkinter
 import customtkinter
-import datetime
 import os
 import tkinter
 import tkinter
@@ -8,7 +7,6 @@ from CTkListbox import *
 from CTkMessagebox import CTkMessagebox
 from dateutil import parser
 
-from databaseManager import DatabaseManager
 
 
 def is_within_range(value, min_val, max_val):

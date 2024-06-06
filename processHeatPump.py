@@ -1,42 +1,40 @@
-# TODO aanpassen met heatpomp max power want alleen aaan uit dus staat altijd op max power,
-# snacht temp checken dus voor tussen bepaalde uren niet opwarmen maar bij berekeken hoeveel binnen temp word door loss, en dan vananf bepaald uur weer beginnen opwarmen
-
+# Function to calculate the power needed for heating based on given parameters
 def calculate_needed_power(area, COP_base, temp_in_desired, temp_in, U, temp_out):
+    # If any essential parameter is zero, return zero power needed
     if area == 0 or COP_base == 0 or temp_in_desired == 0:
         return 0
 
-    k = 0.025
+    k = 0.025  # Degradation factor for COP
 
+    # Calculate the heating load (Q) required to achieve the desired indoor temperature
     Q = (1.225 * 1005 * area * 2.4 * abs(temp_in_desired - temp_in)) / 3600  # 2.4 = standard ceiling height
+    # Calculate heat loss (Q_loss) through the building envelope
     Q_loss = U * area * abs(temp_out - temp_in)
 
-    COP = COP_base - k * (temp_in - temp_out) if (temp_in - temp_out) <= 15 else max(COP_base / 2,
-                                                                                     2)  # Ensuring COP doesn't go unrealistically low
+    # Calculate the COP of the heat pump, ensuring it doesn't drop unrealistically low
+    COP = COP_base - k * (temp_in - temp_out) if (temp_in - temp_out) <= 15 else max(COP_base / 2, 2)
 
-    power_needed = ((Q + Q_loss) / COP) / 1000  # * 3600 nodig?
+    # Calculate the power needed for heating in kW
+    power_needed = ((Q + Q_loss) / COP) / 1000
 
     return power_needed
 
-
+# Function to calculate the indoor temperature over a given time period without heating
 def calculate_indoor_temperature(temp_out, temp_in, U, area):
     """
     Calculates the indoor temperature over a given time period without heating.
-    
+
     Parameters:
         temp_out (float): Outdoor temperature in degrees Celsius.
         temp_in (float): Initial indoor temperature in degrees Celsius.
         U (float): Overall heat transfer coefficient in W/(m²K).
         area (float): Surface area through which heat is being lost (in m²).
-        volume (float): Volume of the indoor space (in m³).
-    
+
     Returns:
         float: New indoor temperature in degrees Celsius after the specified time.
-        :param area:
-        :param U:
-        :param temp_in:
-        :param temp_out:
     """
 
+    # If area is zero, return zero temperature change
     if area == 0:
         return 0
 
@@ -50,30 +48,33 @@ def calculate_indoor_temperature(temp_out, temp_in, U, area):
     # Calculate heat loss rate (W)
     Q_loss = U * area * (temp_out - temp_in) * 3600
 
-    # Update the indoor temperature
+    # Update the indoor temperature based on heat loss
     temp_in_new = temp_in + (Q_loss / (mass_air * c_p))
 
     return temp_in_new
 
-
+# Function to process heat pump data points
 def process_heat_pump_data(data_points, area, cop, temp_desired, certificate):
+    # U values based on building energy certificate ratings
     certificate_U_values = {"A+": 0.15, "A": 0.25, "B": 0.35, "C": 0.5, "D": 0.7, "E": 0.9, "F": 1}
 
-    # U = building_U_values.get(building, 0.3)  # Default U value if building type not found
+    # Get U value from certificate rating, default to 0.3 if not found
+    U = certificate_U_values.get(certificate, 0.3)
 
-    U = certificate_U_values.get(certificate, 0.3)  # Default U value if building type not found
-
+    # Initialize current indoor temperature to the desired temperature
     temp_in_current = temp_desired
+
+    # Loop through data points to calculate heat pump usage
     for i in range(len(data_points) - 1):
-        # if temp_in_current < 100000: print(str(data_points[i]["temperature_out"]) + "     " + str(temp_in_current))
+        # Check if within heating hours and current temp is below desired temp
         if 7 <= data_points[i]["time_value"].hour <= 22 and temp_in_current <= temp_desired:
-            heat_pump_value = calculate_needed_power(area, cop, temp_desired, temp_in_current, U,
-                                                     data_points[i]["temperature_out"])
+            # Calculate needed power and set current temperature to desired
+            heat_pump_value = calculate_needed_power(area, cop, temp_desired, temp_in_current, U, data_points[i]["temperature_out"])
             temp_in_current = temp_desired
             data_points[i]["heat_pump_value"] = float(heat_pump_value)
         else:
+            # Calculate new indoor temperature without heating
             temp_in_current = calculate_indoor_temperature(data_points[i]["temperature_out"], temp_in_current, U, area)
-            # print(str(temp_in_current))
             data_points[i]["heat_pump_value"] = 0
 
     return data_points

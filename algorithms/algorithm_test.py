@@ -80,11 +80,11 @@ def process_point_optimized(time_difference_hours, time_value, pv_power_values, 
 
     
     
-    grid_injection =        # enter the total kWh grid injection this hour 
-    grid_offtake =          # enter the total kWh grid offtake this hour
-    charge_value =          # enter the total kWh charged on the battery this hour
-    discharge_value =       # enter the total kWh discharged on the battery this hour
-    ev_charged =            # enter the total kWh charged on the ev this hour
+    grid_injection = 0       # enter the total kWh grid injection this hour 
+    grid_offtake = 0         # enter the total kWh grid offtake this hour
+    charge_value = 0         # enter the total kWh charged on the battery this hour
+    discharge_value = 0      # enter the total kWh discharged on the battery this hour
+    ev_charged = 0           # enter the total kWh charged on the ev this hour
     
     ###############################################################
     ### Algoritm code ends here ###################################
